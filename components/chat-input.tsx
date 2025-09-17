@@ -2,7 +2,6 @@ import * as React from "react";
 import { SendIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   input: string;
@@ -29,19 +28,6 @@ export function ChatInput({
       )}px`;
     }
   }, [input]);
-
-  // Handle keyboard shortcuts (Enter to send, Shift+Enter for new line)
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      const form = e.currentTarget.form;
-      if (form && input.trim()) {
-        form.dispatchEvent(
-          new Event("submit", { cancelable: true, bubbles: true })
-        );
-      }
-    }
-  };
 
   return (
     <div className="border-t bg-background md:px-4 md:pt-3 md:pb-3 pb-0 overflow-hidden pt-[9px] px-[9px] flex flex-col">

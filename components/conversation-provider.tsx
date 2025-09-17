@@ -68,7 +68,7 @@ export function ConversationProvider({
         // Set streaming to true when we start receiving a response
         setIsStreaming(true);
       },
-      onFinish: (message) => {
+      onFinish: () => {
         // Set streaming to false when the response is complete
         setIsStreaming(false);
 
