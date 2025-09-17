@@ -8,6 +8,11 @@ import {
   updateBoardTool,
   deleteBoardTool,
   listBoardsTool,
+  createListTool,
+  getListTool,
+  updateListTool,
+  deleteListTool,
+  listListsTool,
 } from "@/TrelloTools";
 
 // You'll need to set OPENAI_API_KEY in your environment variables
@@ -33,11 +38,18 @@ export async function POST(req: NextRequest) {
       messages,
       system: systemPrompt,
       tools: {
+        // Board Tools
         createBoard: createBoardTool,
         getBoard: getBoardTool,
         updateBoard: updateBoardTool,
         deleteBoard: deleteBoardTool,
         listBoards: listBoardsTool,
+        // List Tools
+        createList: createListTool,
+        getList: getListTool,
+        updateList: updateListTool,
+        deleteList: deleteListTool,
+        listLists: listListsTool,
       },
       maxSteps: 5, // Allow multi-step tool usage
       onError: ({ error }) => {

@@ -7,7 +7,15 @@ export {
   listBoardsTool,
 } from "./BoardTools";
 
+// List Tools
+export {
+  createListTool,
+  getListTool,
+  updateListTool,
+  deleteListTool,
+  listListsTool,
+} from "./ListTools";
+
 // Future tool categories can be added here:
-// export * from './ListTools';
 // export * from './CardTools';
 // export * from './MemberTools';

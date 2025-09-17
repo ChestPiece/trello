@@ -36,17 +36,35 @@ TRELLO_API_TOKEN=your_trello_api_token_here
 - **deleteBoard**: Permanently delete boards
 - **listBoards**: List all accessible boards with filtering
 
+### List Tools (`ListTools/`)
+
+- **createList**: Create new lists within boards with custom positioning
+- **getList**: Retrieve detailed list information including cards
+- **updateList**: Modify list properties, position, and settings
+- **deleteList**: Permanently delete lists
+- **listLists**: List all lists in a board with filtering
+
 ## Usage
 
 The tools are automatically integrated into your AI chatbot. Users can interact with them through natural language:
 
 ### Examples
 
+**Board Operations:**
+
 - "Create a new board called 'Project Planning'"
 - "Show me all my boards"
 - "Get details for board ID 12345"
 - "Update the board settings to make it public"
 - "Delete the board with ID 67890"
+
+**List Operations:**
+
+- "Create a new list called 'To Do' in board 12345"
+- "Show me all lists in board 12345"
+- "Get details for list ID 67890"
+- "Update the list name to 'In Progress'"
+- "Delete the list with ID 67890"
 
 ## Tool Features
 
