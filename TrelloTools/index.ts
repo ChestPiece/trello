@@ -25,5 +25,39 @@ export {
   listCardsTool,
 } from "./CardTools";
 
-// Future tool categories can be added here:
-// export * from './MemberTools';
+// Label Tools
+export {
+  createLabelTool,
+  getLabelTool,
+  updateLabelTool,
+  deleteLabelTool,
+  listLabelsTool,
+} from "./LabelTools";
+
+// Attachment Tools
+export {
+  createAttachmentTool,
+  getAttachmentTool,
+  deleteAttachmentTool,
+  listAttachmentsTool,
+} from "./AttachmentTools";
+
+// Checklist Tools
+export {
+  createChecklistTool,
+  getChecklistTool,
+  updateChecklistTool,
+  deleteChecklistTool,
+  listChecklistsTool,
+  createChecklistItemTool,
+  updateChecklistItemTool,
+  deleteChecklistItemTool,
+} from "./ChecklistTools";
+
+// Member Tools
+export {
+  addMemberToBoardTool,
+  removeMemberFromBoardTool,
+  listMembersTool,
+  getMemberTool,
+} from "./MemberTools";

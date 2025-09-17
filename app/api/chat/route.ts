@@ -18,6 +18,28 @@ import {
   updateCardTool,
   deleteCardTool,
   listCardsTool,
+  // New tools
+  createLabelTool,
+  getLabelTool,
+  updateLabelTool,
+  deleteLabelTool,
+  listLabelsTool,
+  createAttachmentTool,
+  getAttachmentTool,
+  deleteAttachmentTool,
+  listAttachmentsTool,
+  createChecklistTool,
+  getChecklistTool,
+  updateChecklistTool,
+  deleteChecklistTool,
+  listChecklistsTool,
+  createChecklistItemTool,
+  updateChecklistItemTool,
+  deleteChecklistItemTool,
+  addMemberToBoardTool,
+  removeMemberFromBoardTool,
+  listMembersTool,
+  getMemberTool,
 } from "@/TrelloTools";
 
 // You'll need to set OPENAI_API_KEY in your environment variables
@@ -61,8 +83,34 @@ export async function POST(req: NextRequest) {
         updateCard: updateCardTool,
         deleteCard: deleteCardTool,
         listCards: listCardsTool,
+        // Label Tools
+        createLabel: createLabelTool,
+        getLabel: getLabelTool,
+        updateLabel: updateLabelTool,
+        deleteLabel: deleteLabelTool,
+        listLabels: listLabelsTool,
+        // Attachment Tools
+        createAttachment: createAttachmentTool,
+        getAttachment: getAttachmentTool,
+        deleteAttachment: deleteAttachmentTool,
+        listAttachments: listAttachmentsTool,
+        // Checklist Tools
+        createChecklist: createChecklistTool,
+        getChecklist: getChecklistTool,
+        updateChecklist: updateChecklistTool,
+        deleteChecklist: deleteChecklistTool,
+        listChecklists: listChecklistsTool,
+        createChecklistItem: createChecklistItemTool,
+        updateChecklistItem: updateChecklistItemTool,
+        deleteChecklistItem: deleteChecklistItemTool,
+        // Member Tools
+        addMemberToBoard: addMemberToBoardTool,
+        removeMemberFromBoard: removeMemberFromBoardTool,
+        listMembers: listMembersTool,
+        getMember: getMemberTool,
       },
-      maxSteps: 5, // Allow multi-step tool usage
+      maxSteps: 10, // Allow more complex multi-step operations
+      temperature: 0, // Ensure deterministic tool calls
       onError: ({ error }) => {
         console.error("Stream error:", error);
       },
@@ -74,12 +122,22 @@ export async function POST(req: NextRequest) {
           usage,
         });
       },
+      // Enhanced tool call repair for better reliability
+      experimental_repairToolCall: async ({ toolCall, error }) => {
+        // Log the error for debugging but don't attempt repair for now
+        console.error("Tool call error:", {
+          toolName: toolCall.toolName,
+          error: error.message,
+          args: toolCall.args,
+        });
+        return null;
+      },
     });
 
     // Return the streaming response
     return result.toDataStreamResponse();
   } catch (error) {
-    console.log("🚀 ~ POST ~ error:", error);
+    console.error("🚀 ~ POST ~ error:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

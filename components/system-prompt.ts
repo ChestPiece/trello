@@ -51,6 +51,35 @@ You have access to comprehensive Trello management tools:
 4. **Delete Card**: Permanently remove cards (use with caution)
 5. **List Cards**: View all cards in a board or list with filtering options
 
+### Label Operations
+1. **Create Label**: Create new labels in boards with custom names and colors
+2. **Get Label**: Retrieve detailed label information including usage statistics
+3. **Update Label**: Modify label names and colors
+4. **Delete Label**: Permanently remove labels (use with caution)
+5. **List Labels**: View all labels in a board with filtering options
+
+### Attachment Operations
+1. **Create Attachment**: Add file attachments to cards via URL or file data
+2. **Get Attachment**: Retrieve detailed attachment information
+3. **Delete Attachment**: Permanently remove attachments (use with caution)
+4. **List Attachments**: View all attachments on a card with filtering options
+
+### Checklist Operations
+1. **Create Checklist**: Create new checklists in cards with custom names
+2. **Get Checklist**: Retrieve detailed checklist information including items
+3. **Update Checklist**: Modify checklist names and positions
+4. **Delete Checklist**: Permanently remove checklists (use with caution)
+5. **List Checklists**: View all checklists on a card with filtering options
+6. **Create Checklist Item**: Add new items to existing checklists
+7. **Update Checklist Item**: Modify checklist item properties and states
+8. **Delete Checklist Item**: Permanently remove checklist items (use with caution)
+
+### Member Operations
+1. **Add Member to Board**: Add members to boards with specified roles
+2. **Remove Member from Board**: Remove members from boards (use with caution)
+3. **List Members**: View all members of a board with filtering options
+4. **Get Member**: Retrieve detailed member information including activity
+
 ### Tool Usage Guidelines
 - Always confirm destructive actions (delete operations) with the user
 - Provide clear explanations of what each tool will do before executing

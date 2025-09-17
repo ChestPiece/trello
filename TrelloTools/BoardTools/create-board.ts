@@ -63,7 +63,7 @@ const createBoardSchema = z.object({
 
 export const createBoardTool = tool({
   description:
-    "Create a new Trello board with specified name, description, and settings",
+    "Create a new Trello board with specified name, description, and settings. Supports comprehensive board configuration including visibility, permissions, and custom preferences.",
   parameters: createBoardSchema,
   execute: async ({
     name,
@@ -134,16 +134,32 @@ export const createBoardTool = tool({
         message: `Successfully created board "${name}" with ID: ${response.data.id}`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Failed to create board";
+      console.error("Create board error:", error);
+
+      let errorMessage = "Failed to create board";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
 
       return {
         success: false,
         error: errorMessage,
+        statusCode,
         message: `Failed to create board "${name}". ${errorMessage}`,
+        suggestions: [
+          "Check if the board name is valid and not too long",
+          "Verify that the organization ID exists if provided",
+          "Ensure API credentials are properly configured",
+          "Check if you have permission to create boards in the organization",
+        ],
       };
     }
   },
