@@ -44,6 +44,14 @@ TRELLO_API_TOKEN=your_trello_api_token_here
 - **deleteList**: Permanently delete lists
 - **listLists**: List all lists in a board with filtering
 
+### Card Tools (`CardTools/`)
+
+- **createCard**: Create new cards in lists with descriptions, due dates, and assignments
+- **getCard**: Retrieve detailed card information including attachments, members, and checklists
+- **updateCard**: Modify card properties, move between lists, and update assignments
+- **deleteCard**: Permanently delete cards
+- **listCards**: List all cards in a board or list with filtering
+
 ## Usage
 
 The tools are automatically integrated into your AI chatbot. Users can interact with them through natural language:
@@ -65,6 +73,15 @@ The tools are automatically integrated into your AI chatbot. Users can interact 
 - "Get details for list ID 67890"
 - "Update the list name to 'In Progress'"
 - "Delete the list with ID 67890"
+
+**Card Operations:**
+
+- "Create a new card called 'Task 1' in list 12345"
+- "Show me all cards in board 12345"
+- "Get details for card ID 67890"
+- "Update the card description to 'Updated task'"
+- "Move the card to list 54321"
+- "Delete the card with ID 67890"
 
 ## Tool Features
 

@@ -13,6 +13,11 @@ import {
   updateListTool,
   deleteListTool,
   listListsTool,
+  createCardTool,
+  getCardTool,
+  updateCardTool,
+  deleteCardTool,
+  listCardsTool,
 } from "@/TrelloTools";
 
 // You'll need to set OPENAI_API_KEY in your environment variables
@@ -50,6 +55,12 @@ export async function POST(req: NextRequest) {
         updateList: updateListTool,
         deleteList: deleteListTool,
         listLists: listListsTool,
+        // Card Tools
+        createCard: createCardTool,
+        getCard: getCardTool,
+        updateCard: updateCardTool,
+        deleteCard: deleteCardTool,
+        listCards: listCardsTool,
       },
       maxSteps: 5, // Allow multi-step tool usage
       onError: ({ error }) => {

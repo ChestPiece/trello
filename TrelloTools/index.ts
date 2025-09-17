@@ -16,6 +16,14 @@ export {
   listListsTool,
 } from "./ListTools";
 
+// Card Tools
+export {
+  createCardTool,
+  getCardTool,
+  updateCardTool,
+  deleteCardTool,
+  listCardsTool,
+} from "./CardTools";
+
 // Future tool categories can be added here:
-// export * from './CardTools';
 // export * from './MemberTools';
