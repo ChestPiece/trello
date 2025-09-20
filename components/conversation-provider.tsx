@@ -26,6 +26,10 @@ interface ConversationContextType {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   isStreaming: boolean;
+  error: Error | undefined;
+  append: (message: Message) => void;
+  stop: () => void;
+  regenerate: () => void;
 }
 
 const ConversationContext = React.createContext<
@@ -59,39 +63,54 @@ export function ConversationProvider({
   }, [conversations]);
 
   // Chat hook for the current conversation
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/chat",
-      id: currentConversationId || undefined,
-      onResponse: (response) => {
-        console.log("🚀 ~ Chat ~ response:", response);
-        // Set streaming to true when we start receiving a response
-        setIsStreaming(true);
-      },
-      onFinish: () => {
-        // Set streaming to false when the response is complete
-        setIsStreaming(false);
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    append,
+    error,
+    stop,
+    regenerate,
+  } = useChat({
+    api: "/api/chat",
+    id: currentConversationId || undefined,
+    // Throttle UI updates to improve performance
+    experimental_throttle: 50,
+    onResponse: (response) => {
+      console.log("🚀 ~ Chat ~ response:", response);
+      // Set streaming to true when we start receiving a response
+      setIsStreaming(true);
+    },
+    onFinish: () => {
+      // Set streaming to false when the response is complete
+      setIsStreaming(false);
 
-        // Update conversation title after first message if it's still the default
-        if (currentConversationId) {
-          setConversations((prevConversations) => {
-            return prevConversations.map((conversation) => {
-              if (
-                conversation.id === currentConversationId &&
-                conversation.title === "New conversation" &&
-                messages.length === 1
-              ) {
-                // Use the first few words of the user's first message as the title
-                const title =
-                  messages[0].content.split(" ").slice(0, 5).join(" ") + "...";
-                return { ...conversation, title };
-              }
-              return conversation;
-            });
+      // Update conversation title after first message if it's still the default
+      if (currentConversationId) {
+        setConversations((prevConversations) => {
+          return prevConversations.map((conversation) => {
+            if (
+              conversation.id === currentConversationId &&
+              conversation.title === "New conversation" &&
+              messages.length === 1
+            ) {
+              // Use the first few words of the user's first message as the title
+              const title =
+                messages[0].content.split(" ").slice(0, 5).join(" ") + "...";
+              return { ...conversation, title };
+            }
+            return conversation;
           });
-        }
-      },
-    });
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Chat error:", error);
+      setIsStreaming(false);
+    },
+  });
 
   // Create a new conversation
   const createNewConversation = React.useCallback(() => {
@@ -124,6 +143,10 @@ export function ConversationProvider({
       handleSubmit,
       isLoading,
       isStreaming,
+      error,
+      append,
+      stop,
+      regenerate,
     }),
     [
       conversations,
@@ -136,6 +159,10 @@ export function ConversationProvider({
       handleSubmit,
       isLoading,
       isStreaming,
+      error,
+      append,
+      stop,
+      regenerate,
     ]
   );
 

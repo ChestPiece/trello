@@ -48,7 +48,8 @@ next-env.d.ts
 .env.test.local
 .env.production.local   
 
-
+.cursor/rules
+doc
 
 
 

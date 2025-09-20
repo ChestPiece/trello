@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SendIcon } from "lucide-react";
+import { SendIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -47,6 +47,9 @@ export function ChatInput({
           }}
         />
         <div className="flex items-center p-3 pt-0">
+          <div className="text-xs text-muted-foreground mr-auto">
+            Press Enter to send, Shift+Enter for new line
+          </div>
           <Button
             onClick={(e) => {
               e.preventDefault();
@@ -54,10 +57,19 @@ export function ChatInput({
             }}
             size="sm"
             className="ml-auto gap-1.5"
-            disabled={isLoading}
+            disabled={isLoading || !input.trim()}
           >
-            Send Message
-            <SendIcon className="size-3.5" />
+            {isLoading ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                Send
+                <SendIcon className="size-3.5" />
+              </>
+            )}
           </Button>
         </div>
       </div>

@@ -143,4 +143,15 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Fix scrollbar issues */
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  /* Ensure proper scrolling in chat area only */
+  [data-radix-scroll-area-viewport] {
+    overflow: auto !important;
+  }
 }

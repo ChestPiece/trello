@@ -61,3 +61,12 @@ export {
   listMembersTool,
   getMemberTool,
 } from "./MemberTools";
+
+// Workspace Tools
+export {
+  createWorkspaceTool,
+  getWorkspaceTool,
+  updateWorkspaceTool,
+  deleteWorkspaceTool,
+  listWorkspacesTool,
+} from "./WorkspaceTools";

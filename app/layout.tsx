@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -9,8 +9,12 @@ const fontSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Chat - Powered by Vercel AI SDK & OpenAI",
-  description: "A chatbot built with Vercel AI SDK and OpenAI",
+  title: "Trello AI Assistant - Powered by Vercel AI SDK & OpenAI",
+  description:
+    "An AI-powered Trello management assistant built with Vercel AI SDK and OpenAI",
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },

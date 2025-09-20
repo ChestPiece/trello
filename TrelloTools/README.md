@@ -52,6 +52,14 @@ TRELLO_API_TOKEN=your_trello_api_token_here
 - **deleteCard**: Permanently delete cards
 - **listCards**: List all cards in a board or list with filtering
 
+### Workspace Tools (`WorkspaceTools/`)
+
+- **createWorkspace**: Create new workspaces with custom settings and preferences
+- **getWorkspace**: Retrieve detailed workspace information including boards and members
+- **updateWorkspace**: Modify workspace properties, settings, and preferences
+- **deleteWorkspace**: Permanently delete workspaces (use with extreme caution)
+- **listWorkspaces**: List all accessible workspaces with filtering options
+
 ## Usage
 
 The tools are automatically integrated into your AI chatbot. Users can interact with them through natural language:
@@ -82,6 +90,14 @@ The tools are automatically integrated into your AI chatbot. Users can interact 
 - "Update the card description to 'Updated task'"
 - "Move the card to list 54321"
 - "Delete the card with ID 67890"
+
+**Workspace Operations:**
+
+- "Create a new workspace called 'My Company'"
+- "Show me all my workspaces"
+- "Get details for workspace ID 12345"
+- "Update the workspace description to 'Updated description'"
+- "Delete the workspace with ID 67890"
 
 ## Tool Features
 
@@ -116,17 +132,24 @@ TrelloTools/
 │   ├── delete-board.ts
 │   ├── list-boards.ts
 │   └── index.ts
+├── WorkspaceTools/
+│   ├── create-workspace.ts
+│   ├── get-workspace.ts
+│   ├── update-workspace.ts
+│   ├── delete-workspace.ts
+│   ├── list-workspaces.ts
+│   └── index.ts
 ├── index.ts
 └── README.md
 ```
 
 ## Future Enhancements
 
-- List management tools
-- Card management tools
-- Member management tools
-- Team/Organization tools
 - Power-up integration tools
+- Advanced workspace analytics
+- Bulk operations for workspaces
+- Workspace templates
+- Advanced member management features
 
 ## Error Handling
 
