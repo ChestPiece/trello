@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useBoards } from "@/hooks/use-boards";
 import { useBoardsByWorkspace } from "@/hooks/use-boards-by-workspace";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { useLists } from "@/hooks/use-lists";

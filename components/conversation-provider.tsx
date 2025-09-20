@@ -72,7 +72,7 @@ export function ConversationProvider({
     append,
     error,
     stop,
-    regenerate,
+    setMessages,
   } = useChat({
     api: "/api/chat",
     id: currentConversationId || undefined,
@@ -130,6 +130,28 @@ export function ConversationProvider({
   const selectConversation = React.useCallback((id: string) => {
     setCurrentConversationId(id);
   }, []);
+
+  // Regenerate the last assistant message
+  const regenerate = React.useCallback(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === "assistant") {
+        // Remove the last assistant message and resend the previous user message
+        const newMessages = messages.slice(0, -1);
+        setMessages(newMessages);
+
+        // Find the last user message and resend it
+        const lastUserMessage = newMessages[newMessages.length - 1];
+        if (lastUserMessage && lastUserMessage.role === "user") {
+          append({
+            id: Date.now().toString(),
+            role: "user",
+            content: lastUserMessage.content,
+          });
+        }
+      }
+    }
+  }, [messages, setMessages, append]);
 
   const value = React.useMemo(
     () => ({

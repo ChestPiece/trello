@@ -26,79 +26,32 @@ export function useLabels(boardId?: string) {
     setError(null);
 
     try {
-      // Call the listLabels tool through the chat API
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `List all labels in board ${boardToUse}`,
-            },
-          ],
-        }),
-      });
+      // Call the dedicated labels API
+      const response = await fetch(
+        `/api/labels?boardId=${boardToUse}&fields=id,name,color,idBoard`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch labels");
       }
 
-      // Mock data for development
-      const mockLabels: Label[] = [
-        {
-          id: "label1",
-          name: "High Priority",
-          color: "red",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label2",
-          name: "Medium Priority",
-          color: "yellow",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label3",
-          name: "Low Priority",
-          color: "green",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label4",
-          name: "Bug",
-          color: "red",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label5",
-          name: "Feature",
-          color: "blue",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label6",
-          name: "Documentation",
-          color: "purple",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label7",
-          name: "Review",
-          color: "orange",
-          idBoard: boardToUse,
-        },
-        {
-          id: "label8",
-          name: "Done",
-          color: "green",
-          idBoard: boardToUse,
-        },
-      ];
+      const result = await response.json();
 
-      setLabels(mockLabels);
+      if (!result.success) {
+        throw new Error(result.error || "Failed to fetch labels");
+      }
+
+      // Transform the API result to match our Label interface
+      const transformedLabels: Label[] = result.labels.map(
+        (label: Record<string, unknown>) => ({
+          id: label.id as string,
+          name: label.name as string,
+          color: label.color as string,
+          idBoard: label.idBoard as string,
+        })
+      );
+
+      setLabels(transformedLabels);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch labels");
       console.error("Error fetching labels:", err);

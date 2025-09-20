@@ -231,13 +231,13 @@ export function ListUpdateCard({ onSubmit, className }: ListUpdateCardProps) {
                 <SelectValue placeholder="Select position" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Position 1</SelectItem>
-                <SelectItem value="2">Position 2</SelectItem>
-                <SelectItem value="3">Position 3</SelectItem>
-                <SelectItem value="4">Position 4</SelectItem>
-                <SelectItem value="5">Position 5</SelectItem>
                 <SelectItem value="top">Top</SelectItem>
                 <SelectItem value="bottom">Bottom</SelectItem>
+                {Array.from({ length: Math.max(availableLists.length, 5) }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    Position {i + 1}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -9,6 +9,7 @@ export interface FormDetectionPatterns {
   listUpdate: RegExp;
   listDelete: RegExp;
   listClose: RegExp;
+  listArchive: RegExp;
   cardCreation: RegExp;
   cardUpdate: RegExp;
   cardDelete: RegExp;
@@ -41,11 +42,13 @@ export const formDetectionPatterns: FormDetectionPatterns = {
   listCreation:
     /\b(?:create|make|new|add)\s+(?:a\s+)?list\b|list\s+(?:creation|create)\s+form/i,
   listUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?list\b|list\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:update|edit|modify|change)\s+(?:a\s+)?list\b|list\s+(?:update|edit|modify)\s+form|list\s+update\s+form/i,
   listDelete:
     /\b(?:delete|remove|destroy)\s+(?:a\s+)?list\b|list\s+(?:delete|remove)\s+form/i,
   listClose:
-    /\b(?:close|reopen|archive)\s+(?:a\s+)?list\b|list\s+(?:close|reopen)\s+form/i,
+    /\b(?:close|reopen)\s+(?:a\s+)?list\b|list\s+(?:close|reopen)\s+form/i,
+  listArchive:
+    /\b(?:archive|unarchive|hide|restore)\s+(?:a\s+)?list\b|list\s+(?:archive|unarchive)\s+form|list\s+archive\s+form/i,
 
   // Card patterns
   cardCreation:
@@ -96,6 +99,7 @@ export interface FormDetectionResult {
   shouldShowListUpdateForm: boolean;
   shouldShowListDeleteForm: boolean;
   shouldShowListCloseForm: boolean;
+  shouldShowListArchiveForm: boolean;
   shouldShowCardCreationForm: boolean;
   shouldShowCardUpdateForm: boolean;
   shouldShowCardDeleteForm: boolean;
@@ -128,6 +132,7 @@ export function detectFormType(
       shouldShowListUpdateForm: false,
       shouldShowListDeleteForm: false,
       shouldShowListCloseForm: false,
+      shouldShowListArchiveForm: false,
       shouldShowCardCreationForm: false,
       shouldShowCardUpdateForm: false,
       shouldShowCardDeleteForm: false,
@@ -158,6 +163,7 @@ export function detectFormType(
     shouldShowListUpdateForm: formDetectionPatterns.listUpdate.test(content),
     shouldShowListDeleteForm: formDetectionPatterns.listDelete.test(content),
     shouldShowListCloseForm: formDetectionPatterns.listClose.test(content),
+    shouldShowListArchiveForm: formDetectionPatterns.listArchive.test(content),
     shouldShowCardCreationForm:
       formDetectionPatterns.cardCreation.test(content),
     shouldShowCardUpdateForm: formDetectionPatterns.cardUpdate.test(content),

@@ -171,7 +171,7 @@ export function WorkspaceDeleteCard({
 
           <div className="space-y-1">
             <Label htmlFor="confirmation-text" className="text-sm font-medium">
-              Type "DELETE" to confirm *
+              Type &quot;DELETE&quot; to confirm *
             </Label>
             <Input
               id="confirmation-text"

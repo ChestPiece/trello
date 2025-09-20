@@ -14,32 +14,32 @@ import {
 import { Label } from "@/components/ui/label";
 import { useBoards } from "@/hooks/use-boards";
 import { useCards } from "@/hooks/use-cards";
-import { useAttachments } from "@/hooks/use-attachments";
+import { useChecklists } from "@/hooks/use-checklists";
 
-export interface AttachmentDeleteData {
-  attachmentId: string;
+export interface ChecklistDeleteData {
+  checklistId: string;
   confirmationText: string;
 }
 
-export interface AttachmentDeleteCardProps {
-  onSubmit: (data: AttachmentDeleteData) => void;
+export interface ChecklistDeleteCardProps {
+  onSubmit: (data: ChecklistDeleteData) => void;
   className?: string;
 }
 
-export function AttachmentDeleteCard({
+export function ChecklistDeleteCard({
   onSubmit,
   className,
-}: AttachmentDeleteCardProps) {
+}: ChecklistDeleteCardProps) {
   const { boards: availableBoards, loading: boardsLoading } = useBoards();
   const [selectedBoardId, setSelectedBoardId] = React.useState<string>("");
   const { cards: availableCards, loading: cardsLoading } =
     useCards(selectedBoardId);
   const [selectedCardId, setSelectedCardId] = React.useState<string>("");
-  const { attachments: availableAttachments, loading: attachmentsLoading } =
-    useAttachments(selectedCardId);
+  const { checklists: availableChecklists, loading: checklistsLoading } =
+    useChecklists(selectedCardId);
 
-  const [formData, setFormData] = React.useState<AttachmentDeleteData>({
-    attachmentId: "",
+  const [formData, setFormData] = React.useState<ChecklistDeleteData>({
+    checklistId: "",
     confirmationText: "",
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -48,10 +48,10 @@ export function AttachmentDeleteCard({
     e.preventDefault();
 
     if (
-      !formData.attachmentId.trim() ||
+      !formData.checklistId.trim() ||
       formData.confirmationText !== "DELETE"
     ) {
-      return; // Don't submit if no attachment is selected or confirmation text is wrong
+      return; // Don't submit if no checklist is selected or confirmation text is wrong
     }
 
     setIsSubmitting(true);
@@ -60,20 +60,20 @@ export function AttachmentDeleteCard({
       await onSubmit(formData);
       // Reset form after successful submission
       setFormData({
-        attachmentId: "",
+        checklistId: "",
         confirmationText: "",
       });
       setSelectedBoardId("");
       setSelectedCardId("");
     } catch (error) {
-      console.error("Error submitting attachment deletion:", error);
+      console.error("Error submitting checklist deletion:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleInputChange = (
-    field: keyof AttachmentDeleteData,
+    field: keyof ChecklistDeleteData,
     value: string
   ) => {
     setFormData((prev) => ({
@@ -87,7 +87,7 @@ export function AttachmentDeleteCard({
     setSelectedCardId("");
     setFormData((prev) => ({
       ...prev,
-      attachmentId: "",
+      checklistId: "",
     }));
   };
 
@@ -95,53 +95,30 @@ export function AttachmentDeleteCard({
     setSelectedCardId(cardId);
     setFormData((prev) => ({
       ...prev,
-      attachmentId: "",
+      checklistId: "",
     }));
   };
 
-  const selectedAttachment = availableAttachments.find(
-    (attachment) => attachment.id === formData.attachmentId
+  const selectedChecklist = availableChecklists.find(
+    (checklist) => checklist.id === formData.checklistId
   );
 
   const selectedCard = availableCards.find(
     (card) => card.id === selectedCardId
   );
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) return "🖼️";
-    if (mimeType.startsWith("video/")) return "🎥";
-    if (mimeType.startsWith("audio/")) return "🎵";
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("word")) return "📝";
-    if (mimeType.includes("excel") || mimeType.includes("spreadsheet"))
-      return "📊";
-    if (mimeType.includes("powerpoint") || mimeType.includes("presentation"))
-      return "📽️";
-    if (mimeType.includes("zip") || mimeType.includes("archive")) return "📦";
-    if (mimeType.includes("text/")) return "📄";
-    return "📎";
-  };
-
   return (
     <Card className={`w-full ${className || ""}`}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-red-600">
-          Delete Attachment
+          Delete Checklist
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-800">
             <strong>Warning:</strong> This action will permanently delete the
-            attachment from the card. This cannot be undone.
+            checklist and all its items from the card. This cannot be undone.
           </p>
         </div>
 
@@ -233,26 +210,24 @@ export function AttachmentDeleteCard({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="attachment-select" className="text-sm font-medium">
-              Select Attachment to Delete *
+            <Label htmlFor="checklist-select" className="text-sm font-medium">
+              Select Checklist to Delete *
             </Label>
             <Select
-              value={formData.attachmentId}
-              onValueChange={(value) =>
-                handleInputChange("attachmentId", value)
-              }
-              disabled={attachmentsLoading || !selectedCardId}
+              value={formData.checklistId}
+              onValueChange={(value) => handleInputChange("checklistId", value)}
+              disabled={checklistsLoading || !selectedCardId}
             >
               <SelectTrigger className="w-full">
                 <SelectValue
                   placeholder={
                     !selectedCardId
                       ? "Select a card first"
-                      : attachmentsLoading
-                      ? "Loading attachments..."
-                      : availableAttachments.length === 0
-                      ? "No attachments available"
-                      : "Choose an attachment to delete"
+                      : checklistsLoading
+                      ? "Loading checklists..."
+                      : availableChecklists.length === 0
+                      ? "No checklists available"
+                      : "Choose a checklist to delete"
                   }
                 />
               </SelectTrigger>
@@ -261,60 +236,93 @@ export function AttachmentDeleteCard({
                   <SelectItem value="no-card" disabled>
                     Select a card first
                   </SelectItem>
-                ) : attachmentsLoading ? (
+                ) : checklistsLoading ? (
                   <SelectItem value="loading" disabled>
-                    Loading attachments...
+                    Loading checklists...
                   </SelectItem>
-                ) : availableAttachments.length > 0 ? (
-                  availableAttachments.map((attachment) => (
-                    <SelectItem key={attachment.id} value={attachment.id}>
+                ) : availableChecklists.length > 0 ? (
+                  availableChecklists.map((checklist) => (
+                    <SelectItem key={checklist.id} value={checklist.id}>
                       <div className="flex items-center space-x-2">
-                        <span>{getFileIcon(attachment.mimeType)}</span>
-                        <span className="truncate">{attachment.name}</span>
-                        {attachment.size > 0 && (
-                          <span className="text-xs text-gray-500">
-                            ({formatFileSize(attachment.size)})
-                          </span>
-                        )}
+                        <span>📋</span>
+                        <span>{checklist.name}</span>
+                        <span className="text-xs text-gray-500">
+                          ({checklist.checkItems.length} items)
+                        </span>
                       </div>
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no-attachments" disabled>
-                    No attachments available
+                  <SelectItem value="no-checklists" disabled>
+                    No checklists available
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
           </div>
 
-          {selectedAttachment && (
+          {selectedChecklist && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
-                <strong>Attachment to delete:</strong>
-                <div className="flex items-center space-x-2 mt-2">
-                  <span>{getFileIcon(selectedAttachment.mimeType)}</span>
-                  <div>
-                    <div className="font-medium">{selectedAttachment.name}</div>
-                    <div className="text-xs text-gray-600">
-                      {selectedAttachment.url}
-                    </div>
-                    {selectedAttachment.size > 0 && (
-                      <div className="text-xs text-gray-500">
-                        Size: {formatFileSize(selectedAttachment.size)}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-500">
-                      Type: {selectedAttachment.mimeType}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Added:{" "}
-                      {new Date(selectedAttachment.date).toLocaleDateString()}
-                    </div>
+                <strong>Checklist to delete:</strong> {selectedChecklist.name}
+                <div className="mt-2">
+                  <div className="text-sm">
+                    <strong>Total Items:</strong>{" "}
+                    {selectedChecklist.checkItems.length}
+                  </div>
+                  <div className="text-sm">
+                    <strong>Completed:</strong>{" "}
+                    {
+                      selectedChecklist.checkItems.filter(
+                        (item) => item.state === "complete"
+                      ).length
+                    }
+                  </div>
+                  <div className="text-sm">
+                    <strong>Remaining:</strong>{" "}
+                    {
+                      selectedChecklist.checkItems.filter(
+                        (item) => item.state === "incomplete"
+                      ).length
+                    }
                   </div>
                 </div>
+                {selectedChecklist.checkItems.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-xs font-medium">
+                      Items that will be deleted:
+                    </div>
+                    <div className="space-y-1 mt-1">
+                      {selectedChecklist.checkItems
+                        .slice(0, 5)
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center space-x-2 text-xs"
+                          >
+                            <span>{item.state === "complete" ? "☑" : "☐"}</span>
+                            <span
+                              className={
+                                item.state === "complete"
+                                  ? "line-through text-gray-500"
+                                  : ""
+                              }
+                            >
+                              {item.name}
+                            </span>
+                          </div>
+                        ))}
+                      {selectedChecklist.checkItems.length > 5 && (
+                        <div className="text-xs text-gray-500">
+                          ... and {selectedChecklist.checkItems.length - 5} more
+                          items
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <span className="block mt-2 text-red-600">
-                  ⚠️ This attachment will be permanently removed from the card.
+                  ⚠️ All checklist items will be permanently deleted.
                 </span>
               </p>
             </div>
@@ -335,7 +343,7 @@ export function AttachmentDeleteCard({
 
           <div className="space-y-1">
             <Label htmlFor="confirmation-text" className="text-sm font-medium">
-              Type "DELETE" to confirm *
+              Type &quot;DELETE&quot; to confirm *
             </Label>
             <Input
               id="confirmation-text"
@@ -355,12 +363,12 @@ export function AttachmentDeleteCard({
             variant="destructive"
             className="w-full"
             disabled={
-              !formData.attachmentId.trim() ||
+              !formData.checklistId.trim() ||
               formData.confirmationText !== "DELETE" ||
               isSubmitting
             }
           >
-            {isSubmitting ? "Deleting..." : "Delete Attachment"}
+            {isSubmitting ? "Deleting..." : "Delete Checklist"}
           </Button>
         </form>
       </CardContent>

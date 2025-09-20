@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/Theme/theme-provider";
+import { DataRefreshProvider } from "@/components/data-refresh-provider";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -29,7 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fontSans.variable} font-sans antialiased`}>
       <body>
-        <ThemeProvider defaultTheme="system">{children}</ThemeProvider>
+        <ThemeProvider defaultTheme="system">
+          <DataRefreshProvider>{children}</DataRefreshProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

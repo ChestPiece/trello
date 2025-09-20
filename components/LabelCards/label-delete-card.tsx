@@ -13,26 +13,39 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useBoards } from "@/hooks/use-boards";
-import { useLists } from "@/hooks/use-lists";
+import { useLabels } from "@/hooks/use-labels";
 
-export interface ListDeleteData {
-  listId: string;
+export interface LabelDeleteData {
+  labelId: string;
   confirmationText: string;
 }
 
-export interface ListDeleteCardProps {
-  onSubmit: (data: ListDeleteData) => void;
+export interface LabelDeleteCardProps {
+  onSubmit: (data: LabelDeleteData) => void;
   className?: string;
 }
 
-export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
+const LABEL_COLORS = [
+  { value: "red", label: "Red", color: "bg-red-500" },
+  { value: "yellow", label: "Yellow", color: "bg-yellow-500" },
+  { value: "orange", label: "Orange", color: "bg-orange-500" },
+  { value: "green", label: "Green", color: "bg-green-500" },
+  { value: "blue", label: "Blue", color: "bg-blue-500" },
+  { value: "purple", label: "Purple", color: "bg-purple-500" },
+  { value: "pink", label: "Pink", color: "bg-pink-500" },
+  { value: "sky", label: "Sky", color: "bg-sky-500" },
+  { value: "lime", label: "Lime", color: "bg-lime-500" },
+  { value: "gray", label: "Gray", color: "bg-gray-500" },
+];
+
+export function LabelDeleteCard({ onSubmit, className }: LabelDeleteCardProps) {
   const { boards: availableBoards, loading: boardsLoading } = useBoards();
   const [selectedBoardId, setSelectedBoardId] = React.useState<string>("");
-  const { lists: availableLists, loading: listsLoading } =
-    useLists(selectedBoardId);
+  const { labels: availableLabels, loading: labelsLoading } =
+    useLabels(selectedBoardId);
 
-  const [formData, setFormData] = React.useState<ListDeleteData>({
-    listId: "",
+  const [formData, setFormData] = React.useState<LabelDeleteData>({
+    labelId: "",
     confirmationText: "",
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -40,8 +53,8 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.listId.trim() || formData.confirmationText !== "DELETE") {
-      return; // Don't submit if no list is selected or confirmation text is wrong
+    if (!formData.labelId.trim() || formData.confirmationText !== "DELETE") {
+      return; // Don't submit if no label is selected or confirmation text is wrong
     }
 
     setIsSubmitting(true);
@@ -50,18 +63,18 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
       await onSubmit(formData);
       // Reset form after successful submission
       setFormData({
-        listId: "",
+        labelId: "",
         confirmationText: "",
       });
       setSelectedBoardId("");
     } catch (error) {
-      console.error("Error submitting list deletion:", error);
+      console.error("Error submitting label deletion:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (field: keyof ListDeleteData, value: string) => {
+  const handleInputChange = (field: keyof LabelDeleteData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -72,24 +85,25 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
     setSelectedBoardId(boardId);
     setFormData((prev) => ({
       ...prev,
-      listId: "",
+      labelId: "",
     }));
   };
 
-  const selectedList = availableLists.find(
-    (list) => list.id === formData.listId
+  const selectedLabel = availableLabels.find(
+    (label) => label.id === formData.labelId
   );
 
   return (
     <Card className={`w-full ${className || ""}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base text-red-600">Delete List</CardTitle>
+        <CardTitle className="text-base text-red-600">Delete Label</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p className="text-sm text-red-800">
             <strong>Warning:</strong> This action will permanently delete the
-            list and all its cards. This cannot be undone.
+            label from the board. All cards using this label will lose the label
+            association. This cannot be undone.
           </p>
         </div>
 
@@ -135,24 +149,24 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="list-select" className="text-sm font-medium">
-              Select List to Delete *
+            <Label htmlFor="label-select" className="text-sm font-medium">
+              Select Label to Delete *
             </Label>
             <Select
-              value={formData.listId}
-              onValueChange={(value) => handleInputChange("listId", value)}
-              disabled={listsLoading || !selectedBoardId}
+              value={formData.labelId}
+              onValueChange={(value) => handleInputChange("labelId", value)}
+              disabled={labelsLoading || !selectedBoardId}
             >
               <SelectTrigger className="w-full">
                 <SelectValue
                   placeholder={
                     !selectedBoardId
                       ? "Select a board first"
-                      : listsLoading
-                      ? "Loading lists..."
-                      : availableLists.length === 0
-                      ? "No lists available"
-                      : "Choose a list to delete"
+                      : labelsLoading
+                      ? "Loading labels..."
+                      : availableLabels.length === 0
+                      ? "No labels available"
+                      : "Choose a label to delete"
                   }
                 />
               </SelectTrigger>
@@ -161,42 +175,58 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
                   <SelectItem value="no-board" disabled>
                     Select a board first
                   </SelectItem>
-                ) : listsLoading ? (
+                ) : labelsLoading ? (
                   <SelectItem value="loading" disabled>
-                    Loading lists...
+                    Loading labels...
                   </SelectItem>
-                ) : availableLists.length > 0 ? (
-                  availableLists.map((list) => (
-                    <SelectItem key={list.id} value={list.id}>
-                      {list.name}
+                ) : availableLabels.length > 0 ? (
+                  availableLabels.map((label) => (
+                    <SelectItem key={label.id} value={label.id}>
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            LABEL_COLORS.find((c) => c.value === label.color)
+                              ?.color || "bg-gray-500"
+                          }`}
+                        />
+                        <span>{label.name}</span>
+                      </div>
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no-lists" disabled>
-                    No lists available
+                  <SelectItem value="no-labels" disabled>
+                    No labels available
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
           </div>
 
-          {selectedList && (
+          {selectedLabel && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
-                <strong>List to delete:</strong> {selectedList.name}
-                {selectedList.cards && selectedList.cards.length > 0 && (
-                  <span className="block mt-1">
-                    This list contains {selectedList.cards.length} card(s) that
-                    will also be deleted.
+                <strong>Label to delete:</strong>
+                <div className="flex items-center space-x-2 mt-2">
+                  <div
+                    className={`w-4 h-4 rounded-full ${
+                      LABEL_COLORS.find((c) => c.value === selectedLabel.color)
+                        ?.color || "bg-gray-500"
+                    }`}
+                  />
+                  <span className="text-sm font-medium">
+                    {selectedLabel.name}
                   </span>
-                )}
+                </div>
+                <span className="block mt-2 text-red-600">
+                  ⚠️ All cards using this label will lose the label association.
+                </span>
               </p>
             </div>
           )}
 
           <div className="space-y-1">
             <Label htmlFor="confirmation-text" className="text-sm font-medium">
-              Type "DELETE" to confirm *
+              Type &quot;DELETE&quot; to confirm *
             </Label>
             <Input
               id="confirmation-text"
@@ -216,12 +246,12 @@ export function ListDeleteCard({ onSubmit, className }: ListDeleteCardProps) {
             variant="destructive"
             className="w-full"
             disabled={
-              !formData.listId.trim() ||
+              !formData.labelId.trim() ||
               formData.confirmationText !== "DELETE" ||
               isSubmitting
             }
           >
-            {isSubmitting ? "Deleting..." : "Delete List"}
+            {isSubmitting ? "Deleting..." : "Delete Label"}
           </Button>
         </form>
       </CardContent>

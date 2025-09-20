@@ -83,81 +83,40 @@ export function useWorkspaces() {
     setError(null);
 
     try {
-      // Call the listWorkspaces tool through the chat API
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: "List all my workspaces with their details",
-            },
-          ],
-        }),
-      });
+      // Call the dedicated workspaces API
+      const response = await fetch(
+        `/api/workspaces?fields=id,name,displayName,desc,url,website,logo,prefs`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch workspaces");
       }
 
-      // Parse the streaming response to extract workspace data
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("No response body");
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to fetch workspaces");
       }
 
-      let result = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      // Transform the API result to match our Workspace interface
+      const transformedWorkspaces: Workspace[] = result.workspaces.map(
+        (workspace: Record<string, unknown>) => ({
+          id: workspace.id as string,
+          name: workspace.name as string,
+          displayName: workspace.displayName as string,
+          desc: workspace.desc as string,
+          descData: workspace.descData,
+          url: workspace.url as string,
+          website: workspace.website as string,
+          logo: workspace.logo as string,
+          prefs: workspace.prefs as Workspace["prefs"],
+          memberships: workspace.memberships as Workspace["memberships"],
+          boards: workspace.boards as Workspace["boards"],
+          members: workspace.members as Workspace["members"],
+        })
+      );
 
-        const chunk = new TextDecoder().decode(value);
-        result += chunk;
-      }
-
-      // Try to extract workspace data from the response
-      try {
-        // Look for workspace data in the response
-        const workspaceMatches = result.match(/"workspaces":\s*\[([\s\S]*?)\]/);
-        if (workspaceMatches) {
-          const workspacesJson = `[${workspaceMatches[1]}]`;
-          const workspacesData = JSON.parse(workspacesJson);
-
-          const formattedWorkspaces: Workspace[] = workspacesData.map(
-            (workspace: Record<string, unknown>) => ({
-              id: workspace.id,
-              name: workspace.name,
-              displayName: workspace.displayName,
-              desc: workspace.desc,
-              descData: workspace.descData,
-              url: workspace.url,
-              website: workspace.website,
-              logo: workspace.logo,
-              prefs: workspace.prefs,
-              memberships: workspace.memberships,
-              boards: workspace.boards,
-              members: workspace.members,
-            })
-          );
-
-          setWorkspaces(formattedWorkspaces);
-        } else {
-          // Fallback: try to parse the entire response as JSON
-          const responseData = JSON.parse(result);
-          if (responseData.workspaces) {
-            setWorkspaces(responseData.workspaces);
-          } else {
-            throw new Error("No workspaces found in response");
-          }
-        }
-      } catch (parseError) {
-        console.error("Error parsing workspace data:", parseError);
-        // If parsing fails, show an error but don't crash
-        setError("Failed to parse workspace data from Trello API");
-      }
+      setWorkspaces(transformedWorkspaces);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch workspaces"

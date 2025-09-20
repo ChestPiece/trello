@@ -1,7 +1,7 @@
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
-import { systemPrompt } from "@/components/system-prompt";
+import { systemPrompt } from "@/components/Prompts/system-prompt";
 import {
   createBoardTool,
   getBoardTool,
@@ -13,6 +13,8 @@ import {
   updateListTool,
   deleteListTool,
   listListsTool,
+  archiveListTool,
+  unarchiveListTool,
   createCardTool,
   getCardTool,
   updateCardTool,
@@ -83,6 +85,8 @@ export async function POST(req: NextRequest) {
         updateList: updateListTool,
         deleteList: deleteListTool,
         listLists: listListsTool,
+        archiveList: archiveListTool,
+        unarchiveList: unarchiveListTool,
         // Card Tools
         createCard: createCardTool,
         getCard: getCardTool,
@@ -180,7 +184,8 @@ Please provide corrected arguments that match the tool's schema. Return only val
             });
 
             try {
-              const repairedArgs = JSON.parse(repairResponse.text);
+              const text = await repairResponse.text;
+              const repairedArgs = JSON.parse(text);
               console.log(
                 `Repaired arguments for ${toolCall.toolName}:`,
                 repairedArgs
@@ -204,7 +209,6 @@ Please provide corrected arguments that match the tool's schema. Return only val
             return {
               ...toolCall,
               args: {
-                ...toolCall.args,
                 _error: `API Error: ${error.message}. Please check your Trello API credentials and try again.`,
               },
             };

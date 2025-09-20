@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -40,7 +41,7 @@ export const FormattedText = memo(
 
             // Enhanced paragraph styling
             p: ({ children }) => (
-              <p className=" leading-relaxed mb-2">{children}</p>
+              <div className=" leading-relaxed mb-2">{children}</div>
             ),
 
             // Custom list styling
@@ -129,9 +130,11 @@ export const FormattedText = memo(
             // Image styling
             img: ({ src, alt }) => (
               <div className="my-4">
-                <img
-                  src={src || "/placeholder.svg"}
-                  alt={alt}
+                <Image
+                  src={typeof src === "string" ? src : "/placeholder.svg"}
+                  alt={alt || ""}
+                  width={800}
+                  height={400}
                   className="max-w-full h-auto rounded-lg shadow-sm border border-slate-200"
                 />
                 {alt && (

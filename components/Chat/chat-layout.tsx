@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Chat } from "@/components/chat";
+import { Chat } from "@/components/Chat/chat";
 import { Sidebar } from "@/components/sidebar";
 import { useConversation } from "@/components/conversation-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/Theme/theme-toggle";
+import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ChatLayout() {
   const {
@@ -39,6 +41,10 @@ export function ChatLayout() {
           </h1>
           <h1 className="text-xl font-semibold block sm:hidden"></h1>
           <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon">
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">Settings</span>
+            </Button>
             <ThemeToggle />
           </div>
         </header>

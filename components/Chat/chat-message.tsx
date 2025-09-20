@@ -1,55 +1,85 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Message } from "ai";
-import { FormattedText } from "./formatted-text";
+import { FormattedText } from "../formatted-text";
 import { format } from "date-fns";
-import { BoardCreationCard, BoardCreationData } from "./board-creation-card";
-import { BoardUpdateCard, BoardUpdateData } from "./board-update-card";
-import { BoardDeleteCard, BoardDeleteData } from "./board-delete-card";
-import { BoardCloseCard, BoardCloseData } from "./board-close-card";
-import { ListCreationCard, ListCreationData } from "./list-creation-card";
-import { ListUpdateCard, ListUpdateData } from "./list-update-card";
-import { ListDeleteCard, ListDeleteData } from "./list-delete-card";
-import { ListCloseCard, ListCloseData } from "./list-close-card";
-import { CardCreationCard, CardCreationData } from "./card-creation-card";
-import { CardUpdateCard, CardUpdateData } from "./card-update-card";
-import { CardDeleteCard, CardDeleteData } from "./card-delete-card";
+import {
+  BoardCreationCard,
+  BoardCreationData,
+} from "../BoardCards/board-creation-card";
+import {
+  BoardUpdateCard,
+  BoardUpdateData,
+} from "../BoardCards/board-update-card";
+import {
+  BoardDeleteCard,
+  BoardDeleteData,
+} from "../BoardCards/board-delete-card";
+import { BoardCloseCard, BoardCloseData } from "../BoardCards/board-close-card";
+import {
+  ListCreationCard,
+  ListCreationData,
+} from "../ListCards/list-creation-card";
+import { ListUpdateCard, ListUpdateData } from "../ListCards/list-update-card";
+import { ListDeleteCard, ListDeleteData } from "../ListCards/list-delete-card";
+import { ListCloseCard, ListCloseData } from "../ListCards/list-close-card";
+import {
+  ListArchiveCard,
+  ListArchiveData,
+} from "../ListCards/list-archive-card";
+import {
+  CardCreationCard,
+  CardCreationData,
+} from "../Cards/card-creation-card";
+import { CardUpdateCard, CardUpdateData } from "../Cards/card-update-card";
+import { CardDeleteCard, CardDeleteData } from "../Cards/card-delete-card";
 import {
   WorkspaceCreationCard,
   WorkspaceCreationData,
-} from "./workspace-creation-card";
+} from "../WorkspaceCards/workspace-creation-card";
 import {
   WorkspaceUpdateCard,
   WorkspaceUpdateData,
-} from "./workspace-update-card";
+} from "../WorkspaceCards/workspace-update-card";
 import {
   WorkspaceDeleteCard,
   WorkspaceDeleteData,
-} from "./workspace-delete-card";
-import { LabelCreationCard, LabelCreationData } from "./label-creation-card";
-import { LabelUpdateCard, LabelUpdateData } from "./label-update-card";
-import { LabelDeleteCard, LabelDeleteData } from "./label-delete-card";
+} from "../WorkspaceCards/workspace-delete-card";
+import {
+  LabelCreationCard,
+  LabelCreationData,
+} from "../LabelCards/label-creation-card";
+import {
+  LabelUpdateCard,
+  LabelUpdateData,
+} from "../LabelCards/label-update-card";
+import {
+  LabelDeleteCard,
+  LabelDeleteData,
+} from "../LabelCards/label-delete-card";
 import {
   AttachmentCreationCard,
   AttachmentCreationData,
-} from "./attachment-creation-card";
+} from "../AttachmentsCards/attachment-creation-card";
 import {
   AttachmentDeleteCard,
   AttachmentDeleteData,
-} from "./attachment-delete-card";
+} from "../AttachmentsCards/attachment-delete-card";
 import {
   ChecklistCreationCard,
   ChecklistCreationData,
-} from "./checklist-creation-card";
+} from "../ChecklistCards/checklist-creation-card";
 import {
   ChecklistUpdateCard,
   ChecklistUpdateData,
-} from "./checklist-update-card";
+} from "../ChecklistCards/checklist-update-card";
 import {
   ChecklistDeleteCard,
   ChecklistDeleteData,
-} from "./checklist-delete-card";
-import { useConversation } from "./conversation-provider";
-import { detectFormType, shouldShowAnyForm } from "./form-detection";
+} from "../ChecklistCards/checklist-delete-card";
+import { useConversation } from "../conversation-provider";
+import { useDataRefresh } from "../data-refresh-provider";
+import { detectFormType, shouldShowAnyForm } from "../form-detection";
 
 export interface ChatMessageProps {
   message: Message;
@@ -64,6 +94,7 @@ const formatDate = (timestamp: string) => {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const { append } = useConversation();
+  const { refreshLists, refreshBoards, refreshCards } = useDataRefresh();
 
   // Use enhanced form detection logic
   const formDetection = detectFormType(message.content, message.role);
@@ -76,6 +107,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`,
       });
+      // Trigger data refresh for boards
+      refreshBoards();
     } catch (error) {
       console.error("Error creating board:", error);
     }
@@ -95,6 +128,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: updateMessage,
       });
+      // Trigger data refresh for boards
+      refreshBoards();
     } catch (error) {
       console.error("Error updating board:", error);
     }
@@ -108,6 +143,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `Delete board with ID: "${data.boardId}"`,
       });
+      // Trigger data refresh for boards
+      refreshBoards();
     } catch (error) {
       console.error("Error deleting board:", error);
     }
@@ -122,6 +159,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `${action} board with ID: "${data.boardId}"`,
       });
+      // Trigger data refresh for boards
+      refreshBoards();
     } catch (error) {
       console.error("Error closing/reopening board:", error);
     }
@@ -135,6 +174,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`,
       });
+      // Trigger data refresh for lists
+      refreshLists(data.boardId);
     } catch (error) {
       console.error("Error creating list:", error);
     }
@@ -155,6 +196,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: updateMessage,
       });
+      // Trigger data refresh for lists
+      refreshLists(data.idBoard);
     } catch (error) {
       console.error("Error updating list:", error);
     }
@@ -168,6 +211,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `Delete list with ID: "${data.listId}"`,
       });
+      // Trigger data refresh for lists
+      refreshLists();
     } catch (error) {
       console.error("Error deleting list:", error);
     }
@@ -182,8 +227,27 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `${action} list with ID: "${data.listId}"`,
       });
+      // Trigger data refresh for lists
+      refreshLists();
     } catch (error) {
       console.error("Error closing/reopening list:", error);
+    }
+  };
+
+  const handleListArchive = async (data: ListArchiveData) => {
+    try {
+      // Send a message to the AI to archive/unarchive the list using the Trello tools
+      const action = data.action === "archive" ? "archive" : "unarchive";
+      const archiveCards = data.archiveAllCards ? " and archive all cards" : "";
+      await append({
+        id: Date.now().toString(),
+        role: "user",
+        content: `${action} list with ID: "${data.listId}"${archiveCards}`,
+      });
+      // Trigger data refresh for lists
+      refreshLists();
+    } catch (error) {
+      console.error("Error archiving/unarchiving list:", error);
     }
   };
 
@@ -201,6 +265,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
           data.urlSource ? `, copy from: "${data.urlSource}"` : ""
         }`,
       });
+      // Trigger data refresh for cards
+      refreshCards(undefined, data.listId);
     } catch (error) {
       console.error("Error creating card:", error);
     }
@@ -225,6 +291,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: updateMessage,
       });
+      // Trigger data refresh for cards
+      refreshCards();
     } catch (error) {
       console.error("Error updating card:", error);
     }
@@ -238,6 +306,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         role: "user",
         content: `Delete card with ID: "${data.cardId}"`,
       });
+      // Trigger data refresh for cards
+      refreshCards();
     } catch (error) {
       console.error("Error deleting card:", error);
     }
@@ -473,6 +543,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <ListDeleteCard onSubmit={handleListDelete} className="w-full" />
           ) : formDetection.shouldShowListCloseForm ? (
             <ListCloseCard onSubmit={handleListClose} className="w-full" />
+          ) : formDetection.shouldShowListArchiveForm ? (
+            <ListArchiveCard onSubmit={handleListArchive} className="w-full" />
           ) : formDetection.shouldShowCardCreationForm ? (
             <CardCreationCard
               onSubmit={handleCardCreation}
@@ -534,11 +606,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
           ) : (
             <>
               {message.content.split("\n").map((text, i) => (
-                <>
-                  <p key={i} className={i > 0 ? "mt-2" : ""}>
+                <React.Fragment key={i}>
+                  <p className={i > 0 ? "mt-2" : ""}>
                     <FormattedText content={text} />
                   </p>
-                </>
+                </React.Fragment>
               ))}
               <span className="text-xs text-left">
                 {formatDate(new Date().toISOString())}

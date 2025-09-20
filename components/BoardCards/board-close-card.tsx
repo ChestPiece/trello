@@ -109,7 +109,7 @@ export function BoardCloseCard({ onSubmit, className }: BoardCloseCardProps) {
       </CardHeader>
       <CardContent>
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800 font-medium">
+          <p className="text-sm text-black font-medium">
             {formData.action === "close" ? (
               <>
                 ℹ️ Closing a board will make it inactive but preserve all data.
@@ -118,7 +118,7 @@ export function BoardCloseCard({ onSubmit, className }: BoardCloseCardProps) {
               <>ℹ️ Reopening a board will make it active again.</>
             )}
           </p>
-          <p className="text-xs text-blue-600 mt-1">
+          <p className="text-xs text-black mt-1">
             {formData.action === "close"
               ? "You can reopen it later from your closed boards."
               : "All cards, lists, and data will be restored."}

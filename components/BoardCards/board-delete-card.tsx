@@ -157,7 +157,7 @@ export function BoardDeleteCard({ onSubmit, className }: BoardDeleteCardProps) {
 
           <div className="space-y-1">
             <Label htmlFor="confirmation-text" className="text-sm font-medium">
-              Type "DELETE" to confirm *
+              Type &quot;DELETE&quot; to confirm *
             </Label>
             <Input
               id="confirmation-text"
@@ -170,7 +170,7 @@ export function BoardDeleteCard({ onSubmit, className }: BoardDeleteCardProps) {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              You must type "DELETE" exactly to confirm this action.
+              You must type &quot;DELETE&quot; exactly to confirm this action.
             </p>
           </div>
 
@@ -187,5 +187,3 @@ export function BoardDeleteCard({ onSubmit, className }: BoardDeleteCardProps) {
     </Card>
   );
 }
-
-

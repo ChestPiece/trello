@@ -4,7 +4,6 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -57,14 +56,14 @@ export function ChecklistUpdateCard({
         setFormData((prev) => ({
           ...prev,
           name: selectedChecklist.name,
-          pos: selectedChecklist.pos.toString(),
+          pos: selectedChecklist.pos,
         }));
         setSelectedCardId(selectedChecklist.idCard);
         // Find the board ID from the card
         const card = availableCards.find(
           (c) => c.id === selectedChecklist.idCard
         );
-        if (card) {
+        if (card && card.idBoard) {
           setSelectedBoardId(card.idBoard);
         }
       }
@@ -296,7 +295,7 @@ export function ChecklistUpdateCard({
               Position
             </Label>
             <Select
-              value={formData.pos}
+              value={formData.pos?.toString()}
               onValueChange={(value) => handleInputChange("pos", value)}
             >
               <SelectTrigger className="w-full">
@@ -400,5 +399,3 @@ export function ChecklistUpdateCard({
     </Card>
   );
 }
-
-

@@ -4,7 +4,6 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,82 +13,51 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useBoards } from "@/hooks/use-boards";
-import { useLists } from "@/hooks/use-lists";
 import { useCards } from "@/hooks/use-cards";
 
-export interface AttachmentCreationData {
-  cardId: string;
+export interface ChecklistItemData {
   name: string;
-  url: string;
-  mimeType?: string;
-  setCover?: boolean;
+  pos?: number;
+  due?: string;
+  idMember?: string;
 }
 
-export interface AttachmentCreationCardProps {
-  onSubmit: (data: AttachmentCreationData) => void;
+export interface ChecklistCreationData {
+  cardId: string;
+  name: string;
+  pos?: "top" | "bottom" | number;
+  idChecklistSource?: string;
+  checkItems?: ChecklistItemData[];
+}
+
+export interface ChecklistCreationCardProps {
+  onSubmit: (data: ChecklistCreationData) => void;
   className?: string;
 }
 
-const COMMON_MIME_TYPES = [
-  { value: "image/jpeg", label: "JPEG Image" },
-  { value: "image/png", label: "PNG Image" },
-  { value: "image/gif", label: "GIF Image" },
-  { value: "image/webp", label: "WebP Image" },
-  { value: "application/pdf", label: "PDF Document" },
-  { value: "application/msword", label: "Word Document (.doc)" },
-  {
-    value:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    label: "Word Document (.docx)",
-  },
-  { value: "application/vnd.ms-excel", label: "Excel Spreadsheet (.xls)" },
-  {
-    value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    label: "Excel Spreadsheet (.xlsx)",
-  },
-  {
-    value: "application/vnd.ms-powerpoint",
-    label: "PowerPoint Presentation (.ppt)",
-  },
-  {
-    value:
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    label: "PowerPoint Presentation (.pptx)",
-  },
-  { value: "text/plain", label: "Text File" },
-  { value: "text/csv", label: "CSV File" },
-  { value: "application/zip", label: "ZIP Archive" },
-  { value: "text/html", label: "Web Page" },
-];
-
-export function AttachmentCreationCard({
+export function ChecklistCreationCard({
   onSubmit,
   className,
-}: AttachmentCreationCardProps) {
+}: ChecklistCreationCardProps) {
   const { boards: availableBoards, loading: boardsLoading } = useBoards();
   const [selectedBoardId, setSelectedBoardId] = React.useState<string>("");
-  const { lists: availableLists, loading: listsLoading } =
-    useLists(selectedBoardId);
   const { cards: availableCards, loading: cardsLoading } =
     useCards(selectedBoardId);
 
-  const [formData, setFormData] = React.useState<AttachmentCreationData>({
+  const [formData, setFormData] = React.useState<ChecklistCreationData>({
     cardId: "",
     name: "",
-    url: "",
-    mimeType: "",
-    setCover: false,
+    pos: "bottom",
+    idChecklistSource: "",
+    checkItems: [],
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [newItemName, setNewItemName] = React.useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.cardId.trim() ||
-      !formData.name.trim() ||
-      !formData.url.trim()
-    ) {
+    if (!formData.cardId.trim() || !formData.name.trim()) {
       return; // Don't submit if required fields are empty
     }
 
@@ -101,21 +69,22 @@ export function AttachmentCreationCard({
       setFormData({
         cardId: "",
         name: "",
-        url: "",
-        mimeType: "",
-        setCover: false,
+        pos: "bottom",
+        idChecklistSource: "",
+        checkItems: [],
       });
       setSelectedBoardId("");
+      setNewItemName("");
     } catch (error) {
-      console.error("Error submitting attachment creation:", error);
+      console.error("Error submitting checklist creation:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleInputChange = (
-    field: keyof AttachmentCreationData,
-    value: string | boolean
+    field: keyof ChecklistCreationData,
+    value: string | ChecklistItemData[]
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -131,6 +100,28 @@ export function AttachmentCreationCard({
     }));
   };
 
+  const addChecklistItem = () => {
+    if (newItemName.trim()) {
+      const newItem: ChecklistItemData = {
+        name: newItemName.trim(),
+        pos: (formData.checkItems?.length || 0) + 1,
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        checkItems: [...(prev.checkItems || []), newItem],
+      }));
+      setNewItemName("");
+    }
+  };
+
+  const removeChecklistItem = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      checkItems: prev.checkItems?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
   const selectedCard = availableCards.find(
     (card) => card.id === formData.cardId
   );
@@ -138,7 +129,7 @@ export function AttachmentCreationCard({
   return (
     <Card className={`w-full ${className || ""}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Add Attachment</CardTitle>
+        <CardTitle className="text-base">Create New Checklist</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -229,13 +220,13 @@ export function AttachmentCreationCard({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="attachment-name" className="text-sm font-medium">
-              Attachment Name *
+            <Label htmlFor="checklist-name" className="text-sm font-medium">
+              Checklist Name *
             </Label>
             <Input
-              id="attachment-name"
+              id="checklist-name"
               type="text"
-              placeholder="Enter attachment name"
+              placeholder="Enter checklist name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
               required
@@ -244,53 +235,94 @@ export function AttachmentCreationCard({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="attachment-url" className="text-sm font-medium">
-              URL *
-            </Label>
-            <Input
-              id="attachment-url"
-              type="url"
-              placeholder="https://example.com/file.pdf"
-              value={formData.url}
-              onChange={(e) => handleInputChange("url", e.target.value)}
-              required
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="mime-type" className="text-sm font-medium">
-              File Type
+            <Label htmlFor="checklist-position" className="text-sm font-medium">
+              Position
             </Label>
             <Select
-              value={formData.mimeType}
-              onValueChange={(value) => handleInputChange("mimeType", value)}
+              value={formData.pos?.toString()}
+              onValueChange={(value) => handleInputChange("pos", value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select file type (optional)" />
+                <SelectValue placeholder="Select position" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Auto-detect</SelectItem>
-                {COMMON_MIME_TYPES.map((mimeType) => (
-                  <SelectItem key={mimeType.value} value={mimeType.value}>
-                    {mimeType.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="top">Top</SelectItem>
+                <SelectItem value="bottom">Bottom</SelectItem>
+                <SelectItem value="1">Position 1</SelectItem>
+                <SelectItem value="2">Position 2</SelectItem>
+                <SelectItem value="3">Position 3</SelectItem>
+                <SelectItem value="4">Position 4</SelectItem>
+                <SelectItem value="5">Position 5</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="set-cover"
-              checked={formData.setCover}
-              onChange={(e) => handleInputChange("setCover", e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            <Label htmlFor="set-cover" className="text-sm">
-              Set as card cover
+          <div className="space-y-1">
+            <Label htmlFor="checklist-source" className="text-sm font-medium">
+              Copy from Checklist (optional)
             </Label>
+            <Input
+              id="checklist-source"
+              type="text"
+              placeholder="Enter checklist ID to copy from"
+              value={formData.idChecklistSource}
+              onChange={(e) =>
+                handleInputChange("idChecklistSource", e.target.value)
+              }
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Checklist Items (optional)
+            </Label>
+            <div className="flex space-x-2">
+              <Input
+                type="text"
+                placeholder="Enter checklist item name"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                className="flex-1"
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addChecklistItem();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addChecklistItem}
+                disabled={!newItemName.trim()}
+              >
+                Add
+              </Button>
+            </div>
+
+            {formData.checkItems && formData.checkItems.length > 0 && (
+              <div className="space-y-1">
+                {formData.checkItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-2 p-2 bg-gray-50 rounded"
+                  >
+                    <span className="text-sm">☐</span>
+                    <span className="text-sm flex-1">{item.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeChecklistItem(index)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {selectedCard && (
@@ -314,23 +346,26 @@ export function AttachmentCreationCard({
 
           <div className="p-3 bg-green-50 border border-green-200 rounded-md">
             <p className="text-sm text-green-800">
-              <strong>Attachment Preview:</strong>
+              <strong>Checklist Preview:</strong>
               <div className="mt-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-gray-400 rounded"></div>
-                  <span className="text-sm font-medium">
-                    {formData.name || "Attachment Name"}
-                  </span>
+                <div className="font-medium">
+                  {formData.name || "Checklist Name"}
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {formData.url || "https://example.com/file"}
-                </div>
-                {formData.mimeType && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Type:{" "}
-                    {COMMON_MIME_TYPES.find(
-                      (m) => m.value === formData.mimeType
-                    )?.label || formData.mimeType}
+                {formData.checkItems && formData.checkItems.length > 0 ? (
+                  <div className="mt-1 space-y-1">
+                    {formData.checkItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <span>☐</span>
+                        <span>{item.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 mt-1">
+                    No items added yet
                   </div>
                 )}
               </div>
@@ -341,18 +376,13 @@ export function AttachmentCreationCard({
             type="submit"
             className="w-full"
             disabled={
-              !formData.cardId.trim() ||
-              !formData.name.trim() ||
-              !formData.url.trim() ||
-              isSubmitting
+              !formData.cardId.trim() || !formData.name.trim() || isSubmitting
             }
           >
-            {isSubmitting ? "Adding..." : "Add Attachment"}
+            {isSubmitting ? "Creating..." : "Create Checklist"}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
-
-

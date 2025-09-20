@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ChatInput } from "@/components/chat-input";
-import { ChatMessage } from "@/components/chat-message";
+import { ChatInput } from "@/components/Chat/chat-input";
+import { ChatMessage } from "@/components/Chat/chat-message";
 import { useConversation } from "@/components/conversation-provider";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "../ui/scroll-area";
 
 export function Chat() {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -17,7 +17,6 @@ export function Chat() {
     isLoading,
     isStreaming,
     error,
-    stop,
     regenerate,
   } = useConversation();
 
@@ -48,7 +47,7 @@ export function Chat() {
           <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="max-w-md text-center">
               <h1 className="mb-2 text-2xl font-bold">
-                Welcome, what's on your mind today?
+                Welcome, what&apos;s on your mind today?
               </h1>
               <p className="text-muted-foreground">
                 Start a conversation by sending a message below.
@@ -94,25 +93,6 @@ export function Chat() {
                         className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
                       >
                         Regenerate
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Control buttons for streaming */}
-              {isStreaming && (
-                <div className="chat-message flex w-full items-start gap-4 py-4 justify-start">
-                  <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-muted">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-muted-foreground">
-                        AI is responding...
-                      </div>
-                      <button
-                        onClick={stop}
-                        className="text-xs px-2 py-1 bg-destructive text-destructive-foreground rounded hover:bg-destructive/90"
-                      >
-                        Stop
                       </button>
                     </div>
                   </div>

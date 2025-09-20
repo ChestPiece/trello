@@ -36,135 +36,42 @@ export function useChecklists(cardId?: string) {
     setError(null);
 
     try {
-      // Call the listChecklists tool through the chat API
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `List all checklists for card ${cardToUse}`,
-            },
-          ],
-        }),
-      });
+      // Call the dedicated checklists API
+      const response = await fetch(
+        `/api/checklists?cardId=${cardToUse}&checkItems=all&fields=id,name,idCard,pos&checkItemFields=id,name,state,pos,due,idMember`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch checklists");
       }
 
-      // Mock data for development
-      const mockChecklists: Checklist[] = [
-        {
-          id: "checklist1",
-          name: "Project Setup",
-          idCard: cardToUse,
-          pos: 1,
-          checkItems: [
-            {
-              id: "item1",
-              name: "Create project repository",
-              state: "complete",
-              pos: 1,
-              due: null,
-              idMember: "member1",
-            },
-            {
-              id: "item2",
-              name: "Set up development environment",
-              state: "complete",
-              pos: 2,
-              due: null,
-              idMember: "member1",
-            },
-            {
-              id: "item3",
-              name: "Configure CI/CD pipeline",
-              state: "incomplete",
-              pos: 3,
-              due: "2024-01-25T00:00:00Z",
-              idMember: "member2",
-            },
-            {
-              id: "item4",
-              name: "Write initial documentation",
-              state: "incomplete",
-              pos: 4,
-              due: "2024-01-30T00:00:00Z",
-              idMember: "member3",
-            },
-          ],
-        },
-        {
-          id: "checklist2",
-          name: "Design Phase",
-          idCard: cardToUse,
-          pos: 2,
-          checkItems: [
-            {
-              id: "item5",
-              name: "Create wireframes",
-              state: "complete",
-              pos: 1,
-              due: null,
-              idMember: "member2",
-            },
-            {
-              id: "item6",
-              name: "Design user interface",
-              state: "incomplete",
-              pos: 2,
-              due: "2024-02-05T00:00:00Z",
-              idMember: "member2",
-            },
-            {
-              id: "item7",
-              name: "Create style guide",
-              state: "incomplete",
-              pos: 3,
-              due: "2024-02-10T00:00:00Z",
-              idMember: "member2",
-            },
-          ],
-        },
-        {
-          id: "checklist3",
-          name: "Testing",
-          idCard: cardToUse,
-          pos: 3,
-          checkItems: [
-            {
-              id: "item8",
-              name: "Unit tests",
-              state: "incomplete",
-              pos: 1,
-              due: "2024-02-15T00:00:00Z",
-              idMember: "member1",
-            },
-            {
-              id: "item9",
-              name: "Integration tests",
-              state: "incomplete",
-              pos: 2,
-              due: "2024-02-20T00:00:00Z",
-              idMember: "member1",
-            },
-            {
-              id: "item10",
-              name: "User acceptance testing",
-              state: "incomplete",
-              pos: 3,
-              due: "2024-02-25T00:00:00Z",
-              idMember: "member3",
-            },
-          ],
-        },
-      ];
+      const result = await response.json();
 
-      setChecklists(mockChecklists);
+      if (!result.success) {
+        throw new Error(result.error || "Failed to fetch checklists");
+      }
+
+      // Transform the API result to match our Checklist interface
+      const transformedChecklists: Checklist[] = result.checklists.map(
+        (checklist: Record<string, unknown>) => ({
+          id: checklist.id as string,
+          name: checklist.name as string,
+          idCard: checklist.idCard as string,
+          pos: checklist.pos as number,
+          checkItems: (
+            (checklist.checkItems as Record<string, unknown>[]) || []
+          ).map((item: Record<string, unknown>) => ({
+            id: item.id as string,
+            name: item.name as string,
+            state: item.state as "complete" | "incomplete",
+            pos: item.pos as number,
+            due: item.due as string | null,
+            idMember: item.idMember as string | null,
+          })),
+        })
+      );
+
+      setChecklists(transformedChecklists);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch checklists"
@@ -188,5 +95,3 @@ export function useChecklists(cardId?: string) {
     refetch: fetchChecklists,
   };
 }
-
-
