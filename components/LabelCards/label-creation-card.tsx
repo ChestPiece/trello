@@ -13,11 +13,15 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useBoards } from "@/hooks/use-boards";
+import { useLists } from "@/hooks/use-lists";
+import { useCards } from "@/hooks/use-cards";
 
 export interface LabelCreationData {
   boardId: string;
   name: string;
   color: string;
+  listId?: string;
+  cardId?: string;
 }
 
 export interface LabelCreationCardProps {
@@ -42,13 +46,25 @@ export function LabelCreationCard({
   onSubmit,
   className,
 }: LabelCreationCardProps) {
-  const { boards: availableBoards, loading: boardsLoading } = useBoards();
-
   const [formData, setFormData] = React.useState<LabelCreationData>({
     boardId: "",
     name: "",
     color: "red",
+    listId: "",
+    cardId: "",
   });
+
+  const { boards: availableBoards, loading: boardsLoading } = useBoards();
+
+  // Use useMemo to avoid dependency issues
+  const boardId = React.useMemo(() => formData.boardId, [formData.boardId]);
+  const listId = React.useMemo(() => formData.listId, [formData.listId]);
+
+  const { lists: availableLists, loading: listsLoading } = useLists(boardId);
+  const { cards: availableCards, loading: cardsLoading } = useCards(
+    boardId,
+    listId
+  );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,12 +77,21 @@ export function LabelCreationCard({
     setIsSubmitting(true);
 
     try {
-      await onSubmit(formData);
+      // Clean up the data - remove empty optional fields
+      const submitData = {
+        ...formData,
+        listId: formData.listId || undefined,
+        cardId: formData.cardId || undefined,
+      };
+
+      await onSubmit(submitData);
       // Reset form after successful submission
       setFormData({
         boardId: "",
         name: "",
         color: "red",
+        listId: "",
+        cardId: "",
       });
     } catch (error) {
       console.error("Error submitting label creation:", error);
@@ -76,10 +101,24 @@ export function LabelCreationCard({
   };
 
   const handleInputChange = (field: keyof LabelCreationData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+
+      // If board changes, reset list and card selections
+      if (field === "boardId") {
+        newData.listId = "";
+        newData.cardId = "";
+      }
+      // If list changes, reset card selection
+      else if (field === "listId") {
+        newData.cardId = "";
+      }
+
+      return newData;
+    });
   };
 
   return (
@@ -128,6 +167,94 @@ export function LabelCreationCard({
               </SelectContent>
             </Select>
           </div>
+
+          {/* List Selection - only show if board is selected */}
+          {formData.boardId && (
+            <div className="space-y-1">
+              <Label htmlFor="list-select" className="text-sm font-medium">
+                Select List (Optional)
+              </Label>
+              <Select
+                value={formData.listId}
+                onValueChange={(value) => handleInputChange("listId", value)}
+                disabled={listsLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      listsLoading
+                        ? "Loading lists..."
+                        : availableLists.length === 0
+                        ? "No lists available"
+                        : "Choose a list (optional)"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No specific list</SelectItem>
+                  {listsLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading lists...
+                    </SelectItem>
+                  ) : availableLists.length > 0 ? (
+                    availableLists.map((list) => (
+                      <SelectItem key={list.id} value={list.id}>
+                        {list.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-lists" disabled>
+                      No lists available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Card Selection - only show if list is selected */}
+          {formData.listId && (
+            <div className="space-y-1">
+              <Label htmlFor="card-select" className="text-sm font-medium">
+                Select Card (Optional)
+              </Label>
+              <Select
+                value={formData.cardId}
+                onValueChange={(value) => handleInputChange("cardId", value)}
+                disabled={cardsLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      cardsLoading
+                        ? "Loading cards..."
+                        : availableCards.length === 0
+                        ? "No cards available"
+                        : "Choose a card (optional)"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No specific card</SelectItem>
+                  {cardsLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading cards...
+                    </SelectItem>
+                  ) : availableCards.length > 0 ? (
+                    availableCards.map((card) => (
+                      <SelectItem key={card.id} value={card.id}>
+                        {card.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-cards" disabled>
+                      No cards available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-1">
             <Label htmlFor="label-name" className="text-sm font-medium">
@@ -184,6 +311,13 @@ export function LabelCreationCard({
                   {formData.name || "Label Name"}
                 </span>
               </div>
+              {formData.listId && (
+                <div className="mt-2 text-xs text-blue-600">
+                  <strong>Context:</strong> Will be associated with the selected
+                  list
+                  {formData.cardId && " and added to the selected card"}
+                </div>
+              )}
             </p>
           </div>
 

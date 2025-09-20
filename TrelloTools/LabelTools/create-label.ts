@@ -19,13 +19,22 @@ const createLabelSchema = z.object({
       "lime",
     ])
     .describe("The color of the label"),
+  listId: z
+    .string()
+    .optional()
+    .describe("Optional ID of the list to associate the label with"),
+  cardId: z
+    .string()
+    .optional()
+    .describe("Optional ID of the card to add the label to immediately"),
 });
 
 export const createLabelTool = tool({
   description:
-    "Create a new label in a Trello board with specified name and color",
+    "Create a new label in a Trello board with specified name and color. Optionally associate with a specific list or add to a specific card immediately.",
   parameters: createLabelSchema,
-  execute: async ({ boardId, name, color }) => {
+  execute: async ({ boardId, name, color, listId: _listId, cardId }) => {
+    // Note: listId is not used as Trello labels are board-level, not list-level
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -47,16 +56,45 @@ export const createLabelTool = tool({
 
       const response = await axios.post(`${baseUrl}?${params.toString()}`);
 
+      const labelData = {
+        id: response.data.id,
+        name: response.data.name,
+        color: response.data.color,
+        boardId: response.data.idBoard,
+        uses: response.data.uses,
+      };
+
+      const additionalActions: string[] = [];
+
+      // If cardId is provided, add the label to the card immediately
+      if (cardId) {
+        try {
+          const addLabelUrl = `https://api.trello.com/1/cards/${cardId}/idLabels`;
+          const addLabelParams = new URLSearchParams({
+            key: apiKey,
+            token: apiToken,
+            value: response.data.id,
+          });
+
+          await axios.post(`${addLabelUrl}?${addLabelParams.toString()}`);
+          additionalActions.push(`Added label to card ${cardId}`);
+        } catch (cardError) {
+          console.warn("Failed to add label to card:", cardError);
+          additionalActions.push(
+            `Warning: Could not add label to card ${cardId}`
+          );
+        }
+      }
+
       return {
         success: true,
-        label: {
-          id: response.data.id,
-          name: response.data.name,
-          color: response.data.color,
-          boardId: response.data.idBoard,
-          uses: response.data.uses,
-        },
-        message: `Successfully created label "${name}" with color ${color} in board ${boardId}`,
+        label: labelData,
+        message: `Successfully created label "${name}" with color ${color} in board ${boardId}${
+          additionalActions.length > 0
+            ? `. ${additionalActions.join(", ")}`
+            : ""
+        }`,
+        additionalActions,
       };
     } catch (error: unknown) {
       const errorMessage =

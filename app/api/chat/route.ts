@@ -26,6 +26,8 @@ import {
   updateLabelTool,
   deleteLabelTool,
   listLabelsTool,
+  addLabelToCardTool,
+  removeLabelFromCardTool,
   createAttachmentTool,
   getAttachmentTool,
   deleteAttachmentTool,
@@ -99,6 +101,8 @@ export async function POST(req: NextRequest) {
         updateLabel: updateLabelTool,
         deleteLabel: deleteLabelTool,
         listLabels: listLabelsTool,
+        addLabelToCard: addLabelToCardTool,
+        removeLabelFromCard: removeLabelFromCardTool,
         // Attachment Tools
         createAttachment: createAttachmentTool,
         getAttachment: getAttachmentTool,

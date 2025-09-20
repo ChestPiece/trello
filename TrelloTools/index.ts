@@ -34,6 +34,8 @@ export {
   updateLabelTool,
   deleteLabelTool,
   listLabelsTool,
+  addLabelToCardTool,
+  removeLabelFromCardTool,
 } from "./LabelTools";
 
 // Attachment Tools
