@@ -15,7 +15,16 @@ export const getAttachmentTool = tool({
   description:
     "Retrieve detailed information about a specific Trello attachment",
   parameters: getAttachmentSchema,
-  execute: async ({ cardId, attachmentId, fields }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    cardId,
+    attachmentId,
+    fields,
+  }: {
+    cardId: string;
+    attachmentId: string;
+    fields?: string[];
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

@@ -11,7 +11,14 @@ export const removeMemberFromBoardTool = tool({
   description:
     "Remove a member from a Trello board. This action cannot be undone.",
   parameters: removeMemberFromBoardSchema,
-  execute: async ({ boardId, memberId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    boardId,
+    memberId,
+  }: {
+    boardId: string;
+    memberId: string;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -28,7 +35,7 @@ export const removeMemberFromBoardTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,

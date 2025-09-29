@@ -10,7 +10,8 @@ export const deleteLabelTool = tool({
   description:
     "Delete a Trello label permanently. This action cannot be undone.",
   parameters: deleteLabelSchema,
-  execute: async ({ labelId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({ labelId }: { labelId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -27,7 +28,7 @@ export const deleteLabelTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,

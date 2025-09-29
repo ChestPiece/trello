@@ -13,7 +13,14 @@ export const deleteChecklistItemTool = tool({
   description:
     "Delete a Trello checklist item permanently. This action cannot be undone.",
   parameters: deleteChecklistItemSchema,
-  execute: async ({ checklistId, checkItemId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    checklistId,
+    checkItemId,
+  }: {
+    checklistId: string;
+    checkItemId: string;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -30,7 +37,7 @@ export const deleteChecklistItemTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,

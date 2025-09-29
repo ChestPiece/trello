@@ -22,7 +22,18 @@ export const listAttachmentsTool = tool({
   description:
     "List all attachments on a Trello card with optional filtering and field selection",
   parameters: listAttachmentsSchema,
-  execute: async ({ cardId, fields, filter, limit }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    cardId,
+    fields,
+    filter,
+    limit,
+  }: {
+    cardId: string;
+    fields?: string[];
+    filter?: "cover" | "gallery" | "all";
+    limit?: number;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

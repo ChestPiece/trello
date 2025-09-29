@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { nanoid } from "nanoid";
 import { UIMessage } from "ai";
 
@@ -24,7 +23,12 @@ interface ConversationContextType {
   isLoading: boolean;
   isStreaming: boolean;
   error: Error | undefined;
-  append: (message: UIMessage) => void;
+  append: (message: {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    parts: Array<{ type: string; text?: string }>;
+  }) => void;
   stop: () => void;
   regenerate: () => void;
   reload: () => void;
@@ -73,9 +77,7 @@ export function ConversationProvider({
     setMessages,
     reload,
   } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-    }),
+    api: "/api/chat",
     id: currentConversationId || undefined,
     // Throttle UI updates to improve performance
     experimental_throttle: 50,
@@ -84,7 +86,7 @@ export function ConversationProvider({
       // Set streaming to true when we start receiving a response
       setIsStreaming(true);
     },
-    onFinish: ({ message }) => {
+    onFinish: () => {
       // Set streaming to false when the response is complete
       setIsStreaming(false);
 
@@ -151,6 +153,9 @@ export function ConversationProvider({
           append({
             id: Date.now().toString(),
             role: "user",
+            content:
+              lastUserMessage.parts.find((part) => part.type === "text")
+                ?.text || "",
             parts: lastUserMessage.parts,
           });
         }
@@ -159,23 +164,24 @@ export function ConversationProvider({
   }, [messages, setMessages, append]);
 
   const value = React.useMemo(
-    () => ({
-      conversations,
-      currentConversationId,
-      createNewConversation,
-      selectConversation,
-      messages,
-      input,
-      handleInputChange,
-      handleSubmit,
-      isLoading,
-      isStreaming,
-      error,
-      append,
-      stop,
-      regenerate,
-      reload,
-    }),
+    () =>
+      ({
+        conversations,
+        currentConversationId,
+        createNewConversation,
+        selectConversation,
+        messages: messages as UIMessage[],
+        input,
+        handleInputChange,
+        handleSubmit,
+        isLoading,
+        isStreaming,
+        error,
+        append,
+        stop,
+        regenerate,
+        reload,
+      } as ConversationContextType),
     [
       conversations,
       currentConversationId,

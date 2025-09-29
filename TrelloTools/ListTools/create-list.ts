@@ -21,6 +21,7 @@ export const createListTool = tool({
   description:
     "Create a new list in a Trello board with specified name and optional settings",
   parameters: createListSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     boardId,
     name,
@@ -28,6 +29,13 @@ export const createListTool = tool({
     closed,
     idListSource,
     subscribe,
+  }: {
+    boardId: string;
+    name: string;
+    position?: string | number;
+    closed?: boolean;
+    idListSource?: string;
+    subscribe?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

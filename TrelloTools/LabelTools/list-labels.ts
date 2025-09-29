@@ -34,7 +34,30 @@ export const listLabelsTool = tool({
   description:
     "List all labels in a Trello board with optional filtering, field selection, and color filtering",
   parameters: listLabelsSchema,
-  execute: async ({ boardId, fields, limit, filter, color }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    boardId,
+    fields,
+    limit,
+    filter,
+    color,
+  }: {
+    boardId: string;
+    fields?: string[];
+    limit?: number;
+    filter?: "all" | "none";
+    color?:
+      | "yellow"
+      | "purple"
+      | "blue"
+      | "red"
+      | "green"
+      | "orange"
+      | "black"
+      | "sky"
+      | "pink"
+      | "lime";
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -60,7 +83,15 @@ export const listLabelsTool = tool({
 
       // Apply client-side color filtering if specified
       if (color) {
-        labels = labels.filter((label: any) => label.color === color);
+        labels = labels.filter(
+          (label: {
+            id: string;
+            name: string;
+            color: string;
+            uses: number;
+            idBoard: string;
+          }) => label.color === color
+        );
       }
 
       // Apply limit after filtering

@@ -77,7 +77,60 @@ export const createWorkspaceTool = tool({
   description:
     "Create a new Trello workspace (organization) with specified display name, description, and settings. Supports comprehensive workspace configuration including permissions, visibility, and custom preferences.",
   parameters: createWorkspaceSchema,
-  execute: async ({ displayName, description, name, website, logo, prefs }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    displayName,
+    description,
+    name,
+    website,
+    logo,
+    prefs,
+  }: {
+    displayName: string;
+    description?: string;
+    name?: string;
+    website?: string;
+    logo?: string;
+    prefs?: {
+      permissionLevel?: "private" | "public" | "org";
+      externalMembersDisabled?: boolean;
+      googleAppsVersion?: number;
+      orgInviteRestrict?: string;
+      boardVisibilityRestrict?: {
+        private?: string;
+        org?: string;
+        public?: string;
+      };
+      boardDeleteRestrict?: {
+        private?: string;
+        org?: string;
+        public?: string;
+      };
+      selfJoin?: boolean;
+      cardCovers?: boolean;
+      hideVotes?: boolean;
+      invitations?: "disabled" | "enabled" | "members";
+      voting?: "disabled" | "enabled" | "members";
+      comments?: "disabled" | "enabled" | "members";
+      background?: string;
+      backgroundColor?: string;
+      backgroundImage?: string;
+      backgroundImageScaled?: Array<{
+        width: number;
+        height: number;
+        url: string;
+      }>;
+      backgroundTile?: boolean;
+      backgroundBrightness?: "dark" | "light";
+      backgroundBottomColor?: string;
+      backgroundTopColor?: string;
+      canBePublic?: boolean;
+      canBeEnterprise?: boolean;
+      canBeOrg?: boolean;
+      canBePrivate?: boolean;
+      canInvite?: boolean;
+    };
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

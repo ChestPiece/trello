@@ -25,7 +25,26 @@ const updateLabelSchema = z.object({
 export const updateLabelTool = tool({
   description: "Update an existing Trello label with new name or color",
   parameters: updateLabelSchema,
-  execute: async ({ labelId, name, color }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    labelId,
+    name,
+    color,
+  }: {
+    labelId: string;
+    name?: string;
+    color?:
+      | "yellow"
+      | "purple"
+      | "blue"
+      | "red"
+      | "green"
+      | "orange"
+      | "black"
+      | "sky"
+      | "pink"
+      | "lime";
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

@@ -69,6 +69,7 @@ export const updateCardTool = tool({
   description:
     "Update an existing Trello card with new name, description, position, or other settings",
   parameters: updateCardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     cardId,
     name,
@@ -88,6 +89,33 @@ export const updateCardTool = tool({
     locationName,
     coordinates,
     subscribed,
+  }: {
+    cardId: string;
+    name?: string;
+    desc?: string;
+    closed?: boolean;
+    idList?: string;
+    idBoard?: string;
+    pos?: string | number;
+    due?: string;
+    dueComplete?: boolean;
+    start?: string;
+    idLabels?: string[];
+    idMembers?: string[];
+    idAttachmentCover?: string;
+    keepFromSource?:
+      | "all"
+      | "attachments"
+      | "checklists"
+      | "comments"
+      | "customFields"
+      | "labels"
+      | "members"
+      | "stickers";
+    address?: string;
+    locationName?: string;
+    coordinates?: string;
+    subscribed?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
@@ -162,5 +190,3 @@ export const updateCardTool = tool({
     }
   },
 });
-
-

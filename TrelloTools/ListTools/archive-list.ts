@@ -14,7 +14,14 @@ export const archiveListTool = tool({
   description:
     "Archive a Trello list. This closes the list and optionally archives all cards within it. Archived lists can be restored later.",
   parameters: archiveListSchema,
-  execute: async ({ listId, archiveAllCards = false }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    listId,
+    archiveAllCards = false,
+  }: {
+    listId: string;
+    archiveAllCards?: boolean;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -61,4 +68,3 @@ export const archiveListTool = tool({
     }
   },
 });
-

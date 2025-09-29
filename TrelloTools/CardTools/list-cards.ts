@@ -137,6 +137,7 @@ export const listCardsTool = tool({
   description:
     "List all cards in a Trello board or list with optional filtering and field selection",
   parameters: listCardsSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     boardId,
     listId,
@@ -160,6 +161,29 @@ export const listCardsTool = tool({
     stickers,
     stickerFields,
     customFieldItems,
+  }: {
+    boardId?: string;
+    listId?: string;
+    filter?: "all" | "closed" | "none" | "open" | "visible";
+    fields?: string[];
+    actions?: string;
+    actionFields?: string[];
+    actionsLimit?: number;
+    actionSince?: string;
+    actionBefore?: string;
+    attachments?: boolean;
+    attachmentFields?: string[];
+    members?: boolean;
+    memberFields?: string[];
+    membersVoted?: boolean;
+    memberVotedFields?: string[];
+    checkItemStates?: boolean;
+    checkItemStateFields?: string[];
+    checklists?: "all" | "none";
+    checklistFields?: string[];
+    stickers?: boolean;
+    stickerFields?: string[];
+    customFieldItems?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
@@ -223,30 +247,57 @@ export const listCardsTool = tool({
 
       return {
         success: true,
-        cards: response.data.map((card: any) => ({
-          id: card.id,
-          name: card.name,
-          description: card.desc,
-          listId: card.idList,
-          boardId: card.idBoard,
-          position: card.pos,
-          closed: card.closed,
-          due: card.due,
-          dueComplete: card.dueComplete,
-          start: card.start,
-          url: card.url,
-          shortUrl: card.shortUrl,
-          labels: card.labels || [],
-          members: card.members || [],
-          attachments: card.attachments || [],
-          checklists: card.checklists || [],
-          badges: card.badges || {},
-          cover: card.cover || {},
-          actions: card.actions || [],
-          checkItemStates: card.checkItemStates || [],
-          stickers: card.stickers || [],
-          customFieldItems: card.customFieldItems || [],
-        })),
+        cards: response.data.map(
+          (card: {
+            id: string;
+            name: string;
+            desc: string;
+            idList: string;
+            idBoard: string;
+            closed: boolean;
+            pos: number;
+            due: string | null;
+            dueComplete: boolean;
+            subscribed: boolean;
+            dateLastActivity: string;
+            shortUrl: string;
+            url: string;
+            start: string | null;
+            labels: unknown[];
+            members: unknown[];
+            attachments: unknown[];
+            checklists: unknown[];
+            badges: unknown;
+            cover: unknown;
+            actions: unknown[];
+            checkItemStates: unknown[];
+            stickers: unknown[];
+            customFieldItems: unknown[];
+          }) => ({
+            id: card.id,
+            name: card.name,
+            description: card.desc,
+            listId: card.idList,
+            boardId: card.idBoard,
+            position: card.pos,
+            closed: card.closed,
+            due: card.due,
+            dueComplete: card.dueComplete,
+            start: card.start,
+            url: card.url,
+            shortUrl: card.shortUrl,
+            labels: card.labels || [],
+            members: card.members || [],
+            attachments: card.attachments || [],
+            checklists: card.checklists || [],
+            badges: card.badges || {},
+            cover: card.cover || {},
+            actions: card.actions || [],
+            checkItemStates: card.checkItemStates || [],
+            stickers: card.stickers || [],
+            customFieldItems: card.customFieldItems || [],
+          })
+        ),
         count: response.data.length,
         message: `Successfully retrieved ${response.data.length} card(s) from ${
           boardId ? `board ${boardId}` : `list ${listId}`
@@ -264,5 +315,3 @@ export const listCardsTool = tool({
     }
   },
 });
-
-

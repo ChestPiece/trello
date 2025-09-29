@@ -14,7 +14,14 @@ export const deleteListTool = tool({
   description:
     "Delete a Trello list permanently. Optionally archive all cards in the list first.",
   parameters: deleteListSchema,
-  execute: async ({ listId, archiveAllCards = false }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    listId,
+    archiveAllCards = false,
+  }: {
+    listId: string;
+    archiveAllCards?: boolean;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -40,9 +47,7 @@ export const deleteListTool = tool({
       // To truly delete, we need to close the list first, then delete it
       if (response.data.closed) {
         // Now delete the closed list
-        const deleteResponse = await axios.delete(
-          `${baseUrl}?${params.toString()}`
-        );
+        await axios.delete(`${baseUrl}?${params.toString()}`);
 
         return {
           success: true,

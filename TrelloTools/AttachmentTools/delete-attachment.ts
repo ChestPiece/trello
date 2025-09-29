@@ -11,7 +11,14 @@ export const deleteAttachmentTool = tool({
   description:
     "Delete a Trello attachment permanently. This action cannot be undone.",
   parameters: deleteAttachmentSchema,
-  execute: async ({ cardId, attachmentId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    cardId,
+    attachmentId,
+  }: {
+    cardId: string;
+    attachmentId: string;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -28,7 +35,7 @@ export const deleteAttachmentTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,

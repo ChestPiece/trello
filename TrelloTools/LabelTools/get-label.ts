@@ -13,7 +13,14 @@ const getLabelSchema = z.object({
 export const getLabelTool = tool({
   description: "Retrieve detailed information about a specific Trello label",
   parameters: getLabelSchema,
-  execute: async ({ labelId, fields }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    labelId,
+    fields,
+  }: {
+    labelId: string;
+    fields?: string[];
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

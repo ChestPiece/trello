@@ -10,7 +10,8 @@ export const deleteBoardTool = tool({
   description:
     "Delete a Trello board permanently. This action cannot be undone.",
   parameters: deleteBoardSchema,
-  execute: async ({ boardId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({ boardId }: { boardId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

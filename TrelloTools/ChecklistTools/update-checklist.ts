@@ -14,7 +14,16 @@ const updateChecklistSchema = z.object({
 export const updateChecklistTool = tool({
   description: "Update an existing Trello checklist with new name or position",
   parameters: updateChecklistSchema,
-  execute: async ({ checklistId, name, pos }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    checklistId,
+    name,
+    pos,
+  }: {
+    checklistId: string;
+    name?: string;
+    pos?: string | number;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

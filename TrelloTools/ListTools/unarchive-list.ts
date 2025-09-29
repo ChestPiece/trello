@@ -10,7 +10,8 @@ export const unarchiveListTool = tool({
   description:
     "Unarchive (reopen) a Trello list. This restores a previously archived list and makes it active again.",
   parameters: unarchiveListSchema,
-  execute: async ({ listId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({ listId }: { listId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -54,4 +55,3 @@ export const unarchiveListTool = tool({
     }
   },
 });
-

@@ -10,7 +10,8 @@ export const deleteCardTool = tool({
   description:
     "Delete a Trello card permanently. This action cannot be undone.",
   parameters: deleteCardSchema,
-  execute: async ({ cardId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({ cardId }: { cardId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -27,7 +28,7 @@ export const deleteCardTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,
@@ -46,5 +47,3 @@ export const deleteCardTool = tool({
     }
   },
 });
-
-

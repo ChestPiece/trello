@@ -11,7 +11,8 @@ export const removeLabelFromCardTool = tool({
   description:
     "Remove a specific label from a Trello card. The label must be currently attached to the card.",
   parameters: removeLabelFromCardSchema,
-  execute: async ({ cardId, labelId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({ cardId, labelId }: { cardId: string; labelId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
@@ -28,7 +29,7 @@ export const removeLabelFromCardTool = tool({
         token: apiToken,
       });
 
-      const response = await axios.delete(`${baseUrl}?${params.toString()}`);
+      await axios.delete(`${baseUrl}?${params.toString()}`);
 
       return {
         success: true,

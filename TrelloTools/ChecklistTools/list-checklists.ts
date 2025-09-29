@@ -22,7 +22,18 @@ export const listChecklistsTool = tool({
   description:
     "List all checklists on a Trello card with optional filtering and field selection",
   parameters: listChecklistsSchema,
-  execute: async ({ cardId, fields, checkItems, checkItemFields }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    cardId,
+    fields,
+    checkItems,
+    checkItemFields,
+  }: {
+    cardId: string;
+    fields?: string[];
+    checkItems?: "all" | "none";
+    checkItemFields?: string[];
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

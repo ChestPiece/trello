@@ -93,6 +93,7 @@ export const getWorkspaceTool = tool({
   description:
     "Retrieve detailed information about a specific Trello workspace including boards, members, actions, and other data",
   parameters: getWorkspaceSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     workspaceId,
     fields,
@@ -115,6 +116,28 @@ export const getWorkspaceTool = tool({
     membershipsMember,
     membershipsMemberFields,
     paidAccount,
+  }: {
+    workspaceId: string;
+    fields?: string[];
+    actions?: string;
+    actionFields?: string[];
+    actionsLimit?: number;
+    actionSince?: string;
+    actionBefore?: string;
+    boards?: string;
+    boardFields?: string[];
+    boardActions?: string;
+    boardActionsEntities?: boolean;
+    boardActionsFormat?: string;
+    boardActionsSince?: string;
+    boardActionsLimit?: number;
+    boardLists?: string;
+    members?: string;
+    memberFields?: string[];
+    memberships?: string[];
+    membershipsMember?: boolean;
+    membershipsMemberFields?: string[];
+    paidAccount?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

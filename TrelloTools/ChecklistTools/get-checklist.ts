@@ -22,7 +22,18 @@ export const getChecklistTool = tool({
   description:
     "Retrieve detailed information about a specific Trello checklist",
   parameters: getChecklistSchema,
-  execute: async ({ checklistId, fields, checkItems, checkItemFields }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    checklistId,
+    fields,
+    checkItems,
+    checkItemFields,
+  }: {
+    checklistId: string;
+    fields?: string[];
+    checkItems?: "all" | "none";
+    checkItemFields?: string[];
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

@@ -176,6 +176,7 @@ export const listWorkspacesTool = tool({
   description:
     "List all Trello workspaces accessible to the authenticated user with optional filtering and field selection",
   parameters: listWorkspacesSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     fields,
     filter,
@@ -214,6 +215,44 @@ export const listWorkspacesTool = tool({
     memberActivityMemberCreatorMemberFormat,
     memberActivityMemberCreatorMemberEntities,
     memberActivityMemberCreatorMemberDisplay,
+  }: {
+    fields?: string[];
+    filter?: "all" | "members" | "none" | "public";
+    paidAccount?: boolean;
+    member?: boolean;
+    memberFields?: string[];
+    memberFilter?: "all" | "none" | "normal" | "owners";
+    memberSort?: "fullName" | "-fullName" | "username" | "-username";
+    memberSortBy?: "fullName" | "username";
+    memberSortOrder?: "asc" | "desc";
+    memberStartIndex?: number;
+    memberCount?: number;
+    memberActivity?: boolean;
+    memberActivityFields?: string[];
+    memberActivitySince?: string;
+    memberActivityBefore?: string;
+    memberActivityLimit?: number;
+    memberActivityFormat?: string;
+    memberActivityEntities?: boolean;
+    memberActivityDisplay?: boolean;
+    memberActivityMember?: boolean;
+    memberActivityMemberFields?: string[];
+    memberActivityMemberCreator?: boolean;
+    memberActivityMemberCreatorFields?: string[];
+    memberActivityMemberCreatorSince?: string;
+    memberActivityMemberCreatorBefore?: string;
+    memberActivityMemberCreatorLimit?: number;
+    memberActivityMemberCreatorFormat?: string;
+    memberActivityMemberCreatorEntities?: boolean;
+    memberActivityMemberCreatorDisplay?: boolean;
+    memberActivityMemberCreatorMember?: boolean;
+    memberActivityMemberCreatorMemberFields?: string[];
+    memberActivityMemberCreatorMemberSince?: string;
+    memberActivityMemberCreatorMemberBefore?: string;
+    memberActivityMemberCreatorMemberLimit?: number;
+    memberActivityMemberCreatorMemberFormat?: string;
+    memberActivityMemberCreatorMemberEntities?: boolean;
+    memberActivityMemberCreatorMemberDisplay?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -106,6 +106,7 @@ export const getBoardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello board including cards, lists, members, and other data",
   parameters: getBoardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     boardId,
     fields,
@@ -132,6 +133,32 @@ export const getBoardTool = tool({
     organizationFields,
     tags,
     tagFields,
+  }: {
+    boardId: string;
+    fields?: string[];
+    actions?: string;
+    actionFields?: string[];
+    actionsLimit?: number;
+    actionSince?: string;
+    actionBefore?: string;
+    cards?: string;
+    cardFields?: string[];
+    cardAttachments?: boolean;
+    cardAttachmentFields?: string[];
+    cardChecklists?: string;
+    cardStickers?: boolean;
+    cardStickerFields?: string[];
+    lists?: string;
+    listFields?: string[];
+    members?: string;
+    memberFields?: string[];
+    memberships?: string[];
+    membershipsMember?: boolean;
+    membershipsMemberFields?: string[];
+    organization?: boolean;
+    organizationFields?: string[];
+    tags?: boolean;
+    tagFields?: string[];
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

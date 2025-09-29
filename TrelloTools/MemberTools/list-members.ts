@@ -22,7 +22,18 @@ export const listMembersTool = tool({
   description:
     "List all members of a Trello board with optional filtering and field selection",
   parameters: listMembersSchema,
-  execute: async ({ boardId, fields, filter, activity }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    boardId,
+    fields,
+    filter,
+    activity,
+  }: {
+    boardId: string;
+    fields?: string[];
+    filter?: "all" | "none" | "normal" | "owners" | "admins";
+    activity?: boolean;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

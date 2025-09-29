@@ -65,6 +65,7 @@ export const createBoardTool = tool({
   description:
     "Create a new Trello board with specified name, description, and settings. Supports comprehensive board configuration including visibility, permissions, and custom preferences.",
   parameters: createBoardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     name,
     description,
@@ -73,6 +74,41 @@ export const createBoardTool = tool({
     defaultLists = true,
     defaultLabels = true,
     prefs,
+  }: {
+    name: string;
+    description?: string;
+    visibility?: "private" | "public" | "org";
+    organizationId?: string;
+    defaultLists?: boolean;
+    defaultLabels?: boolean;
+    prefs?: {
+      permissionLevel?: "private" | "public" | "org";
+      voting?: "disabled" | "enabled" | "members";
+      comments?: "disabled" | "enabled" | "members";
+      invitations?: "disabled" | "enabled" | "members";
+      selfJoin?: boolean;
+      cardCovers?: boolean;
+      isTemplate?: boolean;
+      cardAging?: "regular" | "pirate";
+      calendarFeedEnabled?: boolean;
+      background?: string;
+      backgroundColor?: string;
+      backgroundImage?: string;
+      backgroundImageScaled?: Array<{
+        width: number;
+        height: number;
+        url: string;
+      }>;
+      backgroundTile?: boolean;
+      backgroundBrightness?: "dark" | "light";
+      backgroundBottomColor?: string;
+      backgroundTopColor?: string;
+      canBePublic?: boolean;
+      canBeEnterprise?: boolean;
+      canBeOrg?: boolean;
+      canBePrivate?: boolean;
+      canInvite?: boolean;
+    };
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

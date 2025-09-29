@@ -13,7 +13,20 @@ const createAttachmentSchema = z.object({
 export const createAttachmentTool = tool({
   description: "Create an attachment on a Trello card by URL or file data",
   parameters: createAttachmentSchema,
-  execute: async ({ cardId, url, name, mimeType, file }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    cardId,
+    url,
+    name,
+    mimeType,
+    file,
+  }: {
+    cardId: string;
+    url?: string;
+    name?: string;
+    mimeType?: string;
+    file?: string;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

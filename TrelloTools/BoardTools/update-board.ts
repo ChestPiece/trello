@@ -74,6 +74,7 @@ export const updateBoardTool = tool({
   description:
     "Update an existing Trello board with new name, description, settings, or preferences",
   parameters: updateBoardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     boardId,
     name,
@@ -83,6 +84,53 @@ export const updateBoardTool = tool({
     idOrganization,
     prefs,
     labelNames,
+  }: {
+    boardId: string;
+    name?: string;
+    description?: string;
+    closed?: boolean;
+    subscribed?: boolean;
+    idOrganization?: string;
+    prefs?: {
+      permissionLevel?: "private" | "public" | "org";
+      voting?: "disabled" | "enabled" | "members";
+      comments?: "disabled" | "enabled" | "members";
+      invitations?: "disabled" | "enabled" | "members";
+      selfJoin?: boolean;
+      cardCovers?: boolean;
+      isTemplate?: boolean;
+      cardAging?: "regular" | "pirate";
+      calendarFeedEnabled?: boolean;
+      background?: string;
+      backgroundColor?: string;
+      backgroundImage?: string;
+      backgroundImageScaled?: Array<{
+        width: number;
+        height: number;
+        url: string;
+      }>;
+      backgroundTile?: boolean;
+      backgroundBrightness?: "dark" | "light";
+      backgroundBottomColor?: string;
+      backgroundTopColor?: string;
+      canBePublic?: boolean;
+      canBeEnterprise?: boolean;
+      canBeOrg?: boolean;
+      canBePrivate?: boolean;
+      canInvite?: boolean;
+    };
+    labelNames?: {
+      green?: string;
+      yellow?: string;
+      orange?: string;
+      red?: string;
+      purple?: string;
+      blue?: string;
+      sky?: string;
+      lime?: string;
+      pink?: string;
+      black?: string;
+    };
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
@@ -117,7 +165,7 @@ export const updateBoardTool = tool({
       // Add label names if provided
       if (labelNames) {
         Object.entries(labelNames).forEach(([color, name]) => {
-          if (name !== undefined && name !== null) {
+          if (name !== undefined && name !== null && typeof name === "string") {
             params.append(`labelNames_${color}`, name);
           }
         });

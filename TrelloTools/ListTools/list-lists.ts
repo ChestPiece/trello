@@ -58,16 +58,17 @@ type TrelloListResponse = {
   idBoard: string;
   pos: number;
   subscribed: boolean;
-  softLimit?: any;
+  softLimit?: unknown;
   status?: string;
   creationMethod?: string;
-  cards?: any[];
+  cards?: unknown[];
 };
 
 export const listListsTool = tool({
   description:
     "List all lists in a Trello board with optional filtering and field selection",
   parameters: listListsSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     boardId,
     filter = "all",
@@ -79,6 +80,17 @@ export const listListsTool = tool({
     cardChecklists,
     cardStickers,
     cardStickerFields,
+  }: {
+    boardId: string;
+    filter?: "all" | "closed" | "none" | "open" | "visible";
+    fields?: string[];
+    cards?: "all" | "closed" | "none" | "open" | "visible";
+    cardFields?: string[];
+    cardAttachments?: boolean;
+    cardAttachmentFields?: string[];
+    cardChecklists?: "all" | "none";
+    cardStickers?: boolean;
+    cardStickerFields?: string[];
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -58,6 +58,7 @@ export const getListTool = tool({
   description:
     "Retrieve detailed information about a specific Trello list including cards and other data",
   parameters: getListSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     listId,
     fields,
@@ -69,6 +70,17 @@ export const getListTool = tool({
     cardStickers,
     cardStickerFields,
     filter,
+  }: {
+    listId: string;
+    fields?: string[];
+    cards?: "all" | "closed" | "none" | "open" | "visible";
+    cardFields?: string[];
+    cardAttachments?: boolean;
+    cardAttachmentFields?: string[];
+    cardChecklists?: "all" | "none";
+    cardStickers?: boolean;
+    cardStickerFields?: string[];
+    filter?: "all" | "closed" | "none" | "open" | "visible";
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

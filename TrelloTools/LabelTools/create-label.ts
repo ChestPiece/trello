@@ -33,7 +33,30 @@ export const createLabelTool = tool({
   description:
     "Create a new label in a Trello board with specified name and color. Optionally associate with a specific list or add to a specific card immediately.",
   parameters: createLabelSchema,
-  execute: async ({ boardId, name, color, listId: _listId, cardId }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    boardId,
+    name,
+    color,
+    listId: _listId,
+    cardId,
+  }: {
+    boardId: string;
+    name: string;
+    color:
+      | "yellow"
+      | "purple"
+      | "blue"
+      | "red"
+      | "green"
+      | "orange"
+      | "black"
+      | "sky"
+      | "pink"
+      | "lime";
+    listId?: string;
+    cardId?: string;
+  }) => {
     // Note: listId is not used as Trello labels are board-level, not list-level
     try {
       const apiKey = process.env.TRELLO_API_KEY;

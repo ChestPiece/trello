@@ -23,7 +23,22 @@ export const createChecklistItemTool = tool({
   description:
     "Create a new item in a Trello checklist with specified name and optional settings",
   parameters: createChecklistItemSchema,
-  execute: async ({ checklistId, name, pos, checked, due, dueReminder }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    checklistId,
+    name,
+    pos,
+    checked,
+    due,
+    dueReminder,
+  }: {
+    checklistId: string;
+    name: string;
+    pos?: string | number;
+    checked?: boolean;
+    due?: string;
+    dueReminder?: number;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

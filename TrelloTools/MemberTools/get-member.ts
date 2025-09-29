@@ -70,6 +70,7 @@ const getMemberSchema = z.object({
 export const getMemberTool = tool({
   description: "Retrieve detailed information about a specific Trello member",
   parameters: getMemberSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     memberId,
     fields,
@@ -88,6 +89,24 @@ export const getMemberTool = tool({
     organizations,
     organizationFields,
     organizationPaidAccount,
+  }: {
+    memberId: string;
+    fields?: string[];
+    boards?: "all" | "closed" | "none" | "open" | "starred";
+    boardFields?: string[];
+    boardActions?: string;
+    boardActionsEntities?: boolean;
+    boardActionsLimit?: number;
+    boardActionsFormat?: "count" | "list" | "minimal";
+    boardActionsSince?: string;
+    boardActionsBefore?: string;
+    boardLists?: "all" | "closed" | "none" | "open";
+    boardMemberships?: string[];
+    boardOrganization?: boolean;
+    boardStars?: boolean;
+    organizations?: "all" | "members" | "none" | "public";
+    organizationFields?: string[];
+    organizationPaidAccount?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

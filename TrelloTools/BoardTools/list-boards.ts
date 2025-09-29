@@ -77,6 +77,7 @@ export const listBoardsTool = tool({
   description:
     "List all Trello boards accessible to the authenticated user with optional filtering and field selection",
   parameters: listBoardsSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     filter = "all",
     fields,
@@ -84,6 +85,13 @@ export const listBoardsTool = tool({
     organizationFields,
     lists,
     listFields,
+  }: {
+    filter?: "all" | "closed" | "none" | "open" | "starred";
+    fields?: string[];
+    organization?: boolean;
+    organizationFields?: string[];
+    lists?: string;
+    listFields?: string[];
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -123,6 +123,7 @@ export const getCardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello card including attachments, members, checklists, and other data",
   parameters: getCardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     cardId,
     fields,
@@ -144,6 +145,27 @@ export const getCardTool = tool({
     stickers,
     stickerFields,
     customFieldItems,
+  }: {
+    cardId: string;
+    fields?: string[];
+    actions?: string;
+    actionFields?: string[];
+    actionsLimit?: number;
+    actionSince?: string;
+    actionBefore?: string;
+    attachments?: boolean;
+    attachmentFields?: string[];
+    members?: boolean;
+    memberFields?: string[];
+    membersVoted?: boolean;
+    memberVotedFields?: string[];
+    checkItemStates?: boolean;
+    checkItemStateFields?: string[];
+    checklists?: "all" | "none";
+    checklistFields?: string[];
+    stickers?: boolean;
+    stickerFields?: string[];
+    customFieldItems?: boolean;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
@@ -236,5 +258,3 @@ export const getCardTool = tool({
     }
   },
 });
-
-

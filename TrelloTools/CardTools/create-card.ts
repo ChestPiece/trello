@@ -56,6 +56,7 @@ export const createCardTool = tool({
   description:
     "Create a new card in a Trello list with specified name, description, and optional settings",
   parameters: createCardSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     name,
     desc,
@@ -71,6 +72,29 @@ export const createCardTool = tool({
     address,
     locationName,
     coordinates,
+  }: {
+    name: string;
+    desc?: string;
+    idList: string;
+    idLabels?: string[];
+    idMembers?: string[];
+    due?: string;
+    dueComplete?: boolean;
+    pos?: string | number;
+    start?: string;
+    idCardSource?: string;
+    keepFromSource?:
+      | "all"
+      | "attachments"
+      | "checklists"
+      | "comments"
+      | "customFields"
+      | "labels"
+      | "members"
+      | "stickers";
+    address?: string;
+    locationName?: string;
+    coordinates?: string;
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
@@ -142,5 +166,3 @@ export const createCardTool = tool({
     }
   },
 });
-
-

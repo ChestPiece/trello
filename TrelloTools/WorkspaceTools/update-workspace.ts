@@ -71,6 +71,7 @@ export const updateWorkspaceTool = tool({
   description:
     "Update an existing Trello workspace with new display name, description, settings, or preferences. Supports comprehensive workspace configuration updates.",
   parameters: updateWorkspaceSchema,
+  // @ts-expect-error - AI SDK v5 tool function signature issue
   execute: async ({
     workspaceId,
     displayName,
@@ -79,6 +80,52 @@ export const updateWorkspaceTool = tool({
     website,
     logo,
     prefs,
+  }: {
+    workspaceId: string;
+    displayName?: string;
+    description?: string;
+    name?: string;
+    website?: string;
+    logo?: string;
+    prefs?: {
+      permissionLevel?: "private" | "public" | "org";
+      externalMembersDisabled?: boolean;
+      googleAppsVersion?: number;
+      orgInviteRestrict?: string;
+      boardVisibilityRestrict?: {
+        private?: string;
+        org?: string;
+        public?: string;
+      };
+      boardDeleteRestrict?: {
+        private?: string;
+        org?: string;
+        public?: string;
+      };
+      selfJoin?: boolean;
+      cardCovers?: boolean;
+      hideVotes?: boolean;
+      invitations?: "disabled" | "enabled" | "members";
+      voting?: "disabled" | "enabled" | "members";
+      comments?: "disabled" | "enabled" | "members";
+      background?: string;
+      backgroundColor?: string;
+      backgroundImage?: string;
+      backgroundImageScaled?: Array<{
+        width: number;
+        height: number;
+        url: string;
+      }>;
+      backgroundTile?: boolean;
+      backgroundBrightness?: "dark" | "light";
+      backgroundBottomColor?: string;
+      backgroundTopColor?: string;
+      canBePublic?: boolean;
+      canBeEnterprise?: boolean;
+      canBeOrg?: boolean;
+      canBePrivate?: boolean;
+      canInvite?: boolean;
+    };
   }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

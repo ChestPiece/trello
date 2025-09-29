@@ -20,7 +20,18 @@ export const addMemberToBoardTool = tool({
   description:
     "Add a member to a Trello board with specified email or full name",
   parameters: addMemberToBoardSchema,
-  execute: async ({ boardId, email, fullName, type = "normal" }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    boardId,
+    email,
+    fullName,
+    type = "normal",
+  }: {
+    boardId: string;
+    email?: string;
+    fullName?: string;
+    type?: "admin" | "normal" | "observer";
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;

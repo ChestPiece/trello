@@ -24,7 +24,22 @@ export const updateListTool = tool({
   description:
     "Update an existing Trello list with new name, position, or other settings",
   parameters: updateListSchema,
-  execute: async ({ listId, name, closed, pos, subscribed, idBoard }) => {
+  // @ts-expect-error - AI SDK v5 tool function signature issue
+  execute: async ({
+    listId,
+    name,
+    closed,
+    pos,
+    subscribed,
+    idBoard,
+  }: {
+    listId: string;
+    name?: string;
+    closed?: boolean;
+    pos?: string | number;
+    subscribed?: boolean;
+    idBoard?: string;
+  }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;
       const apiToken = process.env.TRELLO_API_TOKEN;
