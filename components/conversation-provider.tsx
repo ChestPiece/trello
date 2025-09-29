@@ -1,18 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { nanoid } from "nanoid";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 
 interface Conversation {
   id: string;
   title: string;
-  messages: {
-    id: string;
-    content: string;
-    role: "user" | "assistant" | "system";
-  }[];
+  messages: UIMessage[];
 }
 
 interface ConversationContextType {
@@ -20,16 +17,17 @@ interface ConversationContextType {
   currentConversationId: string | null;
   createNewConversation: () => void;
   selectConversation: (id: string) => void;
-  messages: Message[];
+  messages: UIMessage[];
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   isStreaming: boolean;
   error: Error | undefined;
-  append: (message: Message) => void;
+  append: (message: UIMessage) => void;
   stop: () => void;
   regenerate: () => void;
+  reload: () => void;
 }
 
 const ConversationContext = React.createContext<
@@ -73,8 +71,11 @@ export function ConversationProvider({
     error,
     stop,
     setMessages,
+    reload,
   } = useChat({
-    api: "/api/chat",
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
     id: currentConversationId || undefined,
     // Throttle UI updates to improve performance
     experimental_throttle: 50,
@@ -83,7 +84,7 @@ export function ConversationProvider({
       // Set streaming to true when we start receiving a response
       setIsStreaming(true);
     },
-    onFinish: () => {
+    onFinish: ({ message }) => {
       // Set streaming to false when the response is complete
       setIsStreaming(false);
 
@@ -97,8 +98,12 @@ export function ConversationProvider({
               messages.length === 1
             ) {
               // Use the first few words of the user's first message as the title
-              const title =
-                messages[0].content.split(" ").slice(0, 5).join(" ") + "...";
+              const firstTextPart = messages[0].parts.find(
+                (part) => part.type === "text"
+              );
+              const title = firstTextPart
+                ? firstTextPart.text.split(" ").slice(0, 5).join(" ") + "..."
+                : "New conversation";
               return { ...conversation, title };
             }
             return conversation;
@@ -146,7 +151,7 @@ export function ConversationProvider({
           append({
             id: Date.now().toString(),
             role: "user",
-            content: lastUserMessage.content,
+            parts: lastUserMessage.parts,
           });
         }
       }
@@ -169,6 +174,7 @@ export function ConversationProvider({
       append,
       stop,
       regenerate,
+      reload,
     }),
     [
       conversations,
@@ -185,6 +191,7 @@ export function ConversationProvider({
       append,
       stop,
       regenerate,
+      reload,
     ]
   );
 

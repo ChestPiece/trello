@@ -1,8 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 import { FormattedText } from "../formatted-text";
-import { format } from "date-fns";
 import {
   BoardCreationCard,
   BoardCreationData,
@@ -82,22 +81,21 @@ import { useDataRefresh } from "../data-refresh-provider";
 import { detectFormType, shouldShowAnyForm } from "../form-detection";
 
 export interface ChatMessageProps {
-  message: Message;
+  message: UIMessage;
 }
-
-const formatDate = (timestamp: string) => {
-  if (!timestamp) return "Time Stamp";
-
-  const date = new Date(timestamp);
-  return format(date, "yyyy-M-d");
-};
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const { append } = useConversation();
   const { refreshLists, refreshBoards, refreshCards } = useDataRefresh();
 
+  // Get text content from message parts for form detection
+  const textContent = message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join(" ");
+
   // Use enhanced form detection logic
-  const formDetection = detectFormType(message.content, message.role);
+  const formDetection = detectFormType(textContent, message.role);
 
   const handleBoardCreation = async (data: BoardCreationData) => {
     try {
@@ -106,6 +104,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`,
+          },
+        ],
       });
       // Trigger data refresh for boards
       refreshBoards();
@@ -127,6 +131,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
       // Trigger data refresh for boards
       refreshBoards();
@@ -142,6 +152,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete board with ID: "${data.boardId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete board with ID: "${data.boardId}"`,
+          },
+        ],
       });
       // Trigger data refresh for boards
       refreshBoards();
@@ -158,6 +174,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `${action} board with ID: "${data.boardId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `${action} board with ID: "${data.boardId}"`,
+          },
+        ],
       });
       // Trigger data refresh for boards
       refreshBoards();
@@ -173,6 +195,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`,
+        parts: [
+          {
+            type: "text",
+            text: `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`,
+          },
+        ],
       });
       // Trigger data refresh for lists
       refreshLists(data.boardId);
@@ -195,6 +223,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
       // Trigger data refresh for lists
       refreshLists(data.idBoard);
@@ -210,6 +244,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete list with ID: "${data.listId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete list with ID: "${data.listId}"`,
+          },
+        ],
       });
       // Trigger data refresh for lists
       refreshLists();
@@ -226,6 +266,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `${action} list with ID: "${data.listId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `${action} list with ID: "${data.listId}"`,
+          },
+        ],
       });
       // Trigger data refresh for lists
       refreshLists();
@@ -243,6 +289,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `${action} list with ID: "${data.listId}"${archiveCards}`,
+        parts: [
+          {
+            type: "text",
+            text: `${action} list with ID: "${data.listId}"${archiveCards}`,
+          },
+        ],
       });
       // Trigger data refresh for lists
       refreshLists();
@@ -264,6 +316,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
         }${data.due ? `, due: "${data.due}"` : ""}${
           data.urlSource ? `, copy from: "${data.urlSource}"` : ""
         }`,
+        parts: [
+          {
+            type: "text",
+            text: `Create a card in list "${data.listId}" with name: "${
+              data.name
+            }"${
+              data.description ? `, description: "${data.description}"` : ""
+            }${data.position ? `, position: "${data.position}"` : ""}${
+              data.due ? `, due: "${data.due}"` : ""
+            }${data.urlSource ? `, copy from: "${data.urlSource}"` : ""}`,
+          },
+        ],
       });
       // Trigger data refresh for cards
       refreshCards(undefined, data.listId);
@@ -290,6 +354,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
       // Trigger data refresh for cards
       refreshCards();
@@ -305,6 +375,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete card with ID: "${data.cardId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete card with ID: "${data.cardId}"`,
+          },
+        ],
       });
       // Trigger data refresh for cards
       refreshCards();
@@ -328,6 +404,20 @@ export function ChatMessage({ message }: ChatMessageProps) {
             ? `, permission level: "${data.permissionLevel}"`
             : ""
         }`,
+        parts: [
+          {
+            type: "text",
+            text: `Create a workspace with display name: "${data.displayName}"${
+              data.description ? `, description: "${data.description}"` : ""
+            }${data.name ? `, name: "${data.name}"` : ""}${
+              data.website ? `, website: "${data.website}"` : ""
+            }${data.logo ? `, logo: "${data.logo}"` : ""}${
+              data.permissionLevel
+                ? `, permission level: "${data.permissionLevel}"`
+                : ""
+            }`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error creating workspace:", error);
@@ -352,6 +442,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error updating workspace:", error);
@@ -365,6 +461,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete workspace with ID: "${data.workspaceId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete workspace with ID: "${data.workspaceId}"`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error deleting workspace:", error);
@@ -378,6 +480,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Create a label in board "${data.boardId}" with name: "${data.name}" and color: "${data.color}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Create a label in board "${data.boardId}" with name: "${data.name}" and color: "${data.color}"`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error creating label:", error);
@@ -394,6 +502,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error updating label:", error);
@@ -407,6 +521,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete label with ID: "${data.labelId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete label with ID: "${data.labelId}"`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error deleting label:", error);
@@ -425,6 +545,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: attachmentMessage,
+        parts: [
+          {
+            type: "text",
+            text: attachmentMessage,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error creating attachment:", error);
@@ -438,6 +564,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete attachment with ID: "${data.attachmentId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete attachment with ID: "${data.attachmentId}"`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error deleting attachment:", error);
@@ -464,6 +596,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: checklistMessage,
+        parts: [
+          {
+            type: "text",
+            text: checklistMessage,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error creating checklist:", error);
@@ -480,6 +618,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: updateMessage,
+        parts: [
+          {
+            type: "text",
+            text: updateMessage,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error updating checklist:", error);
@@ -493,6 +637,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         id: Date.now().toString(),
         role: "user",
         content: `Delete checklist with ID: "${data.checklistId}"`,
+        parts: [
+          {
+            type: "text",
+            text: `Delete checklist with ID: "${data.checklistId}"`,
+          },
+        ],
       });
     } catch (error) {
       console.error("Error deleting checklist:", error);
@@ -605,16 +755,21 @@ export function ChatMessage({ message }: ChatMessageProps) {
             />
           ) : (
             <>
-              {message.content.split("\n").map((text, i) => (
-                <React.Fragment key={i}>
-                  <p className={i > 0 ? "mt-2" : ""}>
-                    <FormattedText content={text} />
-                  </p>
-                </React.Fragment>
-              ))}
-              <span className="text-xs text-left">
-                {formatDate(new Date().toISOString())}
-              </span>
+              {message.parts.map((part, index) => {
+                if (part.type === "text") {
+                  return part.text.split("\n").map((text, i) => (
+                    <React.Fragment key={`${index}-${i}`}>
+                      <p className={i > 0 ? "mt-2" : ""}>
+                        <FormattedText content={text} />
+                      </p>
+                    </React.Fragment>
+                  ));
+                }
+                return null;
+              })}
+              <div className="text-xs text-left space-y-1">
+                <div>{new Date().toLocaleTimeString()}</div>
+              </div>
             </>
           )}
         </div>

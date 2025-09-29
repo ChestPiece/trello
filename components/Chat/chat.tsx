@@ -18,6 +18,7 @@ export function Chat() {
     isStreaming,
     error,
     regenerate,
+    reload,
   } = useConversation();
 
   // Scroll to bottom when messages change
@@ -85,12 +86,18 @@ export function Chat() {
                 <div className="chat-message flex w-full items-start gap-4 py-4 justify-start">
                   <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-destructive/10 border border-destructive/20">
                     <div className="text-sm text-destructive">
-                      <strong>Error:</strong> {error.message}
+                      <strong>Something went wrong.</strong> Please try again.
                     </div>
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={regenerate}
+                        onClick={reload}
                         className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                      >
+                        Retry
+                      </button>
+                      <button
+                        onClick={regenerate}
+                        className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90"
                       >
                         Regenerate
                       </button>
