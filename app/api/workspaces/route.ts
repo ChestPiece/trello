@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listWorkspacesTool } from "@/TrelloTools/WorkspaceTools/list-workspaces";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,31 +14,25 @@ export async function GET(request: NextRequest) {
       "prefs",
     ];
 
-    const result = await listWorkspacesTool.execute(
-      {
-        fields,
-      },
-      {
-        toolCallId: "list-workspaces-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch workspaces" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns workspace information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      workspaces: result.workspaces,
-      count: result.count,
-      message: result.message,
+      message:
+        "Use the chat interface to interact with Trello workspaces. The AI assistant can help you create, update, delete, and manage workspaces.",
+      availableOperations: [
+        "createWorkspace - Create a new workspace",
+        "getWorkspace - Get workspace details",
+        "updateWorkspace - Update workspace information",
+        "deleteWorkspace - Delete a workspace",
+        "listWorkspaces - List all workspaces",
+      ],
+      parameters: {
+        fields: fields,
+      },
     });
   } catch (error) {
-    console.error("Error in /api/workspaces:", error);
+    console.error("Error in workspaces API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

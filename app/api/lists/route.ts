@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listListsTool } from "@/TrelloTools/ListTools/list-lists";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,40 +6,28 @@ export async function GET(request: NextRequest) {
     const boardId = searchParams.get("boardId");
     const filter = searchParams.get("filter") || "all";
 
-    if (!boardId) {
-      return NextResponse.json(
-        { error: "boardId is required" },
-        { status: 400 }
-      );
-    }
-
-    const result = await listListsTool.execute(
-      {
-        boardId,
-        filter: filter as "all" | "closed" | "none" | "open" | "visible",
-        fields: ["id", "name", "closed", "idBoard", "pos", "subscribed"],
-        cards: "none", // Don't include cards for performance
-      },
-      {
-        toolCallId: "list-lists-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch lists" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns list information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      lists: result.lists,
-      count: result.count,
+      message:
+        "Use the chat interface to interact with Trello lists. The AI assistant can help you create, update, delete, and list lists.",
+      availableOperations: [
+        "createList - Create a new list",
+        "getList - Get list details",
+        "updateList - Update list information",
+        "deleteList - Delete a list",
+        "listLists - List all lists",
+        "archiveList - Archive a list",
+        "unarchiveList - Unarchive a list",
+      ],
+      parameters: {
+        boardId: boardId || "not provided",
+        filter: filter,
+      },
     });
   } catch (error) {
-    console.error("Error fetching lists:", error);
+    console.error("Error in lists API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

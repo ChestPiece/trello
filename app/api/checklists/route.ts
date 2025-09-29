@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listChecklistsTool } from "@/TrelloTools/ChecklistTools/list-checklists";
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,41 +20,31 @@ export async function GET(request: NextRequest) {
       "idMember",
     ];
 
-    if (!cardId) {
-      return NextResponse.json(
-        { error: "cardId parameter is required" },
-        { status: 400 }
-      );
-    }
-
-    const result = await listChecklistsTool.execute(
-      {
-        cardId,
-        fields,
-        checkItems: checkItems as "all" | "none",
-        checkItemFields,
-      },
-      {
-        toolCallId: "list-checklists-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch checklists" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns checklist information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      checklists: result.checklists,
-      count: result.count,
-      message: result.message,
+      message:
+        "Use the chat interface to interact with Trello checklists. The AI assistant can help you create, update, delete, and manage checklists.",
+      availableOperations: [
+        "createChecklist - Create a new checklist",
+        "getChecklist - Get checklist details",
+        "updateChecklist - Update checklist information",
+        "deleteChecklist - Delete a checklist",
+        "listChecklists - List all checklists",
+        "createChecklistItem - Create a new checklist item",
+        "updateChecklistItem - Update checklist item",
+        "deleteChecklistItem - Delete a checklist item",
+      ],
+      parameters: {
+        cardId: cardId || "not provided",
+        fields: fields,
+        checkItems: checkItems,
+        checkItemFields: checkItemFields,
+      },
     });
   } catch (error) {
-    console.error("Error in /api/checklists:", error);
+    console.error("Error in checklists API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

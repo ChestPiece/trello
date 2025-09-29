@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, UIMessage } from "ai";
+import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 import { systemPrompt } from "@/components/Prompts/system-prompt";
@@ -52,6 +52,9 @@ import {
   listWorkspacesTool,
 } from "@/TrelloTools";
 
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
+
 // You'll need to set OPENAI_API_KEY in your environment variables
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing OPENAI_API_KEY environment variable");
@@ -65,15 +68,21 @@ if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
 }
 
 export async function POST(req: NextRequest) {
-  // Extract the `messages` from the body of the request
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
-    // Stream the response using streamText with Trello tools integration
+    // Validate messages
+    if (!messages || !Array.isArray(messages)) {
+      return new Response("Invalid messages format", { status: 400 });
+    }
+
     const result = streamText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o") as unknown as Parameters<
+        typeof streamText
+      >[0]["model"],
       messages: convertToModelMessages(messages),
       system: systemPrompt,
+      stopWhen: stepCountIs(5), // Limit steps for better performance
       tools: {
         // Board Tools
         createBoard: createBoardTool,
@@ -129,105 +138,9 @@ export async function POST(req: NextRequest) {
         deleteWorkspace: deleteWorkspaceTool,
         listWorkspaces: listWorkspacesTool,
       },
-      maxSteps: 10, // Allow more complex multi-step operations
       temperature: 0, // Ensure deterministic tool calls
-      onError: ({ error }) => {
-        console.error("Stream error:", error);
-      },
-      onFinish: ({ text, toolCalls, toolResults, usage }) => {
-        console.log("Stream finished:", {
-          textLength: text.length,
-          toolCallsCount: toolCalls.length,
-          toolResultsCount: toolResults.length,
-          usage,
-        });
-      },
-      // Enhanced tool call repair for better reliability
-      experimental_repairToolCall: async ({ toolCall, error, tools }) => {
-        console.error("Tool call error:", {
-          toolName: toolCall.toolName,
-          error: error.message,
-          args: toolCall.args,
-        });
-
-        try {
-          // Get the tool definition
-          const tool = tools[toolCall.toolName as keyof typeof tools];
-          if (!tool) {
-            console.error(
-              `Tool ${toolCall.toolName} not found in tools object`
-            );
-            return null;
-          }
-
-          // For schema validation errors, try to repair the input
-          if (
-            error.message.includes("schema") ||
-            error.message.includes("validation")
-          ) {
-            console.log(
-              `Attempting to repair tool call for ${toolCall.toolName}`
-            );
-
-            // Create a repair prompt
-            const repairPrompt = `The AI tried to call the tool "${
-              toolCall.toolName
-            }" with these arguments:
-${JSON.stringify(toolCall.args, null, 2)}
-
-But it failed with this error:
-${error.message}
-
-Please provide corrected arguments that match the tool's schema. Return only valid JSON.`;
-
-            // Use streamText for repair instead of generateText
-            const repairResponse = await streamText({
-              model: openai("gpt-4o"),
-              prompt: repairPrompt,
-              temperature: 0,
-            });
-
-            try {
-              const text = await repairResponse.text;
-              const repairedArgs = JSON.parse(text);
-              console.log(
-                `Repaired arguments for ${toolCall.toolName}:`,
-                repairedArgs
-              );
-
-              return {
-                ...toolCall,
-                args: repairedArgs,
-              };
-            } catch (parseError) {
-              console.error("Failed to parse repaired arguments:", parseError);
-              return null;
-            }
-          }
-
-          // For other errors, try to provide a more helpful error message
-          if (
-            error.message.includes("API") ||
-            error.message.includes("network")
-          ) {
-            return {
-              ...toolCall,
-              args: {
-                _error: `API Error: ${error.message}. Please check your Trello API credentials and try again.`,
-              },
-            };
-          }
-
-          // For unknown errors, return null to let the system handle it
-          return null;
-        } catch (repairError) {
-          console.error("Error during tool call repair:", repairError);
-          return null;
-        }
-      },
     });
 
-    // Return the streaming response
     return result.toUIMessageStreamResponse({
       originalMessages: messages,
       messageMetadata: ({ part }) => {
@@ -242,6 +155,14 @@ Please provide corrected arguments that match the tool's schema. Return only val
             totalTokens: part.totalUsage.totalTokens,
           };
         }
+      },
+      onError: (error) => {
+        console.error("Stream error:", error);
+        // Return a user-friendly error message
+        if (error instanceof Error) {
+          return `An error occurred: ${error.message}`;
+        }
+        return "An error occurred while processing your request.";
       },
     });
   } catch (error) {

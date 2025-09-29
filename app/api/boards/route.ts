@@ -1,48 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listBoardsTool } from "@/TrelloTools/BoardTools/list-boards";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") || "all";
 
-    const result = await listBoardsTool.execute(
-      {
-        filter: filter as "all" | "closed" | "none" | "open" | "starred",
-        fields: [
-          "id",
-          "name",
-          "desc",
-          "url",
-          "shortUrl",
-          "closed",
-          "pinned",
-          "starred",
-          "idOrganization",
-        ],
-        organization: true,
-        lists: "none", // Don't include lists for performance
-      },
-      {
-        toolCallId: "list-boards-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch boards" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns board information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      boards: result.boards,
-      count: result.count,
+      message:
+        "Use the chat interface to interact with Trello boards. The AI assistant can help you create, update, delete, and list boards.",
+      availableOperations: [
+        "createBoard - Create a new board",
+        "getBoard - Get board details",
+        "updateBoard - Update board settings",
+        "deleteBoard - Delete a board",
+        "listBoards - List all boards",
+      ],
+      filter: filter,
     });
   } catch (error) {
-    console.error("Error fetching boards:", error);
+    console.error("Error in boards API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listAttachmentsTool } from "@/TrelloTools/AttachmentTools/list-attachments";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,57 +7,29 @@ export async function GET(request: NextRequest) {
     const filter = searchParams.get("filter") || "all";
     const limit = searchParams.get("limit");
 
-    if (!cardId) {
-      return NextResponse.json(
-        { error: "cardId parameter is required" },
-        { status: 400 }
-      );
-    }
-
-    const result = await listAttachmentsTool.execute(
-      {
-        cardId,
-        filter: filter as "cover" | "gallery" | "all",
-        fields: [
-          "id",
-          "name",
-          "url",
-          "mimeType",
-          "bytes",
-          "date",
-          "idMember",
-          "isUpload",
-          "pos",
-          "edgeColor",
-          "fileName",
-          "idCard",
-        ],
-        ...(limit && { limit: parseInt(limit) }),
-      },
-      {
-        toolCallId: "list-attachments-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch attachments" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns attachment information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      attachments: result.attachments,
-      count: result.count,
+      message:
+        "Use the chat interface to interact with Trello attachments. The AI assistant can help you create, delete, and list attachments.",
+      availableOperations: [
+        "createAttachment - Create a new attachment",
+        "getAttachment - Get attachment details",
+        "deleteAttachment - Delete an attachment",
+        "listAttachments - List all attachments",
+      ],
+      parameters: {
+        cardId: cardId || "not provided",
+        filter: filter,
+        limit: limit || "not provided",
+      },
     });
   } catch (error) {
-    console.error("Error fetching attachments:", error);
+    console.error("Error in attachments API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
-

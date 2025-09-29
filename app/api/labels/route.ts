@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listLabelsTool } from "@/TrelloTools/LabelTools/list-labels";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,39 +11,28 @@ export async function GET(request: NextRequest) {
       "idBoard",
     ];
 
-    if (!boardId) {
-      return NextResponse.json(
-        { error: "boardId parameter is required" },
-        { status: 400 }
-      );
-    }
-
-    const result = await listLabelsTool.execute(
-      {
-        boardId,
-        fields,
-      },
-      {
-        toolCallId: "list-labels-" + Date.now(),
-        messages: [],
-      }
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Failed to fetch labels" },
-        { status: 500 }
-      );
-    }
-
+    // This is a simple REST endpoint that returns label information
+    // The actual tool execution happens in the chat context
     return NextResponse.json({
       success: true,
-      labels: result.labels,
-      count: result.count,
-      message: result.message,
+      message:
+        "Use the chat interface to interact with Trello labels. The AI assistant can help you create, update, delete, and manage labels.",
+      availableOperations: [
+        "createLabel - Create a new label",
+        "getLabel - Get label details",
+        "updateLabel - Update label information",
+        "deleteLabel - Delete a label",
+        "listLabels - List all labels",
+        "addLabelToCard - Add label to a card",
+        "removeLabelFromCard - Remove label from a card",
+      ],
+      parameters: {
+        boardId: boardId || "not provided",
+        fields: fields,
+      },
     });
   } catch (error) {
-    console.error("Error in /api/labels:", error);
+    console.error("Error in labels API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
