@@ -5,11 +5,11 @@ import axios from "axios";
 const listCardsSchema = z.object({
   boardId: z
     .string()
-    .optional()
+    .nullable()
     .describe("The ID of the board to get cards from"),
   listId: z
     .string()
-    .optional()
+    .nullable()
     .describe("The ID of the list to get cards from"),
   filter: z
     .union([
@@ -19,9 +19,9 @@ const listCardsSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for cards to return"),
-  fields: z.array(z.string()).optional().describe("Fields to return for cards"),
+  fields: z.array(z.string()).nullable().describe("Fields to return for cards"),
   actions: z
     .union([
       z.literal("all"),
@@ -67,77 +67,77 @@ const listCardsSchema = z.object({
       z.literal("updateOrganization"),
       z.literal("updateOrganizationInvitation"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for actions to return"),
   actionFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for actions"),
   actionsLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Limit the number of actions returned"),
   actionSince: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions since this date (ISO 8601 format)"),
   actionBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions before this date (ISO 8601 format)"),
   attachments: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include attachments"),
   attachmentFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for attachments"),
-  members: z.boolean().optional().describe("Whether to include members"),
+  members: z.boolean().nullable().describe("Whether to include members"),
   memberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for members"),
   membersVoted: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include members who voted"),
   memberVotedFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for members who voted"),
   checkItemStates: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include check item states"),
   checkItemStateFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for check item states"),
   checklists: z
     .union([z.literal("all"), z.literal("none")])
-    .optional()
+    .nullable()
     .describe("Filter for checklists"),
   checklistFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for checklists"),
-  stickers: z.boolean().optional().describe("Whether to include stickers"),
+  stickers: z.boolean().nullable().describe("Whether to include stickers"),
   stickerFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for stickers"),
   customFieldItems: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include custom field items"),
 });
 
 export const listCardsTool = tool({
   description:
     "List all cards in a Trello board or list with optional filtering and field selection",
-  parameters: listCardsSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listCardsSchema,
+
   execute: async ({
     boardId,
     listId,

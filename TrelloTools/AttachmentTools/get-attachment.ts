@@ -7,15 +7,15 @@ const getAttachmentSchema = z.object({
   attachmentId: z.string().describe("The ID of the attachment to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., name,url,mimeType,bytes)"),
 });
 
 export const getAttachmentTool = tool({
   description:
     "Retrieve detailed information about a specific Trello attachment",
-  parameters: getAttachmentSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getAttachmentSchema,
+
   execute: async ({
     cardId,
     attachmentId,

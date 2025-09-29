@@ -6,107 +6,107 @@ const getBoardSchema = z.object({
   boardId: z.string().describe("The ID of the board to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe(
       "Specific fields to return (e.g., name,desc,closed,idOrganization)"
     ),
   actions: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Actions to include (e.g., all, addAttachmentToCard, addChecklistToCard)"
     ),
   actionFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for actions to return"),
   actionsLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Maximum number of actions to return"),
   actionSince: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions since this date (ISO 8601)"),
   actionBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions before this date (ISO 8601)"),
   cards: z
     .string()
-    .optional()
+    .nullable()
     .describe("Cards to include (e.g., all, closed, none, open, visible)"),
   cardFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for cards to return"),
   cardAttachments: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for card attachments"),
   cardChecklists: z
     .string()
-    .optional()
+    .nullable()
     .describe("Checklists to include (e.g., all, none)"),
   cardStickers: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for card stickers"),
   lists: z
     .string()
-    .optional()
+    .nullable()
     .describe("Lists to include (e.g., all, closed, none, open)"),
   listFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for lists to return"),
   members: z
     .string()
-    .optional()
+    .nullable()
     .describe("Members to include (e.g., all, none, normal, owners)"),
   memberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for members to return"),
   memberships: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe(
       "Memberships to include (e.g., all, active, admin, deactivated, me, normal)"
     ),
   membershipsMember: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member data for memberships"),
   membershipsMemberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for membership members"),
   organization: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include organization data"),
   organizationFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for organization"),
-  tags: z.boolean().optional().describe("Whether to include tags"),
-  tagFields: z.array(z.string()).optional().describe("Fields for tags"),
+  tags: z.boolean().nullable().describe("Whether to include tags"),
+  tagFields: z.array(z.string()).nullable().describe("Fields for tags"),
 });
 
 export const getBoardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello board including cards, lists, members, and other data",
-  parameters: getBoardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getBoardSchema,
+
   execute: async ({
     boardId,
     fields,

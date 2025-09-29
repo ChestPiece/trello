@@ -4,17 +4,17 @@ import axios from "axios";
 
 const updateChecklistSchema = z.object({
   checklistId: z.string().describe("The ID of the checklist to update"),
-  name: z.string().optional().describe("New name for the checklist"),
+  name: z.string().nullable().describe("New name for the checklist"),
   pos: z
     .union([z.string(), z.number()])
-    .optional()
+    .nullable()
     .describe("New position of the checklist"),
 });
 
 export const updateChecklistTool = tool({
   description: "Update an existing Trello checklist with new name or position",
-  parameters: updateChecklistSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: updateChecklistSchema,
+
   execute: async ({
     checklistId,
     name,

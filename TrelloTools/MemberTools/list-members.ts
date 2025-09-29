@@ -6,23 +6,23 @@ const listMembersSchema = z.object({
   boardId: z.string().describe("The ID of the board to list members from"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., username,fullName,email)"),
   filter: z
     .enum(["all", "none", "normal", "owners", "admins"])
-    .optional()
+    .nullable()
     .describe("Filter members by type"),
   activity: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include activity information"),
 });
 
 export const listMembersTool = tool({
   description:
     "List all members of a Trello board with optional filtering and field selection",
-  parameters: listMembersSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listMembersSchema,
+
   execute: async ({
     boardId,
     fields,

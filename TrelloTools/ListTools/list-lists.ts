@@ -12,9 +12,9 @@ const listListsSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for lists to return"),
-  fields: z.array(z.string()).optional().describe("Fields to return for lists"),
+  fields: z.array(z.string()).nullable().describe("Fields to return for lists"),
   cards: z
     .union([
       z.literal("all"),
@@ -23,31 +23,31 @@ const listListsSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for cards in the lists"),
   cardFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for cards"),
   cardAttachments: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for card attachments"),
   cardChecklists: z
     .union([z.literal("all"), z.literal("none")])
-    .optional()
+    .nullable()
     .describe("Filter for card checklists"),
   cardStickers: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for card stickers"),
 });
 
@@ -67,8 +67,8 @@ type TrelloListResponse = {
 export const listListsTool = tool({
   description:
     "List all lists in a Trello board with optional filtering and field selection",
-  parameters: listListsSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listListsSchema,
+
   execute: async ({
     boardId,
     filter = "all",

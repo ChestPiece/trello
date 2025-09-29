@@ -21,19 +21,19 @@ const createLabelSchema = z.object({
     .describe("The color of the label"),
   listId: z
     .string()
-    .optional()
+    .nullable()
     .describe("Optional ID of the list to associate the label with"),
   cardId: z
     .string()
-    .optional()
+    .nullable()
     .describe("Optional ID of the card to add the label to immediately"),
 });
 
 export const createLabelTool = tool({
   description:
     "Create a new label in a Trello board with specified name and color. Optionally associate with a specific list or add to a specific card immediately.",
-  parameters: createLabelSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createLabelSchema,
+
   execute: async ({
     boardId,
     name,

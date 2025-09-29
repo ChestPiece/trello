@@ -7,20 +7,20 @@ const addMemberToBoardSchema = z.object({
   email: z
     .string()
     .email()
-    .optional()
+    .nullable()
     .describe("Email address of the member to add"),
-  fullName: z.string().optional().describe("Full name of the member to add"),
+  fullName: z.string().nullable().describe("Full name of the member to add"),
   type: z
     .enum(["admin", "normal", "observer"])
-    .optional()
+    .nullable()
     .describe("Type of membership for the member"),
 });
 
 export const addMemberToBoardTool = tool({
   description:
     "Add a member to a Trello board with specified email or full name",
-  parameters: addMemberToBoardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: addMemberToBoardSchema,
+
   execute: async ({
     boardId,
     email,

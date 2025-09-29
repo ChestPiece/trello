@@ -4,27 +4,26 @@ import axios from "axios";
 
 const updateListSchema = z.object({
   listId: z.string().describe("The ID of the list to update"),
-  name: z.string().optional().describe("New name for the list"),
-  closed: z.boolean().optional().describe("Whether the list should be closed"),
+  name: z.string().nullable().describe("New name for the list"),
+  closed: z.boolean().nullable().describe("Whether the list should be closed"),
   pos: z
     .union([z.string(), z.number()])
-    .optional()
+    .nullable()
     .describe("New position of the list"),
   subscribed: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to subscribe to the list"),
   idBoard: z
     .string()
-    .optional()
+    .nullable()
     .describe("ID of the board to move the list to"),
 });
 
 export const updateListTool = tool({
   description:
     "Update an existing Trello list with new name, position, or other settings",
-  parameters: updateListSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: updateListSchema,
   execute: async ({
     listId,
     name,

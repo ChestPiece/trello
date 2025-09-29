@@ -9,8 +9,8 @@ const deleteCardSchema = z.object({
 export const deleteCardTool = tool({
   description:
     "Delete a Trello card permanently. This action cannot be undone.",
-  parameters: deleteCardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteCardSchema,
+
   execute: async ({ cardId }: { cardId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

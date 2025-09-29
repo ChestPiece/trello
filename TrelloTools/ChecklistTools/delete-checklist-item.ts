@@ -12,8 +12,8 @@ const deleteChecklistItemSchema = z.object({
 export const deleteChecklistItemTool = tool({
   description:
     "Delete a Trello checklist item permanently. This action cannot be undone.",
-  parameters: deleteChecklistItemSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteChecklistItemSchema,
+
   execute: async ({
     checklistId,
     checkItemId,

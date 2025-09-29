@@ -49,35 +49,35 @@ interface TrelloBoardResponse {
 const listBoardsSchema = z.object({
   filter: z
     .enum(["all", "closed", "none", "open", "starred"])
-    .optional()
+    .nullable()
     .describe("Filter boards by status"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return for each board"),
   organization: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include organization data"),
   organizationFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for organization data"),
   lists: z
     .string()
-    .optional()
+    .nullable()
     .describe("Lists to include (e.g., all, closed, none, open)"),
   listFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for lists to return"),
 });
 
 export const listBoardsTool = tool({
   description:
     "List all Trello boards accessible to the authenticated user with optional filtering and field selection",
-  parameters: listBoardsSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listBoardsSchema,
+
   execute: async ({
     filter = "all",
     fields,

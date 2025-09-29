@@ -9,8 +9,8 @@ const deleteLabelSchema = z.object({
 export const deleteLabelTool = tool({
   description:
     "Delete a Trello label permanently. This action cannot be undone.",
-  parameters: deleteLabelSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteLabelSchema,
+
   execute: async ({ labelId }: { labelId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

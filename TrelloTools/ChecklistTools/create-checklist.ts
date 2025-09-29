@@ -7,11 +7,11 @@ const createChecklistSchema = z.object({
   name: z.string().describe("The name of the checklist"),
   idChecklistSource: z
     .string()
-    .optional()
+    .nullable()
     .describe("ID of a checklist to copy from"),
   pos: z
     .union([z.string(), z.number()])
-    .optional()
+    .nullable()
     .describe(
       "Position of the checklist. 'top', 'bottom', or a positive number"
     ),
@@ -20,8 +20,8 @@ const createChecklistSchema = z.object({
 export const createChecklistTool = tool({
   description:
     "Create a new checklist in a Trello card with specified name and optional settings",
-  parameters: createChecklistSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createChecklistSchema,
+
   execute: async ({
     cardId,
     name,

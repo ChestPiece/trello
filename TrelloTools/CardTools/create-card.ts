@@ -4,33 +4,33 @@ import axios from "axios";
 
 const createCardSchema = z.object({
   name: z.string().describe("The name of the card to create"),
-  desc: z.string().optional().describe("The description of the card"),
+  desc: z.string().nullable().describe("The description of the card"),
   idList: z.string().describe("The ID of the list to create the card in"),
   idLabels: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Array of label IDs to add to the card"),
   idMembers: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Array of member IDs to add to the card"),
   due: z
     .string()
-    .optional()
+    .nullable()
     .describe("Due date for the card (ISO 8601 format)"),
   dueComplete: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether the card is marked as complete"),
   pos: z
     .union([z.string(), z.number()])
-    .optional()
+    .nullable()
     .describe("Position of the card. 'top', 'bottom', or a positive number"),
   start: z
     .string()
-    .optional()
+    .nullable()
     .describe("Start date for the card (ISO 8601 format)"),
-  idCardSource: z.string().optional().describe("ID of a card to copy from"),
+  idCardSource: z.string().nullable().describe("ID of a card to copy from"),
   keepFromSource: z
     .union([
       z.literal("all"),
@@ -42,21 +42,21 @@ const createCardSchema = z.object({
       z.literal("members"),
       z.literal("stickers"),
     ])
-    .optional()
+    .nullable()
     .describe("What to copy from the source card"),
-  address: z.string().optional().describe("Address for the card location"),
-  locationName: z.string().optional().describe("Name of the location"),
+  address: z.string().nullable().describe("Address for the card location"),
+  locationName: z.string().nullable().describe("Name of the location"),
   coordinates: z
     .string()
-    .optional()
+    .nullable()
     .describe("Coordinates for the card location (latitude,longitude)"),
 });
 
 export const createCardTool = tool({
   description:
     "Create a new card in a Trello list with specified name, description, and optional settings",
-  parameters: createCardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createCardSchema,
+
   execute: async ({
     name,
     desc,

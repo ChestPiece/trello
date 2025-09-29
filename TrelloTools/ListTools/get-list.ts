@@ -6,7 +6,7 @@ const getListSchema = z.object({
   listId: z.string().describe("The ID of the list to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for the list"),
   cards: z
     .union([
@@ -16,31 +16,31 @@ const getListSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for cards in the list"),
   cardFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for cards"),
   cardAttachments: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for card attachments"),
   cardChecklists: z
     .union([z.literal("all"), z.literal("none")])
-    .optional()
+    .nullable()
     .describe("Filter for card checklists"),
   cardStickers: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for card stickers"),
   filter: z
     .union([
@@ -50,15 +50,15 @@ const getListSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for the list itself"),
 });
 
 export const getListTool = tool({
   description:
     "Retrieve detailed information about a specific Trello list including cards and other data",
-  parameters: getListSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getListSchema,
+
   execute: async ({
     listId,
     fields,

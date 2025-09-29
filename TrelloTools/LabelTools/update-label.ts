@@ -4,7 +4,7 @@ import axios from "axios";
 
 const updateLabelSchema = z.object({
   labelId: z.string().describe("The ID of the label to update"),
-  name: z.string().optional().describe("New name for the label"),
+  name: z.string().nullable().describe("New name for the label"),
   color: z
     .enum([
       "yellow",
@@ -18,14 +18,14 @@ const updateLabelSchema = z.object({
       "pink",
       "lime",
     ])
-    .optional()
+    .nullable()
     .describe("New color for the label"),
 });
 
 export const updateLabelTool = tool({
   description: "Update an existing Trello label with new name or color",
-  parameters: updateLabelSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: updateLabelSchema,
+
   execute: async ({
     labelId,
     name,

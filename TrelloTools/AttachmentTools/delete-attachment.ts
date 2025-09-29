@@ -10,8 +10,8 @@ const deleteAttachmentSchema = z.object({
 export const deleteAttachmentTool = tool({
   description:
     "Delete a Trello attachment permanently. This action cannot be undone.",
-  parameters: deleteAttachmentSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteAttachmentSchema,
+
   execute: async ({
     cardId,
     attachmentId,

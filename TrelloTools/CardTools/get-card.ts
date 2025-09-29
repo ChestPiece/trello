@@ -6,7 +6,7 @@ const getCardSchema = z.object({
   cardId: z.string().describe("The ID of the card to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for the card"),
   actions: z
     .union([
@@ -53,77 +53,77 @@ const getCardSchema = z.object({
       z.literal("updateOrganization"),
       z.literal("updateOrganizationInvitation"),
     ])
-    .optional()
+    .nullable()
     .describe("Filter for actions to return"),
   actionFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for actions"),
   actionsLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Limit the number of actions returned"),
   actionSince: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions since this date (ISO 8601 format)"),
   actionBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter actions before this date (ISO 8601 format)"),
   attachments: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include attachments"),
   attachmentFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for attachments"),
-  members: z.boolean().optional().describe("Whether to include members"),
+  members: z.boolean().nullable().describe("Whether to include members"),
   memberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for members"),
   membersVoted: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include members who voted"),
   memberVotedFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for members who voted"),
   checkItemStates: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include check item states"),
   checkItemStateFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for check item states"),
   checklists: z
     .union([z.literal("all"), z.literal("none")])
-    .optional()
+    .nullable()
     .describe("Filter for checklists"),
   checklistFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for checklists"),
-  stickers: z.boolean().optional().describe("Whether to include stickers"),
+  stickers: z.boolean().nullable().describe("Whether to include stickers"),
   stickerFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields to return for stickers"),
   customFieldItems: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include custom field items"),
 });
 
 export const getCardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello card including attachments, members, checklists, and other data",
-  parameters: getCardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getCardSchema,
+
   execute: async ({
     cardId,
     fields,

@@ -4,16 +4,16 @@ import axios from "axios";
 
 const createAttachmentSchema = z.object({
   cardId: z.string().describe("The ID of the card to attach the file to"),
-  url: z.string().url().optional().describe("URL of the file to attach"),
-  name: z.string().optional().describe("Name for the attachment"),
-  mimeType: z.string().optional().describe("MIME type of the attachment"),
-  file: z.string().optional().describe("Base64 encoded file data"),
+  url: z.string().url().nullable().describe("URL of the file to attach"),
+  name: z.string().nullable().describe("Name for the attachment"),
+  mimeType: z.string().nullable().describe("MIME type of the attachment"),
+  file: z.string().nullable().describe("Base64 encoded file data"),
 });
 
 export const createAttachmentTool = tool({
   description: "Create an attachment on a Trello card by URL or file data",
-  parameters: createAttachmentSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createAttachmentSchema,
+
   execute: async ({
     cardId,
     url,

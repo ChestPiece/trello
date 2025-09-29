@@ -3,7 +3,11 @@
 import * as React from "react";
 import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
-import { UIMessage } from "ai";
+import {
+  UIMessage,
+  lastAssistantMessageIsCompleteWithToolCalls,
+  DefaultChatTransport,
+} from "ai";
 
 interface Conversation {
   id: string;
@@ -18,20 +22,23 @@ interface ConversationContextType {
   selectConversation: (id: string) => void;
   messages: UIMessage[];
   input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  isLoading: boolean;
+  setInput: (value: string) => void;
+  sendMessage: (message: { text: string }) => void;
+  status: "ready" | "submitted" | "streaming" | "error";
   isStreaming: boolean;
   error: Error | undefined;
-  append: (message: {
-    id: string;
-    role: "user" | "assistant";
-    content: string;
-    parts: Array<{ type: string; text?: string }>;
-  }) => void;
   stop: () => void;
   regenerate: () => void;
-  reload: () => void;
+  addToolResult: (
+    options:
+      | { tool: string; toolCallId: string; output: unknown }
+      | {
+          tool: string;
+          toolCallId: string;
+          state: "output-error";
+          errorText: string;
+        }
+  ) => void;
 }
 
 const ConversationContext = React.createContext<
@@ -64,29 +71,32 @@ export function ConversationProvider({
     }
   }, [conversations]);
 
-  // Chat hook for the current conversation
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    append,
-    error,
-    stop,
-    setMessages,
-    reload,
-  } = useChat({
-    api: "/api/chat",
+  // Manage input state manually for better control
+  const [input, setInput] = React.useState("");
+
+  // Chat hook for the current conversation - using new AI SDK UI v5 pattern
+  const chatHelpers = useChat({
     id: currentConversationId || undefined,
+    // Configure transport with API endpoint
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
     // Throttle UI updates to improve performance
     experimental_throttle: 50,
-    onResponse: (response) => {
-      console.log("🚀 ~ Chat ~ response:", response);
-      // Set streaming to true when we start receiving a response
-      setIsStreaming(true);
+    // Automatically send when all tool results are available
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    // Handle client-side tool calls
+    onToolCall: async ({ toolCall }) => {
+      // Check if it's a dynamic tool first for proper type narrowing
+      if (toolCall.dynamic) {
+        return;
+      }
+
+      // For now, we'll let server-side tools handle execution
+      // Client-side tools can be added here if needed
+      console.log("Tool call received:", toolCall.toolName);
     },
-    onFinish: () => {
+    onFinish: ({ message, messages: finishedMessages }) => {
       // Set streaming to false when the response is complete
       setIsStreaming(false);
 
@@ -97,10 +107,10 @@ export function ConversationProvider({
             if (
               conversation.id === currentConversationId &&
               conversation.title === "New conversation" &&
-              messages.length === 1
+              finishedMessages.length === 1
             ) {
               // Use the first few words of the user's first message as the title
-              const firstTextPart = messages[0].parts.find(
+              const firstTextPart = finishedMessages[0].parts.find(
                 (part) => part.type === "text"
               );
               const title = firstTextPart
@@ -118,6 +128,21 @@ export function ConversationProvider({
       setIsStreaming(false);
     },
   });
+
+  const {
+    messages,
+    status,
+    error,
+    stop,
+    setMessages,
+    sendMessage,
+    addToolResult,
+  } = chatHelpers;
+
+  // Update streaming state based on status
+  React.useEffect(() => {
+    setIsStreaming(status === "submitted" || status === "streaming");
+  }, [status]);
 
   // Create a new conversation
   const createNewConversation = React.useCallback(() => {
@@ -150,38 +175,58 @@ export function ConversationProvider({
         // Find the last user message and resend it
         const lastUserMessage = newMessages[newMessages.length - 1];
         if (lastUserMessage && lastUserMessage.role === "user") {
-          append({
-            id: Date.now().toString(),
-            role: "user",
-            content:
-              lastUserMessage.parts.find((part) => part.type === "text")
-                ?.text || "",
-            parts: lastUserMessage.parts,
-          });
+          const textPart = lastUserMessage.parts.find(
+            (part) => part.type === "text"
+          );
+          if (textPart && "text" in textPart) {
+            sendMessage({ text: textPart.text });
+          }
         }
       }
     }
-  }, [messages, setMessages, append]);
+  }, [messages, setMessages, sendMessage]);
 
   const value = React.useMemo(
-    () =>
-      ({
-        conversations,
-        currentConversationId,
-        createNewConversation,
-        selectConversation,
-        messages: messages as UIMessage[],
-        input,
-        handleInputChange,
-        handleSubmit,
-        isLoading,
-        isStreaming,
-        error,
-        append,
-        stop,
-        regenerate,
-        reload,
-      } as ConversationContextType),
+    () => ({
+      conversations,
+      currentConversationId,
+      createNewConversation,
+      selectConversation,
+      messages,
+      input,
+      setInput,
+      sendMessage,
+      status,
+      isStreaming,
+      error,
+      stop,
+      regenerate,
+      addToolResult: (
+        options:
+          | { tool: string; toolCallId: string; output: unknown }
+          | {
+              tool: string;
+              toolCallId: string;
+              state: "output-error";
+              errorText: string;
+            }
+      ) => {
+        if ("output" in options) {
+          addToolResult({
+            tool: options.tool,
+            toolCallId: options.toolCallId,
+            output: options.output,
+          });
+        } else {
+          addToolResult({
+            tool: options.tool,
+            toolCallId: options.toolCallId,
+            state: "output-error",
+            errorText: options.errorText,
+          });
+        }
+      },
+    }),
     [
       conversations,
       currentConversationId,
@@ -189,15 +234,13 @@ export function ConversationProvider({
       selectConversation,
       messages,
       input,
-      handleInputChange,
-      handleSubmit,
-      isLoading,
+      sendMessage,
+      status,
       isStreaming,
       error,
-      append,
       stop,
       regenerate,
-      reload,
+      addToolResult,
     ]
   );
 

@@ -64,8 +64,7 @@ const createBoardSchema = z.object({
 export const createBoardTool = tool({
   description:
     "Create a new Trello board with specified name, description, and settings. Supports comprehensive board configuration including visibility, permissions, and custom preferences.",
-  parameters: createBoardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createBoardSchema,
   execute: async ({
     name,
     description,

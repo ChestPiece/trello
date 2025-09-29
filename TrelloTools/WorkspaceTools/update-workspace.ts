@@ -6,44 +6,44 @@ const updateWorkspaceSchema = z.object({
   workspaceId: z.string().describe("The ID of the workspace to update"),
   displayName: z
     .string()
-    .optional()
+    .nullable()
     .describe("New display name for the workspace"),
   description: z
     .string()
-    .optional()
+    .nullable()
     .describe("New description for the workspace"),
-  name: z.string().optional().describe("New name for the workspace"),
-  website: z.string().optional().describe("New website URL for the workspace"),
-  logo: z.string().optional().describe("New logo URL for the workspace"),
+  name: z.string().nullable().describe("New name for the workspace"),
+  website: z.string().nullable().describe("New website URL for the workspace"),
+  logo: z.string().nullable().describe("New logo URL for the workspace"),
   prefs: z
     .object({
-      permissionLevel: z.enum(["private", "public", "org"]).optional(),
-      externalMembersDisabled: z.boolean().optional(),
-      googleAppsVersion: z.number().optional(),
-      orgInviteRestrict: z.string().optional(),
+      permissionLevel: z.enum(["private", "public", "org"]).nullable(),
+      externalMembersDisabled: z.boolean().nullable(),
+      googleAppsVersion: z.number().nullable(),
+      orgInviteRestrict: z.string().nullable(),
       boardVisibilityRestrict: z
         .object({
-          private: z.string().optional(),
-          org: z.string().optional(),
-          public: z.string().optional(),
+          private: z.string().nullable(),
+          org: z.string().nullable(),
+          public: z.string().nullable(),
         })
-        .optional(),
+        .nullable(),
       boardDeleteRestrict: z
         .object({
-          private: z.string().optional(),
-          org: z.string().optional(),
-          public: z.string().optional(),
+          private: z.string().nullable(),
+          org: z.string().nullable(),
+          public: z.string().nullable(),
         })
-        .optional(),
-      selfJoin: z.boolean().optional(),
-      cardCovers: z.boolean().optional(),
-      hideVotes: z.boolean().optional(),
-      invitations: z.enum(["disabled", "enabled", "members"]).optional(),
-      voting: z.enum(["disabled", "enabled", "members"]).optional(),
-      comments: z.enum(["disabled", "enabled", "members"]).optional(),
-      background: z.string().optional(),
-      backgroundColor: z.string().optional(),
-      backgroundImage: z.string().optional(),
+        .nullable(),
+      selfJoin: z.boolean().nullable(),
+      cardCovers: z.boolean().nullable(),
+      hideVotes: z.boolean().nullable(),
+      invitations: z.enum(["disabled", "enabled", "members"]).nullable(),
+      voting: z.enum(["disabled", "enabled", "members"]).nullable(),
+      comments: z.enum(["disabled", "enabled", "members"]).nullable(),
+      background: z.string().nullable(),
+      backgroundColor: z.string().nullable(),
+      backgroundImage: z.string().nullable(),
       backgroundImageScaled: z
         .array(
           z.object({
@@ -52,26 +52,26 @@ const updateWorkspaceSchema = z.object({
             url: z.string(),
           })
         )
-        .optional(),
-      backgroundTile: z.boolean().optional(),
-      backgroundBrightness: z.enum(["dark", "light"]).optional(),
-      backgroundBottomColor: z.string().optional(),
-      backgroundTopColor: z.string().optional(),
-      canBePublic: z.boolean().optional(),
-      canBeEnterprise: z.boolean().optional(),
-      canBeOrg: z.boolean().optional(),
-      canBePrivate: z.boolean().optional(),
-      canInvite: z.boolean().optional(),
+        .nullable(),
+      backgroundTile: z.boolean().nullable(),
+      backgroundBrightness: z.enum(["dark", "light"]).nullable(),
+      backgroundBottomColor: z.string().nullable(),
+      backgroundTopColor: z.string().nullable(),
+      canBePublic: z.boolean().nullable(),
+      canBeEnterprise: z.boolean().nullable(),
+      canBeOrg: z.boolean().nullable(),
+      canBePrivate: z.boolean().nullable(),
+      canInvite: z.boolean().nullable(),
     })
-    .optional()
+    .nullable()
     .describe("Workspace preferences and settings to update"),
 });
 
 export const updateWorkspaceTool = tool({
   description:
     "Update an existing Trello workspace with new display name, description, settings, or preferences. Supports comprehensive workspace configuration updates.",
-  parameters: updateWorkspaceSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: updateWorkspaceSchema,
+
   execute: async ({
     workspaceId,
     displayName,

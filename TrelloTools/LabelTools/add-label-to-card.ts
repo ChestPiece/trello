@@ -10,8 +10,8 @@ const addLabelToCardSchema = z.object({
 export const addLabelToCardTool = tool({
   description:
     "Add a specific label to a Trello card. The label must exist in the same board as the card.",
-  parameters: addLabelToCardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: addLabelToCardSchema,
+
   execute: async ({ cardId, labelId }: { cardId: string; labelId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

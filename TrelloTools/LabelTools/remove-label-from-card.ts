@@ -10,8 +10,8 @@ const removeLabelFromCardSchema = z.object({
 export const removeLabelFromCardTool = tool({
   description:
     "Remove a specific label from a Trello card. The label must be currently attached to the card.",
-  parameters: removeLabelFromCardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: removeLabelFromCardSchema,
+
   execute: async ({ cardId, labelId }: { cardId: string; labelId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

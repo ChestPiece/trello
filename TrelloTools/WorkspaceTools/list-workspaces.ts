@@ -5,168 +5,168 @@ import axios from "axios";
 const listWorkspacesSchema = z.object({
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe(
       "Specific fields to return (e.g., name,displayName,desc,website,logo)"
     ),
   filter: z
     .enum(["all", "members", "none", "public"])
-    .optional()
+    .nullable()
     .describe("Filter workspaces by type"),
   paidAccount: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include paid account information"),
   member: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member information"),
   memberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for members to return"),
   memberFilter: z
     .enum(["all", "none", "normal", "owners"])
-    .optional()
+    .nullable()
     .describe("Filter members by type"),
   memberSort: z
     .enum(["fullName", "-fullName", "username", "-username"])
-    .optional()
+    .nullable()
     .describe("Sort members by field"),
   memberSortBy: z
     .enum(["fullName", "username"])
-    .optional()
+    .nullable()
     .describe("Sort members by specific field"),
   memberSortOrder: z
     .enum(["asc", "desc"])
-    .optional()
+    .nullable()
     .describe("Sort order for members"),
   memberStartIndex: z
     .number()
-    .optional()
+    .nullable()
     .describe("Start index for member pagination"),
-  memberCount: z.number().optional().describe("Number of members to return"),
+  memberCount: z.number().nullable().describe("Number of members to return"),
   memberActivity: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member activity"),
   memberActivityFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for member activity"),
   memberActivitySince: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter member activity since this date (ISO 8601)"),
   memberActivityBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter member activity before this date (ISO 8601)"),
   memberActivityLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Maximum number of member activities to return"),
   memberActivityFormat: z
     .string()
-    .optional()
+    .nullable()
     .describe("Format for member activity (e.g., count, list, minimal)"),
   memberActivityEntities: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member activity entities"),
   memberActivityDisplay: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member activity display"),
   memberActivityMember: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member data for activities"),
   memberActivityMemberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for member activity members"),
   memberActivityMemberCreator: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member creator data for activities"),
   memberActivityMemberCreatorFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for member activity member creators"),
   memberActivityMemberCreatorSince: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Filter member activity member creator since this date (ISO 8601)"
     ),
   memberActivityMemberCreatorBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Filter member activity member creator before this date (ISO 8601)"
     ),
   memberActivityMemberCreatorLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Maximum number of member activity member creators to return"),
   memberActivityMemberCreatorFormat: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Format for member activity member creators (e.g., count, list, minimal)"
     ),
   memberActivityMemberCreatorEntities: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member activity member creator entities"),
   memberActivityMemberCreatorDisplay: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include member activity member creator display"),
   memberActivityMemberCreatorMember: z
     .boolean()
-    .optional()
+    .nullable()
     .describe(
       "Whether to include member data for member activity member creators"
     ),
   memberActivityMemberCreatorMemberFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for member activity member creator members"),
   memberActivityMemberCreatorMemberSince: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Filter member activity member creator member since this date (ISO 8601)"
     ),
   memberActivityMemberCreatorMemberBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Filter member activity member creator member before this date (ISO 8601)"
     ),
   memberActivityMemberCreatorMemberLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe(
       "Maximum number of member activity member creator members to return"
     ),
   memberActivityMemberCreatorMemberFormat: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Format for member activity member creator members (e.g., count, list, minimal)"
     ),
   memberActivityMemberCreatorMemberEntities: z
     .boolean()
-    .optional()
+    .nullable()
     .describe(
       "Whether to include member activity member creator member entities"
     ),
   memberActivityMemberCreatorMemberDisplay: z
     .boolean()
-    .optional()
+    .nullable()
     .describe(
       "Whether to include member activity member creator member display"
     ),
@@ -175,8 +175,8 @@ const listWorkspacesSchema = z.object({
 export const listWorkspacesTool = tool({
   description:
     "List all Trello workspaces accessible to the authenticated user with optional filtering and field selection",
-  parameters: listWorkspacesSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listWorkspacesSchema,
+
   execute: async ({
     fields,
     filter,

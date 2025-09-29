@@ -9,8 +9,8 @@ const unarchiveListSchema = z.object({
 export const unarchiveListTool = tool({
   description:
     "Unarchive (reopen) a Trello list. This restores a previously archived list and makes it active again.",
-  parameters: unarchiveListSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: unarchiveListSchema,
+
   execute: async ({ listId }: { listId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

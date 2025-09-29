@@ -9,8 +9,8 @@ const deleteWorkspaceSchema = z.object({
 export const deleteWorkspaceTool = tool({
   description:
     "Delete a Trello workspace permanently. This action cannot be undone and will remove all boards, members, and data associated with the workspace.",
-  parameters: deleteWorkspaceSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteWorkspaceSchema,
+
   execute: async ({ workspaceId }: { workspaceId: string }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

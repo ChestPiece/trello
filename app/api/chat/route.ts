@@ -1,7 +1,14 @@
-import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
-import { openai } from "@ai-sdk/openai";
+import {
+  streamText,
+  convertToModelMessages,
+  UIMessage,
+  stepCountIs,
+  smoothStream,
+} from "ai";
+import { openai } from "@ai-sdk/openai"; // ✅ v2 import
 import { NextRequest } from "next/server";
 import { systemPrompt } from "@/components/Prompts/system-prompt";
+
 import {
   createBoardTool,
   getBoardTool,
@@ -20,7 +27,6 @@ import {
   updateCardTool,
   deleteCardTool,
   listCardsTool,
-  // New tools
   createLabelTool,
   getLabelTool,
   updateLabelTool,
@@ -44,7 +50,6 @@ import {
   removeMemberFromBoardTool,
   listMembersTool,
   getMemberTool,
-  // Workspace Tools
   createWorkspaceTool,
   getWorkspaceTool,
   updateWorkspaceTool,
@@ -55,34 +60,42 @@ import {
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-// You'll need to set OPENAI_API_KEY in your environment variables
+// Environment checks
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing OPENAI_API_KEY environment variable");
 }
-
-// Check for Trello API credentials
 if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
   console.warn(
     "Warning: Trello API credentials not configured. Trello tools will not work properly."
   );
 }
 
+// ✅ OpenAI client is automatically configured with OPENAI_API_KEY
+
 export async function POST(req: NextRequest) {
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
-    // Validate messages
+    // Validate messages format
     if (!messages || !Array.isArray(messages)) {
       return new Response("Invalid messages format", { status: 400 });
     }
 
+    // Validate that we have at least one message
+    if (messages.length === 0) {
+      return new Response("No messages provided", { status: 400 });
+    }
+
+    // Convert UI messages to model messages
+    const modelMessages = convertToModelMessages(messages);
+
     const result = streamText({
-      model: openai("gpt-4o") as unknown as Parameters<
-        typeof streamText
-      >[0]["model"],
-      messages: convertToModelMessages(messages),
+      model: openai("gpt-4o-mini"),
+      messages: modelMessages,
       system: systemPrompt,
-      stopWhen: stepCountIs(5), // Limit steps for better performance
+      temperature: 0, // Deterministic for tool calls
+      stopWhen: stepCountIs(5), // Allow up to 5 steps for multi-step tool calls
+      experimental_transform: smoothStream(), // ✅ Add smooth streaming
       tools: {
         // Board Tools
         createBoard: createBoardTool,
@@ -90,6 +103,7 @@ export async function POST(req: NextRequest) {
         updateBoard: updateBoardTool,
         deleteBoard: deleteBoardTool,
         listBoards: listBoardsTool,
+
         // List Tools
         createList: createListTool,
         getList: getListTool,
@@ -98,12 +112,14 @@ export async function POST(req: NextRequest) {
         listLists: listListsTool,
         archiveList: archiveListTool,
         unarchiveList: unarchiveListTool,
+
         // Card Tools
         createCard: createCardTool,
         getCard: getCardTool,
         updateCard: updateCardTool,
         deleteCard: deleteCardTool,
         listCards: listCardsTool,
+
         // Label Tools
         createLabel: createLabelTool,
         getLabel: getLabelTool,
@@ -112,11 +128,13 @@ export async function POST(req: NextRequest) {
         listLabels: listLabelsTool,
         addLabelToCard: addLabelToCardTool,
         removeLabelFromCard: removeLabelFromCardTool,
+
         // Attachment Tools
         createAttachment: createAttachmentTool,
         getAttachment: getAttachmentTool,
         deleteAttachment: deleteAttachmentTool,
         listAttachments: listAttachmentsTool,
+
         // Checklist Tools
         createChecklist: createChecklistTool,
         getChecklist: getChecklistTool,
@@ -126,11 +144,13 @@ export async function POST(req: NextRequest) {
         createChecklistItem: createChecklistItemTool,
         updateChecklistItem: updateChecklistItemTool,
         deleteChecklistItem: deleteChecklistItemTool,
+
         // Member Tools
         addMemberToBoard: addMemberToBoardTool,
         removeMemberFromBoard: removeMemberFromBoardTool,
         listMembers: listMembersTool,
         getMember: getMemberTool,
+
         // Workspace Tools
         createWorkspace: createWorkspaceTool,
         getWorkspace: getWorkspaceTool,
@@ -138,35 +158,56 @@ export async function POST(req: NextRequest) {
         deleteWorkspace: deleteWorkspaceTool,
         listWorkspaces: listWorkspacesTool,
       },
-      temperature: 0, // Ensure deterministic tool calls
+      onFinish: ({ finishReason, usage, toolCalls, toolResults }) => {
+        // Log completion for monitoring
+        console.log("Chat completion finished:", {
+          finishReason,
+          usage,
+          toolCallsCount: toolCalls?.length || 0,
+          toolResultsCount: toolResults?.length || 0,
+        });
+      },
+      onError: ({ error }) => {
+        console.error("Stream error:", error);
+      },
     });
 
     return result.toUIMessageStreamResponse({
       originalMessages: messages,
-      messageMetadata: ({ part }) => {
-        if (part.type === "start") {
-          return {
-            createdAt: Date.now(),
-            model: "gpt-4o",
-          };
-        }
-        if (part.type === "finish") {
-          return {
-            totalTokens: part.totalUsage.totalTokens,
-          };
-        }
-      },
-      onError: (error) => {
+      onError: (error: unknown) => {
         console.error("Stream error:", error);
-        // Return a user-friendly error message
+
+        // Provide user-friendly error messages
         if (error instanceof Error) {
+          // Check for specific error types
+          if (error.message.includes("API key")) {
+            return "Authentication error. Please check your API configuration.";
+          }
+          if (error.message.includes("rate limit")) {
+            return "Rate limit exceeded. Please try again in a moment.";
+          }
+          if (error.message.includes("Trello")) {
+            return "Trello service error. Please check your Trello configuration.";
+          }
           return `An error occurred: ${error.message}`;
         }
-        return "An error occurred while processing your request.";
+        return "An unexpected error occurred while processing your request.";
       },
     });
   } catch (error) {
-    console.error("🚀 ~ POST ~ error:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    console.error("Chat API error:", error);
+
+    // Return appropriate error response
+    if (error instanceof Error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

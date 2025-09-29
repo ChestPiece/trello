@@ -12,14 +12,15 @@ export function Chat() {
   const {
     messages,
     input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
+    setInput,
+    sendMessage,
+    status,
     isStreaming,
     error,
     regenerate,
-    reload,
   } = useConversation();
+
+  const isLoading = status !== "ready";
 
   // Scroll to bottom when messages change
   React.useEffect(() => {
@@ -90,16 +91,10 @@ export function Chat() {
                     </div>
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={reload}
+                        onClick={regenerate}
                         className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
                       >
                         Retry
-                      </button>
-                      <button
-                        onClick={regenerate}
-                        className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90"
-                      >
-                        Regenerate
                       </button>
                     </div>
                   </div>
@@ -113,15 +108,13 @@ export function Chat() {
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 border-t bg-background">
-        <div className="p-4">
-          <ChatInput
-            input={input}
-            handleInputChange={handleInputChange}
-            handleSubmit={handleSubmit}
-            isLoading={isLoading}
-          />
-        </div>
+      <div className="shrink-0">
+        <ChatInput
+          input={input}
+          setInput={setInput}
+          sendMessage={sendMessage}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

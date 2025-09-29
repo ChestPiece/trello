@@ -6,12 +6,12 @@ const listLabelsSchema = z.object({
   boardId: z.string().describe("The ID of the board to list labels from"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., name,color,uses)"),
-  limit: z.number().optional().describe("Maximum number of labels to return"),
+  limit: z.number().nullable().describe("Maximum number of labels to return"),
   filter: z
     .enum(["all", "none"])
-    .optional()
+    .nullable()
     .describe("Filter labels by usage (all, none)"),
   color: z
     .enum([
@@ -26,15 +26,15 @@ const listLabelsSchema = z.object({
       "pink",
       "lime",
     ])
-    .optional()
+    .nullable()
     .describe("Filter labels by specific color"),
 });
 
 export const listLabelsTool = tool({
   description:
     "List all labels in a Trello board with optional filtering, field selection, and color filtering",
-  parameters: listLabelsSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listLabelsSchema,
+
   execute: async ({
     boardId,
     fields,

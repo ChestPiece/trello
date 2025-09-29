@@ -6,23 +6,23 @@ const listAttachmentsSchema = z.object({
   cardId: z.string().describe("The ID of the card to list attachments from"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., name,url,mimeType,bytes)"),
   filter: z
     .enum(["cover", "gallery", "all"])
-    .optional()
+    .nullable()
     .describe("Filter attachments by type"),
   limit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Maximum number of attachments to return"),
 });
 
 export const listAttachmentsTool = tool({
   description:
     "List all attachments on a Trello card with optional filtering and field selection",
-  parameters: listAttachmentsSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: listAttachmentsSchema,
+
   execute: async ({
     cardId,
     fields,

@@ -8,48 +8,48 @@ const createWorkspaceSchema = z.object({
     .describe("The display name of the workspace to create"),
   description: z
     .string()
-    .optional()
+    .nullable()
     .describe("Optional description for the workspace"),
   name: z
     .string()
-    .optional()
+    .nullable()
     .describe(
       "Optional name for the workspace (will be generated from displayName if not provided)"
     ),
   website: z
     .string()
-    .optional()
+    .nullable()
     .describe("Optional website URL for the workspace"),
-  logo: z.string().optional().describe("Optional logo URL for the workspace"),
+  logo: z.string().nullable().describe("Optional logo URL for the workspace"),
   prefs: z
     .object({
-      permissionLevel: z.enum(["private", "public", "org"]).optional(),
-      externalMembersDisabled: z.boolean().optional(),
-      googleAppsVersion: z.number().optional(),
-      orgInviteRestrict: z.string().optional(),
+      permissionLevel: z.enum(["private", "public", "org"]).nullable(),
+      externalMembersDisabled: z.boolean().nullable(),
+      googleAppsVersion: z.number().nullable(),
+      orgInviteRestrict: z.string().nullable(),
       boardVisibilityRestrict: z
         .object({
-          private: z.string().optional(),
-          org: z.string().optional(),
-          public: z.string().optional(),
+          private: z.string().nullable(),
+          org: z.string().nullable(),
+          public: z.string().nullable(),
         })
-        .optional(),
+        .nullable(),
       boardDeleteRestrict: z
         .object({
-          private: z.string().optional(),
-          org: z.string().optional(),
-          public: z.string().optional(),
+          private: z.string().nullable(),
+          org: z.string().nullable(),
+          public: z.string().nullable(),
         })
-        .optional(),
-      selfJoin: z.boolean().optional(),
-      cardCovers: z.boolean().optional(),
-      hideVotes: z.boolean().optional(),
-      invitations: z.enum(["disabled", "enabled", "members"]).optional(),
-      voting: z.enum(["disabled", "enabled", "members"]).optional(),
-      comments: z.enum(["disabled", "enabled", "members"]).optional(),
-      background: z.string().optional(),
-      backgroundColor: z.string().optional(),
-      backgroundImage: z.string().optional(),
+        .nullable(),
+      selfJoin: z.boolean().nullable(),
+      cardCovers: z.boolean().nullable(),
+      hideVotes: z.boolean().nullable(),
+      invitations: z.enum(["disabled", "enabled", "members"]).nullable(),
+      voting: z.enum(["disabled", "enabled", "members"]).nullable(),
+      comments: z.enum(["disabled", "enabled", "members"]).nullable(),
+      background: z.string().nullable(),
+      backgroundColor: z.string().nullable(),
+      backgroundImage: z.string().nullable(),
       backgroundImageScaled: z
         .array(
           z.object({
@@ -58,26 +58,26 @@ const createWorkspaceSchema = z.object({
             url: z.string(),
           })
         )
-        .optional(),
-      backgroundTile: z.boolean().optional(),
-      backgroundBrightness: z.enum(["dark", "light"]).optional(),
-      backgroundBottomColor: z.string().optional(),
-      backgroundTopColor: z.string().optional(),
-      canBePublic: z.boolean().optional(),
-      canBeEnterprise: z.boolean().optional(),
-      canBeOrg: z.boolean().optional(),
-      canBePrivate: z.boolean().optional(),
-      canInvite: z.boolean().optional(),
+        .nullable(),
+      backgroundTile: z.boolean().nullable(),
+      backgroundBrightness: z.enum(["dark", "light"]).nullable(),
+      backgroundBottomColor: z.string().nullable(),
+      backgroundTopColor: z.string().nullable(),
+      canBePublic: z.boolean().nullable(),
+      canBeEnterprise: z.boolean().nullable(),
+      canBeOrg: z.boolean().nullable(),
+      canBePrivate: z.boolean().nullable(),
+      canInvite: z.boolean().nullable(),
     })
-    .optional()
+    .nullable()
     .describe("Workspace preferences and settings"),
 });
 
 export const createWorkspaceTool = tool({
   description:
     "Create a new Trello workspace (organization) with specified display name, description, and settings. Supports comprehensive workspace configuration including permissions, visibility, and custom preferences.",
-  parameters: createWorkspaceSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createWorkspaceSchema,
+
   execute: async ({
     displayName,
     description,

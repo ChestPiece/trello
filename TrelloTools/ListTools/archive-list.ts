@@ -6,15 +6,15 @@ const archiveListSchema = z.object({
   listId: z.string().describe("The ID of the list to archive"),
   archiveAllCards: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to archive all cards in the list as well"),
 });
 
 export const archiveListTool = tool({
   description:
     "Archive a Trello list. This closes the list and optionally archives all cards within it. Archived lists can be restored later.",
-  parameters: archiveListSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: archiveListSchema,
+
   execute: async ({
     listId,
     archiveAllCards = false,

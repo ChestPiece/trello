@@ -10,8 +10,8 @@ const removeMemberFromBoardSchema = z.object({
 export const removeMemberFromBoardTool = tool({
   description:
     "Remove a member from a Trello board. This action cannot be undone.",
-  parameters: removeMemberFromBoardSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: removeMemberFromBoardSchema,
+
   execute: async ({
     boardId,
     memberId,

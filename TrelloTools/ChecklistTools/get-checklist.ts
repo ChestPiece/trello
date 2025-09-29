@@ -6,23 +6,23 @@ const getChecklistSchema = z.object({
   checklistId: z.string().describe("The ID of the checklist to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., name,idCard,idBoard)"),
   checkItems: z
     .enum(["all", "none"])
-    .optional()
+    .nullable()
     .describe("Whether to include check items"),
   checkItemFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for check items to return"),
 });
 
 export const getChecklistTool = tool({
   description:
     "Retrieve detailed information about a specific Trello checklist",
-  parameters: getChecklistSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getChecklistSchema,
+
   execute: async ({
     checklistId,
     fields,

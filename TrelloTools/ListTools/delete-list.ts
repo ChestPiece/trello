@@ -6,15 +6,15 @@ const deleteListSchema = z.object({
   listId: z.string().describe("The ID of the list to delete"),
   archiveAllCards: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to archive all cards in the list before deleting"),
 });
 
 export const deleteListTool = tool({
   description:
     "Delete a Trello list permanently. Optionally archive all cards in the list first.",
-  parameters: deleteListSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: deleteListSchema,
+
   execute: async ({
     listId,
     archiveAllCards = false,

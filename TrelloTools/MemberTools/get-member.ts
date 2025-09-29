@@ -6,71 +6,71 @@ const getMemberSchema = z.object({
   memberId: z.string().describe("The ID of the member to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., username,fullName,email)"),
   boards: z
     .enum(["all", "closed", "none", "open", "starred"])
-    .optional()
+    .nullable()
     .describe("Boards to include"),
   boardFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for boards to return"),
-  boardActions: z.string().optional().describe("Actions to include for boards"),
+  boardActions: z.string().nullable().describe("Actions to include for boards"),
   boardActionsEntities: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include action entities for boards"),
   boardActionsLimit: z
     .number()
-    .optional()
+    .nullable()
     .describe("Maximum number of actions to return for boards"),
   boardActionsFormat: z
     .enum(["count", "list", "minimal"])
-    .optional()
+    .nullable()
     .describe("Format for board actions"),
   boardActionsSince: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter board actions since this date"),
   boardActionsBefore: z
     .string()
-    .optional()
+    .nullable()
     .describe("Filter board actions before this date"),
   boardLists: z
     .enum(["all", "closed", "none", "open"])
-    .optional()
+    .nullable()
     .describe("Lists to include for boards"),
   boardMemberships: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Memberships to include for boards"),
   boardOrganization: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include organization for boards"),
   boardStars: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include stars for boards"),
   organizations: z
     .enum(["all", "members", "none", "public"])
-    .optional()
+    .nullable()
     .describe("Organizations to include"),
   organizationFields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Fields for organizations to return"),
   organizationPaidAccount: z
     .boolean()
-    .optional()
+    .nullable()
     .describe("Whether to include paid account info for organizations"),
 });
 
 export const getMemberTool = tool({
   description: "Retrieve detailed information about a specific Trello member",
-  parameters: getMemberSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getMemberSchema,
+
   execute: async ({
     memberId,
     fields,

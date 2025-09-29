@@ -9,21 +9,21 @@ const createChecklistItemSchema = z.object({
   name: z.string().describe("The name of the checklist item"),
   pos: z
     .union([z.string(), z.number()])
-    .optional()
+    .nullable()
     .describe("Position of the item. 'top', 'bottom', or a positive number"),
-  checked: z.boolean().optional().describe("Whether the item is checked"),
+  checked: z.boolean().nullable().describe("Whether the item is checked"),
   due: z
     .string()
-    .optional()
+    .nullable()
     .describe("Due date for the item (ISO 8601 format)"),
-  dueReminder: z.number().optional().describe("Due reminder in minutes"),
+  dueReminder: z.number().nullable().describe("Due reminder in minutes"),
 });
 
 export const createChecklistItemTool = tool({
   description:
     "Create a new item in a Trello checklist with specified name and optional settings",
-  parameters: createChecklistItemSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: createChecklistItemSchema,
+
   execute: async ({
     checklistId,
     name,

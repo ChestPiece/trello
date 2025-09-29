@@ -6,14 +6,14 @@ const getLabelSchema = z.object({
   labelId: z.string().describe("The ID of the label to retrieve"),
   fields: z
     .array(z.string())
-    .optional()
+    .nullable()
     .describe("Specific fields to return (e.g., name,color,uses)"),
 });
 
 export const getLabelTool = tool({
   description: "Retrieve detailed information about a specific Trello label",
-  parameters: getLabelSchema,
-  // @ts-expect-error - AI SDK v5 tool function signature issue
+  inputSchema: getLabelSchema,
+
   execute: async ({
     labelId,
     fields,
