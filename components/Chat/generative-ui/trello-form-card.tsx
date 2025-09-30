@@ -194,8 +194,18 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
         <CardHeader className="space-y-3">
           <CardTitle className="flex items-center gap-3 text-green-700">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-5 h-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <span className="text-xl font-semibold">Success!</span>
@@ -225,8 +235,18 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                           View in Trello
                         </a>
@@ -238,25 +258,35 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
             </div>
           </div>
           <div className="flex gap-3">
-                   <Button
-                     onClick={() => {
-                       setSubmissionResult(null);
-                       setFormData({});
-                       setDynamicOptions({});
-                       setFormError(null);
-                       setIsSubmitting(false);
-                     }}
+            <Button
+              onClick={() => {
+                setSubmissionResult(null);
+                setFormData({});
+                setDynamicOptions({});
+                setFormError(null);
+                setIsSubmitting(false);
+              }}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2.5"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
               </svg>
               Create Another
             </Button>
             {onCancel && (
-              <Button 
-                onClick={onCancel} 
-                variant="outline" 
+              <Button
+                onClick={onCancel}
+                variant="outline"
                 className="flex-1 border-gray-300 hover:bg-gray-50 font-medium py-2.5"
               >
                 <X className="w-4 h-4 mr-2" />
@@ -446,7 +476,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "text":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -470,7 +503,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "textarea":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -494,7 +530,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "select":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -530,7 +569,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
 
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -603,7 +645,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "datetime-local":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -626,7 +671,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "url":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -650,7 +698,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "color":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -682,7 +733,10 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       case "file":
         return (
           <div key={field.name} className="space-y-3">
-            <Label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -757,8 +811,18 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Create {formType.replace("create", "")}
                 </>
