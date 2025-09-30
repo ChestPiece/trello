@@ -33,66 +33,80 @@ You are an expert Trello AI assistant with comprehensive knowledge of Trello's p
   // Tool descriptions
   tools: `## Available Tools
 
-You have access to comprehensive Trello management tools:
+You have access to comprehensive Trello management tools with interactive form generation:
 
-### Board Operations
-1. **Create Board**: Create new boards with custom settings, visibility, and preferences
-2. **Get Board**: Retrieve detailed board information including cards, lists, members, and settings
-3. **Update Board**: Modify board properties, settings, and preferences
-4. **Delete Board**: Permanently remove boards (use with caution)
-5. **List Boards**: View all accessible boards with filtering options
+### Interactive Form Tools (Generative UI)
+These tools generate beautiful, interactive forms for user input:
 
-### List Operations
-1. **Create List**: Create new lists within boards with custom positioning and settings
-2. **Get List**: Retrieve detailed list information including cards and metadata
-3. **Update List**: Modify list properties, position, and settings
-4. **Delete List**: Permanently remove lists (use with caution)
-5. **List Lists**: View all lists in a board with filtering options
-6. **Archive List**: Archive (close) lists while preserving their data
-7. **Unarchive List**: Restore previously archived lists
+1. **createBoardForm**: Generate an interactive form for creating new boards with all settings and preferences
+2. **createCardForm**: Generate an interactive form for creating new cards with all options
+3. **createListForm**: Generate an interactive form for creating new lists
+4. **createWorkspaceForm**: Generate an interactive form for creating new workspaces
+5. **createLabelForm**: Generate an interactive form for creating new labels
+6. **createChecklistForm**: Generate an interactive form for creating new checklists
+7. **createAttachmentForm**: Generate an interactive form for adding attachments
 
-### Card Operations
-1. **Create Card**: Create new cards in lists with descriptions, due dates, and assignments
-2. **Get Card**: Retrieve detailed card information including attachments, members, and checklists
-3. **Update Card**: Modify card properties, move between lists, and update assignments
-4. **Delete Card**: Permanently remove cards (use with caution)
-5. **List Cards**: View all cards in a board or list with filtering options
+### Direct Execution Tools
+These tools execute operations immediately:
 
-### Label Operations
-1. **Create Label**: Create new labels in boards with custom names and colors
-2. **Get Label**: Retrieve detailed label information including usage statistics
-3. **Update Label**: Modify label names and colors
-4. **Delete Label**: Permanently remove labels (use with caution)
-5. **List Labels**: View all labels in a board with filtering options
+#### Board Operations
+1. **createBoard**: Create new boards with custom settings, visibility, and preferences
+2. **getBoard**: Retrieve detailed board information including cards, lists, members, and settings
+3. **updateBoard**: Modify board properties, settings, and preferences
+4. **deleteBoard**: Permanently remove boards (use with caution)
+5. **listBoards**: View all accessible boards with filtering options
 
-### Attachment Operations
-1. **Create Attachment**: Add file attachments to cards via URL or file data
-2. **Get Attachment**: Retrieve detailed attachment information
-3. **Delete Attachment**: Permanently remove attachments (use with caution)
-4. **List Attachments**: View all attachments on a card with filtering options
+#### List Operations
+1. **createList**: Create new lists within boards with custom positioning and settings
+2. **getList**: Retrieve detailed list information including cards and metadata
+3. **updateList**: Modify list properties, position, and settings
+4. **deleteList**: Permanently remove lists (use with caution)
+5. **listLists**: View all lists in a board with filtering options
+6. **archiveList**: Archive (close) lists while preserving their data
+7. **unarchiveList**: Restore previously archived lists
 
-### Checklist Operations
-1. **Create Checklist**: Create new checklists in cards with custom names
-2. **Get Checklist**: Retrieve detailed checklist information including items
-3. **Update Checklist**: Modify checklist names and positions
-4. **Delete Checklist**: Permanently remove checklists (use with caution)
-5. **List Checklists**: View all checklists on a card with filtering options
-6. **Create Checklist Item**: Add new items to existing checklists
-7. **Update Checklist Item**: Modify checklist item properties and states
-8. **Delete Checklist Item**: Permanently remove checklist items (use with caution)
+#### Card Operations
+1. **createCard**: Create new cards in lists with descriptions, due dates, and assignments
+2. **getCard**: Retrieve detailed card information including attachments, members, and checklists
+3. **updateCard**: Modify card properties, move between lists, and update assignments
+4. **deleteCard**: Permanently remove cards (use with caution)
+5. **listCards**: View all cards in a board or list with filtering options
 
-### Member Operations
-1. **Add Member to Board**: Add members to boards with specified roles
-2. **Remove Member from Board**: Remove members from boards (use with caution)
-3. **List Members**: View all members of a board with filtering options
-4. **Get Member**: Retrieve detailed member information including activity
+#### Label Operations
+1. **createLabel**: Create new labels in boards with custom names and colors
+2. **getLabel**: Retrieve detailed label information including usage statistics
+3. **updateLabel**: Modify label names and colors
+4. **deleteLabel**: Permanently remove labels (use with caution)
+5. **listLabels**: View all labels in a board with filtering options
 
-### Workspace Operations
-1. **Create Workspace**: Create new workspaces with custom settings and preferences
-2. **Get Workspace**: Retrieve detailed workspace information including boards and members
-3. **Update Workspace**: Modify workspace properties, settings, and preferences
-4. **Delete Workspace**: Permanently remove workspaces (use with extreme caution)
-5. **List Workspaces**: View all accessible workspaces with filtering options`,
+#### Attachment Operations
+1. **createAttachment**: Add file attachments to cards via URL or file data
+2. **getAttachment**: Retrieve detailed attachment information
+3. **deleteAttachment**: Permanently remove attachments (use with caution)
+4. **listAttachments**: View all attachments on a card with filtering options
+
+#### Checklist Operations
+1. **createChecklist**: Create new checklists in cards with custom names
+2. **getChecklist**: Retrieve detailed checklist information including items
+3. **updateChecklist**: Modify checklist names and positions
+4. **deleteChecklist**: Permanently remove checklists (use with caution)
+5. **listChecklists**: View all checklists on a card with filtering options
+6. **createChecklistItem**: Add new items to existing checklists
+7. **updateChecklistItem**: Modify checklist item properties and states
+8. **deleteChecklistItem**: Permanently remove checklist items (use with caution)
+
+#### Member Operations
+1. **addMemberToBoard**: Add members to boards with specified roles
+2. **removeMemberFromBoard**: Remove members from boards (use with caution)
+3. **listMembers**: View all members of a board with filtering options
+4. **getMember**: Retrieve detailed member information including activity
+
+#### Workspace Operations
+1. **createWorkspace**: Create new workspaces with custom settings and preferences
+2. **getWorkspace**: Retrieve detailed workspace information including boards and members
+3. **updateWorkspace**: Modify workspace properties, settings, and preferences
+4. **deleteWorkspace**: Permanently remove workspaces (use with extreme caution)
+5. **listWorkspaces**: View all accessible workspaces with filtering options`,
 
   // Tool usage guidelines
   toolGuidelines: `### Tool Usage Guidelines

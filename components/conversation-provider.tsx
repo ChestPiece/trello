@@ -111,7 +111,8 @@ export function ConversationProvider({
             ) {
               // Use the first few words of the user's first message as the title
               const firstTextPart = finishedMessages[0].parts.find(
-                (part) => part.type === "text"
+                (part): part is { type: "text"; text: string } =>
+                  part.type === "text"
               );
               const title = firstTextPart
                 ? firstTextPart.text.split(" ").slice(0, 5).join(" ") + "..."
@@ -176,9 +177,10 @@ export function ConversationProvider({
         const lastUserMessage = newMessages[newMessages.length - 1];
         if (lastUserMessage && lastUserMessage.role === "user") {
           const textPart = lastUserMessage.parts.find(
-            (part) => part.type === "text"
+            (part): part is { type: "text"; text: string } =>
+              part.type === "text"
           );
-          if (textPart && "text" in textPart) {
+          if (textPart) {
             sendMessage({ text: textPart.text });
           }
         }

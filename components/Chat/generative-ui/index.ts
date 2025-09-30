@@ -5,3 +5,4 @@ export { TrelloBoardCard } from "./trello-board-card";
 export { TrelloCardCard } from "./trello-card-card";
 export { TrelloListCard } from "./trello-list-card";
 export { TrelloWorkspaceCard } from "./trello-workspace-card";
+export { TrelloFormCard } from "./trello-form-card";

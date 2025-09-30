@@ -8,6 +8,7 @@ import {
   TrelloCardCard,
   TrelloListCard,
   TrelloWorkspaceCard,
+  TrelloFormCard,
 } from "./generative-ui";
 
 export interface ChatMessageProps {
@@ -50,13 +51,38 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-getBoard":
               case "tool-updateBoard": {
                 // Using proper state-based rendering for tools in AI SDK v5
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error creating/fetching board
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={index} className="mt-3">
                     <TrelloBoardCard
                       data={
                         toolPart.state === "output-available"
-                          ? toolPart.output
+                          ? (toolPart.output as Record<string, unknown>)
                           : {}
                       }
                       state={toolPart.state}
@@ -69,13 +95,38 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-createCard":
               case "tool-getCard":
               case "tool-updateCard": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error creating/fetching card
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={index} className="mt-3">
                     <TrelloCardCard
                       data={
                         toolPart.state === "output-available"
-                          ? toolPart.output
+                          ? (toolPart.output as Record<string, unknown>)
                           : {}
                       }
                       state={toolPart.state}
@@ -88,13 +139,38 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-createList":
               case "tool-getList":
               case "tool-updateList": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error creating/fetching list
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={index} className="mt-3">
                     <TrelloListCard
                       data={
                         toolPart.state === "output-available"
-                          ? toolPart.output
+                          ? (toolPart.output as Record<string, unknown>)
                           : {}
                       }
                       state={toolPart.state}
@@ -107,13 +183,38 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-createWorkspace":
               case "tool-getWorkspace":
               case "tool-updateWorkspace": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error creating/fetching workspace
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={index} className="mt-3">
                     <TrelloWorkspaceCard
                       data={
                         toolPart.state === "output-available"
-                          ? toolPart.output
+                          ? (toolPart.output as Record<string, unknown>)
                           : {}
                       }
                       state={toolPart.state}
@@ -124,7 +225,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
               // List operation tools - render arrays of items
               case "tool-listBoards": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                // Handle error state first
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error loading boards
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 // Handle output based on tool state (AI SDK v5 pattern)
                 const outputData =
                   toolPart.state === "output-available" ? toolPart.output : [];
@@ -132,13 +259,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 if (Array.isArray(outputData) && outputData.length > 0) {
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData.slice(0, 5).map((board: any, idx: number) => (
-                        <TrelloBoardCard
-                          key={board.id || idx}
-                          data={board}
-                          state="output-available"
-                        />
-                      ))}
+                      {outputData
+                        .slice(0, 5)
+                        .map((board: unknown, idx: number) => (
+                          <TrelloBoardCard
+                            key={(board as { id?: string })?.id || idx}
+                            data={board as Record<string, unknown>}
+                            state="output-available"
+                          />
+                        ))}
                       {outputData.length > 5 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
                           + {outputData.length - 5} more boards
@@ -164,7 +293,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
               }
 
               case "tool-listCards": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                // Handle error state first
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error loading cards
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 // Handle output based on tool state (AI SDK v5 pattern)
                 const outputData =
                   toolPart.state === "output-available" ? toolPart.output : [];
@@ -172,13 +327,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 if (Array.isArray(outputData) && outputData.length > 0) {
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData.slice(0, 5).map((card: any, idx: number) => (
-                        <TrelloCardCard
-                          key={card.id || idx}
-                          data={card}
-                          state="output-available"
-                        />
-                      ))}
+                      {outputData
+                        .slice(0, 5)
+                        .map((card: unknown, idx: number) => (
+                          <TrelloCardCard
+                            key={(card as { id?: string })?.id || idx}
+                            data={card as Record<string, unknown>}
+                            state="output-available"
+                          />
+                        ))}
                       {outputData.length > 5 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
                           + {outputData.length - 5} more cards
@@ -204,7 +361,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
               }
 
               case "tool-listLists": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                // Handle error state first
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error loading lists
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 // Handle output based on tool state (AI SDK v5 pattern)
                 const outputData =
                   toolPart.state === "output-available" ? toolPart.output : [];
@@ -212,13 +395,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 if (Array.isArray(outputData) && outputData.length > 0) {
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData.slice(0, 5).map((list: any, idx: number) => (
-                        <TrelloListCard
-                          key={list.id || idx}
-                          data={list}
-                          state="output-available"
-                        />
-                      ))}
+                      {outputData
+                        .slice(0, 5)
+                        .map((list: unknown, idx: number) => (
+                          <TrelloListCard
+                            key={(list as { id?: string })?.id || idx}
+                            data={list as Record<string, unknown>}
+                            state="output-available"
+                          />
+                        ))}
                       {outputData.length > 5 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
                           + {outputData.length - 5} more lists
@@ -244,7 +429,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
               }
 
               case "tool-listWorkspaces": {
-                const toolPart = part as any;
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                // Handle error state first
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error loading workspaces
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
                 // Handle output based on tool state (AI SDK v5 pattern)
                 const outputData =
                   toolPart.state === "output-available" ? toolPart.output : [];
@@ -254,10 +465,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     <div key={index} className="mt-3 space-y-3">
                       {outputData
                         .slice(0, 5)
-                        .map((workspace: any, idx: number) => (
+                        .map((workspace: unknown, idx: number) => (
                           <TrelloWorkspaceCard
-                            key={workspace.id || idx}
-                            data={workspace}
+                            key={(workspace as { id?: string })?.id || idx}
+                            data={workspace as Record<string, unknown>}
                             state="output-available"
                           />
                         ))}
@@ -285,6 +496,54 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 break;
               }
 
+              // Form Tools - render interactive forms for CRUD operations
+              case "tool-createBoardForm":
+              case "tool-createCardForm":
+              case "tool-createListForm":
+              case "tool-createWorkspaceForm":
+              case "tool-createLabelForm":
+              case "tool-createChecklistForm":
+              case "tool-createAttachmentForm": {
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  toolCallId: string;
+                  input?: unknown;
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error with form
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={index} className="mt-3">
+                    <TrelloFormCard
+                      toolCallId={toolPart.toolCallId}
+                      formType={part.type.replace("tool-", "")}
+                      input={toolPart.input as Record<string, unknown>}
+                      state={toolPart.state}
+                    />
+                  </div>
+                );
+              }
+
               // Fallback: Other tools use the generic renderer for AI SDK v5 tool structure
               default:
                 if (part.type.startsWith("tool-")) {
@@ -296,8 +555,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
                       | "output-available"
                       | "output-error";
                     toolCallId: string;
-                    input?: any;
-                    output?: any;
+                    input?: unknown;
+                    output?: unknown;
                     errorText?: string;
                   };
 
@@ -305,8 +564,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     <div key={index} className="tool-result mt-2">
                       <ToolResultRenderer
                         toolName={toolName}
-                        input={toolPart.input}
-                        output={toolPart.output}
+                        input={toolPart.input as Record<string, unknown>}
+                        output={toolPart.output as Record<string, unknown>}
                         state={toolPart.state}
                         errorText={toolPart.errorText}
                       />
