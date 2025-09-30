@@ -7,7 +7,7 @@ const removeMemberFromBoardSchema = z.object({
   memberId: z.string().describe("The ID of the member to remove"),
 });
 
-export const removeMemberFromBoardTool = tool({
+export const removeMemberFromBoardTool = {
   description:
     "Remove a member from a Trello board. This action cannot be undone.",
   inputSchema: removeMemberFromBoardSchema,
@@ -60,4 +60,4 @@ export const removeMemberFromBoardTool = tool({
       };
     }
   },
-});
+};

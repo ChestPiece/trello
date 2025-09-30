@@ -12,9 +12,9 @@ const listListsSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .nullable()
+    .optional()
     .describe("Filter for lists to return"),
-  fields: z.array(z.string()).nullable().describe("Fields to return for lists"),
+  fields: z.array(z.string()).optional().describe("Fields to return for lists"),
   cards: z
     .union([
       z.literal("all"),
@@ -23,31 +23,31 @@ const listListsSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .nullable()
+    .optional()
     .describe("Filter for cards in the lists"),
   cardFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for cards"),
   cardAttachments: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for card attachments"),
   cardChecklists: z
     .union([z.literal("all"), z.literal("none")])
-    .nullable()
+    .optional()
     .describe("Filter for card checklists"),
   cardStickers: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for card stickers"),
 });
 
@@ -64,7 +64,7 @@ type TrelloListResponse = {
   cards?: unknown[];
 };
 
-export const listListsTool = tool({
+export const listListsTool = {
   description:
     "List all lists in a Trello board with optional filtering and field selection",
   inputSchema: listListsSchema,
@@ -155,4 +155,4 @@ export const listListsTool = tool({
       };
     }
   },
-});
+};

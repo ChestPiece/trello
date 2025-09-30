@@ -6,7 +6,7 @@ const getListSchema = z.object({
   listId: z.string().describe("The ID of the list to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for the list"),
   cards: z
     .union([
@@ -16,31 +16,31 @@ const getListSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .nullable()
+    .optional()
     .describe("Filter for cards in the list"),
   cardFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for cards"),
   cardAttachments: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for card attachments"),
   cardChecklists: z
     .union([z.literal("all"), z.literal("none")])
-    .nullable()
+    .optional()
     .describe("Filter for card checklists"),
   cardStickers: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields to return for card stickers"),
   filter: z
     .union([
@@ -50,11 +50,11 @@ const getListSchema = z.object({
       z.literal("open"),
       z.literal("visible"),
     ])
-    .nullable()
+    .optional()
     .describe("Filter for the list itself"),
 });
 
-export const getListTool = tool({
+export const getListTool = {
   description:
     "Retrieve detailed information about a specific Trello list including cards and other data",
   inputSchema: getListSchema,
@@ -144,4 +144,4 @@ export const getListTool = tool({
       };
     }
   },
-});
+};

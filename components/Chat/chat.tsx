@@ -41,6 +41,9 @@ export function Chat() {
   // Show typing indicator when loading but not streaming
   const showTypingIndicator = isLoading && !isStreaming;
 
+  // Show skeleton loading for every AI response
+  const showSkeletonLoading = status === "submitted" || status === "streaming";
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {/* Messages area */}
@@ -62,6 +65,38 @@ export function Chat() {
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
+
+              {/* Skeleton loading for AI responses */}
+              {showSkeletonLoading && (
+                <div className="flex w-full items-start gap-4 py-4 justify-start">
+                  <div className="flex max-w-[80%] flex-col gap-4 rounded-2xl px-6 py-5 bg-gradient-to-br from-background to-muted/30 border border-border/40 shadow-lg backdrop-blur-sm">
+                    {/* AI Avatar and name */}
+                    <div className="flex items-center gap-3 mb-1">
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                        <div className="w-4 h-4 bg-primary/60 rounded-full animate-pulse"></div>
+                      </div>
+                      <div className="h-4 bg-gradient-to-r from-primary/30 to-primary/10 rounded-full animate-pulse w-24"></div>
+                    </div>
+
+                    {/* Content skeleton */}
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-full"></div>
+                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-4/5"></div>
+                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-3/4"></div>
+                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-5/6"></div>
+                    </div>
+
+                    {/* Action buttons skeleton */}
+                    <div className="mt-4 flex gap-2">
+                      <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-20"></div>
+                      <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-24"></div>
+                    </div>
+
+                    {/* Subtle shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite] rounded-2xl"></div>
+                  </div>
+                </div>
+              )}
 
               {/* Typing indicator */}
               {showTypingIndicator && (

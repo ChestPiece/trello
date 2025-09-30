@@ -1,4 +1,3 @@
-import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 
@@ -6,103 +5,103 @@ const getBoardSchema = z.object({
   boardId: z.string().describe("The ID of the board to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe(
       "Specific fields to return (e.g., name,desc,closed,idOrganization)"
     ),
   actions: z
     .string()
-    .nullable()
+    .optional()
     .describe(
       "Actions to include (e.g., all, addAttachmentToCard, addChecklistToCard)"
     ),
   actionFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for actions to return"),
   actionsLimit: z
     .number()
-    .nullable()
+    .optional()
     .describe("Maximum number of actions to return"),
   actionSince: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter actions since this date (ISO 8601)"),
   actionBefore: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter actions before this date (ISO 8601)"),
   cards: z
     .string()
-    .nullable()
+    .optional()
     .describe("Cards to include (e.g., all, closed, none, open, visible)"),
   cardFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for cards to return"),
   cardAttachments: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card attachments"),
   cardAttachmentFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for card attachments"),
   cardChecklists: z
     .string()
-    .nullable()
+    .optional()
     .describe("Checklists to include (e.g., all, none)"),
   cardStickers: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include card stickers"),
   cardStickerFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for card stickers"),
   lists: z
     .string()
-    .nullable()
+    .optional()
     .describe("Lists to include (e.g., all, closed, none, open)"),
   listFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for lists to return"),
   members: z
     .string()
-    .nullable()
+    .optional()
     .describe("Members to include (e.g., all, none, normal, owners)"),
   memberFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for members to return"),
   memberships: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe(
       "Memberships to include (e.g., all, active, admin, deactivated, me, normal)"
     ),
   membershipsMember: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include member data for memberships"),
   membershipsMemberFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for membership members"),
   organization: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include organization data"),
   organizationFields: z
-    .array(z.string())
-    .nullable()
+    .union([z.array(z.string()), z.null()])
+    .optional()
     .describe("Fields for organization"),
-  tags: z.boolean().nullable().describe("Whether to include tags"),
-  tagFields: z.array(z.string()).nullable().describe("Fields for tags"),
+  tags: z.boolean().optional().describe("Whether to include tags"),
+  tagFields: z.array(z.string()).optional().describe("Fields for tags"),
 });
 
-export const getBoardTool = tool({
+export const getBoardTool = {
   description:
     "Retrieve detailed information about a specific Trello board including cards, lists, members, and other data",
   inputSchema: getBoardSchema,
@@ -156,7 +155,7 @@ export const getBoardTool = tool({
     membershipsMember?: boolean;
     membershipsMemberFields?: string[];
     organization?: boolean;
-    organizationFields?: string[];
+    organizationFields?: string[] | null;
     tags?: boolean;
     tagFields?: string[];
   }) => {
@@ -209,9 +208,10 @@ export const getBoardTool = tool({
         ...(organization !== undefined && {
           organization: organization.toString(),
         }),
-        ...(organizationFields && {
-          organization_fields: organizationFields.join(","),
-        }),
+        ...(organizationFields &&
+          organizationFields.length > 0 && {
+            organization_fields: organizationFields.join(","),
+          }),
         ...(tags !== undefined && { tags: tags.toString() }),
         ...(tagFields && { tag_fields: tagFields.join(",") }),
       });
@@ -237,4 +237,4 @@ export const getBoardTool = tool({
       };
     }
   },
-});
+};

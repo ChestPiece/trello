@@ -8,7 +8,6 @@ import {
   CheckSquare,
   Clock,
   ExternalLink,
-  Tag,
   Paperclip,
   User,
 } from "lucide-react";
@@ -179,7 +178,7 @@ export function TrelloCardCard({ data, state }: TrelloCardCardProps) {
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
             <div className="flex -space-x-2">
-              {data.members.slice(0, 3).map((member, idx) => (
+              {data.members.slice(0, 3).map((member) => (
                 <div
                   key={member.id}
                   className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-semibold border-2 border-white shadow"
@@ -220,5 +219,3 @@ export function TrelloCardCard({ data, state }: TrelloCardCardProps) {
     </Card>
   );
 }
-
-

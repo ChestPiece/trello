@@ -6,19 +6,19 @@ const listMembersSchema = z.object({
   boardId: z.string().describe("The ID of the board to list members from"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., username,fullName,email)"),
   filter: z
     .enum(["all", "none", "normal", "owners", "admins"])
-    .nullable()
+    .optional()
     .describe("Filter members by type"),
   activity: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include activity information"),
 });
 
-export const listMembersTool = tool({
+export const listMembersTool = {
   description:
     "List all members of a Trello board with optional filtering and field selection",
   inputSchema: listMembersSchema,
@@ -75,4 +75,4 @@ export const listMembersTool = tool({
       };
     }
   },
-});
+};

@@ -6,7 +6,7 @@ const deleteBoardSchema = z.object({
   boardId: z.string().describe("The ID of the board to delete"),
 });
 
-export const deleteBoardTool = tool({
+export const deleteBoardTool = {
   description:
     "Delete a Trello board permanently. This action cannot be undone.",
   inputSchema: deleteBoardSchema,
@@ -53,4 +53,4 @@ export const deleteBoardTool = tool({
       };
     }
   },
-});
+};

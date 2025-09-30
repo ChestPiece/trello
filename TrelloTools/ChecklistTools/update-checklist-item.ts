@@ -7,23 +7,23 @@ const updateChecklistItemSchema = z.object({
     .string()
     .describe("The ID of the checklist containing the item"),
   checkItemId: z.string().describe("The ID of the checklist item to update"),
-  name: z.string().nullable().describe("New name for the item"),
+  name: z.string().optional().describe("New name for the item"),
   state: z
     .enum(["complete", "incomplete"])
-    .nullable()
+    .optional()
     .describe("New state of the item"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("New position of the item"),
   due: z
     .string()
-    .nullable()
+    .optional()
     .describe("New due date for the item (ISO 8601 format)"),
-  dueReminder: z.number().nullable().describe("New due reminder in minutes"),
+  dueReminder: z.number().optional().describe("New due reminder in minutes"),
 });
 
-export const updateChecklistItemTool = tool({
+export const updateChecklistItemTool = {
   description: "Update an existing Trello checklist item with new properties",
   inputSchema: updateChecklistItemSchema,
 
@@ -94,4 +94,4 @@ export const updateChecklistItemTool = tool({
       };
     }
   },
-});
+};

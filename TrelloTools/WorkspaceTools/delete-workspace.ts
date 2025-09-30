@@ -6,7 +6,7 @@ const deleteWorkspaceSchema = z.object({
   workspaceId: z.string().describe("The ID of the workspace to delete"),
 });
 
-export const deleteWorkspaceTool = tool({
+export const deleteWorkspaceTool = {
   description:
     "Delete a Trello workspace permanently. This action cannot be undone and will remove all boards, members, and data associated with the workspace.",
   inputSchema: deleteWorkspaceSchema,
@@ -70,4 +70,4 @@ export const deleteWorkspaceTool = tool({
       };
     }
   },
-});
+};

@@ -9,17 +9,17 @@ const createChecklistItemSchema = z.object({
   name: z.string().describe("The name of the checklist item"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("Position of the item. 'top', 'bottom', or a positive number"),
-  checked: z.boolean().nullable().describe("Whether the item is checked"),
+  checked: z.boolean().optional().describe("Whether the item is checked"),
   due: z
     .string()
-    .nullable()
+    .optional()
     .describe("Due date for the item (ISO 8601 format)"),
-  dueReminder: z.number().nullable().describe("Due reminder in minutes"),
+  dueReminder: z.number().optional().describe("Due reminder in minutes"),
 });
 
-export const createChecklistItemTool = tool({
+export const createChecklistItemTool = {
   description:
     "Create a new item in a Trello checklist with specified name and optional settings",
   inputSchema: createChecklistItemSchema,
@@ -89,4 +89,4 @@ export const createChecklistItemTool = tool({
       };
     }
   },
-});
+};

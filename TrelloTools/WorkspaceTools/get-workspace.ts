@@ -6,90 +6,90 @@ const getWorkspaceSchema = z.object({
   workspaceId: z.string().describe("The ID of the workspace to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe(
       "Specific fields to return (e.g., name,displayName,desc,website,logo)"
     ),
   actions: z
     .string()
-    .nullable()
+    .optional()
     .describe(
       "Actions to include (e.g., all, addAttachmentToCard, addChecklistToCard)"
     ),
   actionFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for actions to return"),
   actionsLimit: z
     .number()
-    .nullable()
+    .optional()
     .describe("Maximum number of actions to return"),
   actionSince: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter actions since this date (ISO 8601)"),
   actionBefore: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter actions before this date (ISO 8601)"),
   boards: z
     .string()
-    .nullable()
+    .optional()
     .describe("Boards to include (e.g., all, closed, none, open, starred)"),
   boardFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for boards to return"),
-  boardActions: z.string().nullable().describe("Board actions to include"),
+  boardActions: z.string().optional().describe("Board actions to include"),
   boardActionsEntities: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include board action entities"),
   boardActionsFormat: z
     .string()
-    .nullable()
+    .optional()
     .describe("Format for board actions (e.g., count, list, minimal)"),
   boardActionsSince: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter board actions since this date (ISO 8601)"),
   boardActionsLimit: z
     .number()
-    .nullable()
+    .optional()
     .describe("Maximum number of board actions to return"),
   boardLists: z
     .string()
-    .nullable()
+    .optional()
     .describe("Board lists to include (e.g., all, closed, none, open)"),
   members: z
     .string()
-    .nullable()
+    .optional()
     .describe("Members to include (e.g., all, none, normal, owners)"),
   memberFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for members to return"),
   memberships: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe(
       "Memberships to include (e.g., all, active, admin, deactivated, me, normal)"
     ),
   membershipsMember: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include member data for memberships"),
   membershipsMemberFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for membership members"),
   paidAccount: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include paid account information"),
 });
 
-export const getWorkspaceTool = tool({
+export const getWorkspaceTool = {
   description:
     "Retrieve detailed information about a specific Trello workspace including boards, members, actions, and other data",
   inputSchema: getWorkspaceSchema,
@@ -208,4 +208,4 @@ export const getWorkspaceTool = tool({
       };
     }
   },
-});
+};

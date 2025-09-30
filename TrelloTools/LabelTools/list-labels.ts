@@ -6,12 +6,12 @@ const listLabelsSchema = z.object({
   boardId: z.string().describe("The ID of the board to list labels from"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,color,uses)"),
-  limit: z.number().nullable().describe("Maximum number of labels to return"),
+  limit: z.number().optional().describe("Maximum number of labels to return"),
   filter: z
     .enum(["all", "none"])
-    .nullable()
+    .optional()
     .describe("Filter labels by usage (all, none)"),
   color: z
     .enum([
@@ -26,11 +26,11 @@ const listLabelsSchema = z.object({
       "pink",
       "lime",
     ])
-    .nullable()
+    .optional()
     .describe("Filter labels by specific color"),
 });
 
-export const listLabelsTool = tool({
+export const listLabelsTool = {
   description:
     "List all labels in a Trello board with optional filtering, field selection, and color filtering",
   inputSchema: listLabelsSchema,
@@ -146,4 +146,4 @@ export const listLabelsTool = tool({
       };
     }
   },
-});
+};

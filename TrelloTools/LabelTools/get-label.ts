@@ -6,11 +6,11 @@ const getLabelSchema = z.object({
   labelId: z.string().describe("The ID of the label to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,color,uses)"),
 });
 
-export const getLabelTool = tool({
+export const getLabelTool = {
   description: "Retrieve detailed information about a specific Trello label",
   inputSchema: getLabelSchema,
 
@@ -59,4 +59,4 @@ export const getLabelTool = tool({
       };
     }
   },
-});
+};

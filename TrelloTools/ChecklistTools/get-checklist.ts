@@ -6,19 +6,19 @@ const getChecklistSchema = z.object({
   checklistId: z.string().describe("The ID of the checklist to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,idCard,idBoard)"),
   checkItems: z
     .enum(["all", "none"])
-    .nullable()
+    .optional()
     .describe("Whether to include check items"),
   checkItemFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for check items to return"),
 });
 
-export const getChecklistTool = tool({
+export const getChecklistTool = {
   description:
     "Retrieve detailed information about a specific Trello checklist",
   inputSchema: getChecklistSchema,
@@ -74,4 +74,4 @@ export const getChecklistTool = tool({
       };
     }
   },
-});
+};

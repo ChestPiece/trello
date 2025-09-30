@@ -1,36 +1,35 @@
-import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 
 const createCardSchema = z.object({
   name: z.string().describe("The name of the card to create"),
-  desc: z.string().nullable().describe("The description of the card"),
+  desc: z.string().optional().describe("The description of the card"),
   idList: z.string().describe("The ID of the list to create the card in"),
   idLabels: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Array of label IDs to add to the card"),
   idMembers: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Array of member IDs to add to the card"),
   due: z
     .string()
-    .nullable()
+    .optional()
     .describe("Due date for the card (ISO 8601 format)"),
   dueComplete: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether the card is marked as complete"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("Position of the card. 'top', 'bottom', or a positive number"),
   start: z
     .string()
-    .nullable()
+    .optional()
     .describe("Start date for the card (ISO 8601 format)"),
-  idCardSource: z.string().nullable().describe("ID of a card to copy from"),
+  idCardSource: z.string().optional().describe("ID of a card to copy from"),
   keepFromSource: z
     .union([
       z.literal("all"),
@@ -42,17 +41,17 @@ const createCardSchema = z.object({
       z.literal("members"),
       z.literal("stickers"),
     ])
-    .nullable()
+    .optional()
     .describe("What to copy from the source card"),
-  address: z.string().nullable().describe("Address for the card location"),
-  locationName: z.string().nullable().describe("Name of the location"),
+  address: z.string().optional().describe("Address for the card location"),
+  locationName: z.string().optional().describe("Name of the location"),
   coordinates: z
     .string()
-    .nullable()
+    .optional()
     .describe("Coordinates for the card location (latitude,longitude)"),
 });
 
-export const createCardTool = tool({
+export const createCardTool = {
   description:
     "Create a new card in a Trello list with specified name, description, and optional settings",
   inputSchema: createCardSchema,
@@ -165,4 +164,4 @@ export const createCardTool = tool({
       };
     }
   },
-});
+};

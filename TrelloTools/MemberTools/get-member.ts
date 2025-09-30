@@ -6,68 +6,68 @@ const getMemberSchema = z.object({
   memberId: z.string().describe("The ID of the member to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., username,fullName,email)"),
   boards: z
     .enum(["all", "closed", "none", "open", "starred"])
-    .nullable()
+    .optional()
     .describe("Boards to include"),
   boardFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for boards to return"),
-  boardActions: z.string().nullable().describe("Actions to include for boards"),
+  boardActions: z.string().optional().describe("Actions to include for boards"),
   boardActionsEntities: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include action entities for boards"),
   boardActionsLimit: z
     .number()
-    .nullable()
+    .optional()
     .describe("Maximum number of actions to return for boards"),
   boardActionsFormat: z
     .enum(["count", "list", "minimal"])
-    .nullable()
+    .optional()
     .describe("Format for board actions"),
   boardActionsSince: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter board actions since this date"),
   boardActionsBefore: z
     .string()
-    .nullable()
+    .optional()
     .describe("Filter board actions before this date"),
   boardLists: z
     .enum(["all", "closed", "none", "open"])
-    .nullable()
+    .optional()
     .describe("Lists to include for boards"),
   boardMemberships: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Memberships to include for boards"),
   boardOrganization: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include organization for boards"),
   boardStars: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include stars for boards"),
   organizations: z
     .enum(["all", "members", "none", "public"])
-    .nullable()
+    .optional()
     .describe("Organizations to include"),
   organizationFields: z
-    .array(z.string())
-    .nullable()
+    .union([z.array(z.string()), z.null()])
+    .optional()
     .describe("Fields for organizations to return"),
   organizationPaidAccount: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include paid account info for organizations"),
 });
 
-export const getMemberTool = tool({
+export const getMemberTool = {
   description: "Retrieve detailed information about a specific Trello member",
   inputSchema: getMemberSchema,
 
@@ -105,7 +105,7 @@ export const getMemberTool = tool({
     boardOrganization?: boolean;
     boardStars?: boolean;
     organizations?: "all" | "members" | "none" | "public";
-    organizationFields?: string[];
+    organizationFields?: string[] | null;
     organizationPaidAccount?: boolean;
   }) => {
     try {
@@ -146,9 +146,10 @@ export const getMemberTool = tool({
           board_stars: boardStars.toString(),
         }),
         ...(organizations && { organizations }),
-        ...(organizationFields && {
-          organization_fields: organizationFields.join(","),
-        }),
+        ...(organizationFields &&
+          organizationFields.length > 0 && {
+            organization_fields: organizationFields.join(","),
+          }),
         ...(organizationPaidAccount !== undefined && {
           organization_paid_account: organizationPaidAccount.toString(),
         }),
@@ -177,4 +178,4 @@ export const getMemberTool = tool({
       };
     }
   },
-});
+};

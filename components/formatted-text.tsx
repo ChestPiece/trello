@@ -39,9 +39,11 @@ export const FormattedText = memo(
               </h3>
             ),
 
-            // Enhanced paragraph styling
+            // Enhanced paragraph styling - use div to avoid hydration issues
             p: ({ children }) => (
-              <div className=" leading-relaxed mb-2">{children}</div>
+              <div className="text-slate-700 leading-relaxed mb-2">
+                {children}
+              </div>
             ),
 
             // Custom list styling
@@ -58,7 +60,7 @@ export const FormattedText = memo(
             // Enhanced blockquote
             blockquote: ({ children }) => (
               <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 rounded-r-lg">
-                <div className="text-slate-700 italic">{children}</div>
+                <p className="text-slate-700 italic m-0">{children}</p>
               </blockquote>
             ),
 

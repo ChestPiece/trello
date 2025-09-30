@@ -6,11 +6,11 @@ const archiveListSchema = z.object({
   listId: z.string().describe("The ID of the list to archive"),
   archiveAllCards: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to archive all cards in the list as well"),
 });
 
-export const archiveListTool = tool({
+export const archiveListTool = {
   description:
     "Archive a Trello list. This closes the list and optionally archives all cards within it. Archived lists can be restored later.",
   inputSchema: archiveListSchema,
@@ -67,4 +67,4 @@ export const archiveListTool = tool({
       };
     }
   },
-});
+};

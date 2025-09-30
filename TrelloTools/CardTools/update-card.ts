@@ -4,41 +4,41 @@ import axios from "axios";
 
 const updateCardSchema = z.object({
   cardId: z.string().describe("The ID of the card to update"),
-  name: z.string().nullable().describe("New name for the card"),
-  desc: z.string().nullable().describe("New description for the card"),
-  closed: z.boolean().nullable().describe("Whether the card should be closed"),
-  idList: z.string().nullable().describe("ID of the list to move the card to"),
+  name: z.string().optional().describe("New name for the card"),
+  desc: z.string().optional().describe("New description for the card"),
+  closed: z.boolean().optional().describe("Whether the card should be closed"),
+  idList: z.string().optional().describe("ID of the list to move the card to"),
   idBoard: z
     .string()
-    .nullable()
+    .optional()
     .describe("ID of the board to move the card to"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("New position of the card"),
   due: z
     .string()
-    .nullable()
+    .optional()
     .describe("New due date for the card (ISO 8601 format)"),
   dueComplete: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether the card is marked as complete"),
   start: z
     .string()
-    .nullable()
+    .optional()
     .describe("New start date for the card (ISO 8601 format)"),
   idLabels: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Array of label IDs to set on the card"),
   idMembers: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Array of member IDs to set on the card"),
   idAttachmentCover: z
     .string()
-    .nullable()
+    .optional()
     .describe("ID of the attachment to use as cover"),
   keepFromSource: z
     .union([
@@ -51,21 +51,21 @@ const updateCardSchema = z.object({
       z.literal("members"),
       z.literal("stickers"),
     ])
-    .nullable()
+    .optional()
     .describe("What to keep from the source when moving"),
-  address: z.string().nullable().describe("New address for the card location"),
-  locationName: z.string().nullable().describe("New name of the location"),
+  address: z.string().optional().describe("New address for the card location"),
+  locationName: z.string().optional().describe("New name of the location"),
   coordinates: z
     .string()
-    .nullable()
+    .optional()
     .describe("New coordinates for the card location (latitude,longitude)"),
   subscribed: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to subscribe to the card"),
 });
 
-export const updateCardTool = tool({
+export const updateCardTool = {
   description:
     "Update an existing Trello card with new name, description, position, or other settings",
   inputSchema: updateCardSchema,
@@ -189,4 +189,4 @@ export const updateCardTool = tool({
       };
     }
   },
-});
+};

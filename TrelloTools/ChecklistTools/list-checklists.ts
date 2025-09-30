@@ -6,19 +6,19 @@ const listChecklistsSchema = z.object({
   cardId: z.string().describe("The ID of the card to list checklists from"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,idCard,idBoard)"),
   checkItems: z
     .enum(["all", "none"])
-    .nullable()
+    .optional()
     .describe("Whether to include check items"),
   checkItemFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for check items to return"),
 });
 
-export const listChecklistsTool = tool({
+export const listChecklistsTool = {
   description:
     "List all checklists on a Trello card with optional filtering and field selection",
   inputSchema: listChecklistsSchema,
@@ -75,4 +75,4 @@ export const listChecklistsTool = tool({
       };
     }
   },
-});
+};

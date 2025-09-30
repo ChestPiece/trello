@@ -7,17 +7,17 @@ const createListSchema = z.object({
   name: z.string().describe("The name of the list to create"),
   position: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("Position of the list. 'top', 'bottom', or a positive number"),
-  closed: z.boolean().nullable().describe("Whether the list should be closed"),
-  idListSource: z.string().nullable().describe("ID of a list to copy from"),
+  closed: z.boolean().optional().describe("Whether the list should be closed"),
+  idListSource: z.string().optional().describe("ID of a list to copy from"),
   subscribe: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to subscribe to the list"),
 });
 
-export const createListTool = tool({
+export const createListTool = {
   description:
     "Create a new list in a Trello board with specified name and optional settings",
   inputSchema: createListSchema,
@@ -87,4 +87,4 @@ export const createListTool = tool({
       };
     }
   },
-});
+};

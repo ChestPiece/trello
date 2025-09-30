@@ -6,7 +6,7 @@ const deleteCardSchema = z.object({
   cardId: z.string().describe("The ID of the card to delete"),
 });
 
-export const deleteCardTool = tool({
+export const deleteCardTool = {
   description:
     "Delete a Trello card permanently. This action cannot be undone.",
   inputSchema: deleteCardSchema,
@@ -46,4 +46,4 @@ export const deleteCardTool = tool({
       };
     }
   },
-});
+};

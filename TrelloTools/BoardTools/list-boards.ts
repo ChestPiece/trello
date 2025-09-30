@@ -49,31 +49,31 @@ interface TrelloBoardResponse {
 const listBoardsSchema = z.object({
   filter: z
     .enum(["all", "closed", "none", "open", "starred"])
-    .nullable()
+    .optional()
     .describe("Filter boards by status"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return for each board"),
   organization: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to include organization data"),
   organizationFields: z
-    .array(z.string())
-    .nullable()
+    .union([z.array(z.string()), z.null()])
+    .optional()
     .describe("Fields for organization data"),
   lists: z
     .string()
-    .nullable()
+    .optional()
     .describe("Lists to include (e.g., all, closed, none, open)"),
   listFields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Fields for lists to return"),
 });
 
-export const listBoardsTool = tool({
+export const listBoardsTool = {
   description:
     "List all Trello boards accessible to the authenticated user with optional filtering and field selection",
   inputSchema: listBoardsSchema,
@@ -81,7 +81,7 @@ export const listBoardsTool = tool({
   execute: async ({
     filter = "all",
     fields,
-    organization,
+    organization = false,
     organizationFields,
     lists,
     listFields,
@@ -89,7 +89,7 @@ export const listBoardsTool = tool({
     filter?: "all" | "closed" | "none" | "open" | "starred";
     fields?: string[];
     organization?: boolean;
-    organizationFields?: string[];
+    organizationFields?: string[] | null;
     lists?: string;
     listFields?: string[];
   }) => {
@@ -112,9 +112,10 @@ export const listBoardsTool = tool({
         ...(organization !== undefined && {
           organization: organization.toString(),
         }),
-        ...(organizationFields && {
-          organization_fields: organizationFields.join(","),
-        }),
+        ...(organizationFields &&
+          organizationFields.length > 0 && {
+            organization_fields: organizationFields.join(","),
+          }),
         ...(lists && { lists }),
         ...(listFields && { list_fields: listFields.join(",") }),
       });
@@ -159,4 +160,4 @@ export const listBoardsTool = tool({
       };
     }
   },
-});
+};

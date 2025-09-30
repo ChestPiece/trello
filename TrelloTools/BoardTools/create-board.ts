@@ -1,4 +1,3 @@
-import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 
@@ -61,7 +60,7 @@ const createBoardSchema = z.object({
     .describe("Board preferences and settings"),
 });
 
-export const createBoardTool = tool({
+export const createBoardTool = {
   description:
     "Create a new Trello board with specified name, description, and settings. Supports comprehensive board configuration including visibility, permissions, and custom preferences.",
   inputSchema: createBoardSchema,
@@ -198,4 +197,4 @@ export const createBoardTool = tool({
       };
     }
   },
-});
+};

@@ -7,7 +7,7 @@ const removeLabelFromCardSchema = z.object({
   labelId: z.string().describe("The ID of the label to remove from the card"),
 });
 
-export const removeLabelFromCardTool = tool({
+export const removeLabelFromCardTool = {
   description:
     "Remove a specific label from a Trello card. The label must be currently attached to the card.",
   inputSchema: removeLabelFromCardSchema,
@@ -70,4 +70,4 @@ export const removeLabelFromCardTool = tool({
       };
     }
   },
-});
+};

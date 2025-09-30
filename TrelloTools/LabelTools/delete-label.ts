@@ -6,7 +6,7 @@ const deleteLabelSchema = z.object({
   labelId: z.string().describe("The ID of the label to delete"),
 });
 
-export const deleteLabelTool = tool({
+export const deleteLabelTool = {
   description:
     "Delete a Trello label permanently. This action cannot be undone.",
   inputSchema: deleteLabelSchema,
@@ -52,4 +52,4 @@ export const deleteLabelTool = tool({
       };
     }
   },
-});
+};

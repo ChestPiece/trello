@@ -4,14 +4,14 @@ import axios from "axios";
 
 const updateChecklistSchema = z.object({
   checklistId: z.string().describe("The ID of the checklist to update"),
-  name: z.string().nullable().describe("New name for the checklist"),
+  name: z.string().optional().describe("New name for the checklist"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("New position of the checklist"),
 });
 
-export const updateChecklistTool = tool({
+export const updateChecklistTool = {
   description: "Update an existing Trello checklist with new name or position",
   inputSchema: updateChecklistSchema,
 
@@ -69,4 +69,4 @@ export const updateChecklistTool = tool({
       };
     }
   },
-});
+};

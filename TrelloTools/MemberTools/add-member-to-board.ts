@@ -7,16 +7,16 @@ const addMemberToBoardSchema = z.object({
   email: z
     .string()
     .email()
-    .nullable()
+    .optional()
     .describe("Email address of the member to add"),
-  fullName: z.string().nullable().describe("Full name of the member to add"),
+  fullName: z.string().optional().describe("Full name of the member to add"),
   type: z
     .enum(["admin", "normal", "observer"])
-    .nullable()
+    .optional()
     .describe("Type of membership for the member"),
 });
 
-export const addMemberToBoardTool = tool({
+export const addMemberToBoardTool = {
   description:
     "Add a member to a Trello board with specified email or full name",
   inputSchema: addMemberToBoardSchema,
@@ -112,4 +112,4 @@ export const addMemberToBoardTool = tool({
       };
     }
   },
-});
+};

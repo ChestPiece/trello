@@ -7,7 +7,7 @@ const deleteAttachmentSchema = z.object({
   attachmentId: z.string().describe("The ID of the attachment to delete"),
 });
 
-export const deleteAttachmentTool = tool({
+export const deleteAttachmentTool = {
   description:
     "Delete a Trello attachment permanently. This action cannot be undone.",
   inputSchema: deleteAttachmentSchema,
@@ -60,4 +60,4 @@ export const deleteAttachmentTool = tool({
       };
     }
   },
-});
+};

@@ -1,4 +1,3 @@
-import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 
@@ -70,7 +69,7 @@ const updateBoardSchema = z.object({
     .describe("Custom names for board labels"),
 });
 
-export const updateBoardTool = tool({
+export const updateBoardTool = {
   description:
     "Update an existing Trello board with new name, description, settings, or preferences",
   inputSchema: updateBoardSchema,
@@ -207,4 +206,4 @@ export const updateBoardTool = tool({
       };
     }
   },
-});
+};

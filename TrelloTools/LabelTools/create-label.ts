@@ -21,15 +21,15 @@ const createLabelSchema = z.object({
     .describe("The color of the label"),
   listId: z
     .string()
-    .nullable()
+    .optional()
     .describe("Optional ID of the list to associate the label with"),
   cardId: z
     .string()
-    .nullable()
+    .optional()
     .describe("Optional ID of the card to add the label to immediately"),
 });
 
-export const createLabelTool = tool({
+export const createLabelTool = {
   description:
     "Create a new label in a Trello board with specified name and color. Optionally associate with a specific list or add to a specific card immediately.",
   inputSchema: createLabelSchema,
@@ -133,4 +133,4 @@ export const createLabelTool = tool({
       };
     }
   },
-});
+};

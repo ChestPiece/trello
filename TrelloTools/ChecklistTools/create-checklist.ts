@@ -7,17 +7,17 @@ const createChecklistSchema = z.object({
   name: z.string().describe("The name of the checklist"),
   idChecklistSource: z
     .string()
-    .nullable()
+    .optional()
     .describe("ID of a checklist to copy from"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe(
       "Position of the checklist. 'top', 'bottom', or a positive number"
     ),
 });
 
-export const createChecklistTool = tool({
+export const createChecklistTool = {
   description:
     "Create a new checklist in a Trello card with specified name and optional settings",
   inputSchema: createChecklistSchema,
@@ -81,4 +81,4 @@ export const createChecklistTool = tool({
       };
     }
   },
-});
+};

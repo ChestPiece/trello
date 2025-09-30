@@ -6,11 +6,11 @@ const deleteListSchema = z.object({
   listId: z.string().describe("The ID of the list to delete"),
   archiveAllCards: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to archive all cards in the list before deleting"),
 });
 
-export const deleteListTool = tool({
+export const deleteListTool = {
   description:
     "Delete a Trello list permanently. Optionally archive all cards in the list first.",
   inputSchema: deleteListSchema,
@@ -74,4 +74,4 @@ export const deleteListTool = tool({
       };
     }
   },
-});
+};

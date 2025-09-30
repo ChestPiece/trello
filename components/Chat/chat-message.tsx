@@ -16,6 +16,20 @@ export interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
+  // Check if this message contains form tools
+  const hasFormTools = message.parts.some(
+    (part) =>
+      part.type.startsWith("tool-") &&
+      (part.type.includes("Form") ||
+        part.type === "tool-createBoardForm" ||
+        part.type === "tool-createCardForm" ||
+        part.type === "tool-createListForm" ||
+        part.type === "tool-createWorkspaceForm" ||
+        part.type === "tool-createLabelForm" ||
+        part.type === "tool-createChecklistForm" ||
+        part.type === "tool-createAttachmentForm")
+  );
+
   return (
     <div
       className={cn(
@@ -35,13 +49,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {message.parts.map((part, index) => {
             switch (part.type) {
               case "text":
-                return part.text.split("\n").map((text, i) => (
-                  <React.Fragment key={`${index}-${i}`}>
-                    <p className={i > 0 ? "mt-2" : ""}>
-                      <FormattedText content={text} />
-                    </p>
-                  </React.Fragment>
-                ));
+                // Suppress text content when form tools are present to avoid redundant text
+                if (hasFormTools) {
+                  return null;
+                }
+                return (
+                  <div key={index} className="text-content">
+                    <FormattedText content={part.text} />
+                  </div>
+                );
 
               // ✅ AI SDK UI Pattern: Handle typed tool parts for real-time generative UI
               // Each tool type gets specific rendering based on its state
@@ -516,6 +532,20 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   errorText?: string;
                 };
 
+                // Debug logging (only log when state changes to avoid infinite loops)
+                if (toolPart.state === "output-available") {
+                  console.log("Form tool part:", {
+                    type: part.type,
+                    state: toolPart.state,
+                    input: toolPart.input,
+                    output: toolPart.output,
+                    hasOutput: !!toolPart.output,
+                    outputKeys: toolPart.output
+                      ? Object.keys(toolPart.output)
+                      : [],
+                  });
+                }
+
                 if (toolPart.state === "output-error") {
                   return (
                     <div
@@ -532,12 +562,34 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   );
                 }
 
+                // Map form tool types to the correct form types expected by TrelloFormCard
+                const getFormType = (toolType: string): string => {
+                  switch (toolType) {
+                    case "tool-createBoardForm":
+                      return "createBoard";
+                    case "tool-createCardForm":
+                      return "createCard";
+                    case "tool-createListForm":
+                      return "createList";
+                    case "tool-createWorkspaceForm":
+                      return "createWorkspace";
+                    case "tool-createLabelForm":
+                      return "createLabel";
+                    case "tool-createChecklistForm":
+                      return "createChecklist";
+                    case "tool-createAttachmentForm":
+                      return "createAttachment";
+                    default:
+                      return toolType.replace("tool-", "");
+                  }
+                };
+
                 return (
                   <div key={index} className="mt-3">
                     <TrelloFormCard
                       toolCallId={toolPart.toolCallId}
-                      formType={part.type.replace("tool-", "")}
-                      input={toolPart.input as Record<string, unknown>}
+                      formType={getFormType(part.type)}
+                      input={toolPart.output as Record<string, unknown>}
                       state={toolPart.state}
                     />
                   </div>

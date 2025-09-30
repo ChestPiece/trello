@@ -104,7 +104,7 @@ export function ConversationProvider({
       // Client-side tools can be added here if needed
       console.log("Tool call received:", toolCall.toolName);
     },
-    onFinish: ({ message, messages: finishedMessages }) => {
+    onFinish: ({ messages: finishedMessages }) => {
       // Set streaming to false when the response is complete
       setIsStreaming(false);
 

@@ -7,11 +7,11 @@ const getAttachmentSchema = z.object({
   attachmentId: z.string().describe("The ID of the attachment to retrieve"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,url,mimeType,bytes)"),
 });
 
-export const getAttachmentTool = tool({
+export const getAttachmentTool = {
   description:
     "Retrieve detailed information about a specific Trello attachment",
   inputSchema: getAttachmentSchema,
@@ -63,4 +63,4 @@ export const getAttachmentTool = tool({
       };
     }
   },
-});
+};

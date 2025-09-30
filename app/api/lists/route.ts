@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
 export async function GET(request: NextRequest) {
   try {
@@ -6,31 +7,137 @@ export async function GET(request: NextRequest) {
     const boardId = searchParams.get("boardId");
     const filter = searchParams.get("filter") || "all";
 
-    // This is a simple REST endpoint that returns list information
-    // The actual tool execution happens in the chat context
+    if (!boardId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "boardId parameter is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.TRELLO_API_KEY;
+    const apiToken = process.env.TRELLO_API_TOKEN;
+
+    if (!apiKey || !apiToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Trello API credentials not configured. Please set TRELLO_API_KEY and TRELLO_API_TOKEN environment variables.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const baseUrl = `https://api.trello.com/1/boards/${boardId}/lists`;
+    const params = new URLSearchParams({
+      key: apiKey,
+      token: apiToken,
+      filter: filter,
+      fields: "id,name,desc,closed,idBoard,pos,subscribed,softLimit,status",
+    });
+
+    const response = await axios.get(`${baseUrl}?${params.toString()}`);
+
     return NextResponse.json({
       success: true,
-      message:
-        "Use the chat interface to interact with Trello lists. The AI assistant can help you create, update, delete, and list lists.",
-      availableOperations: [
-        "createList - Create a new list",
-        "getList - Get list details",
-        "updateList - Update list information",
-        "deleteList - Delete a list",
-        "listLists - List all lists",
-        "archiveList - Archive a list",
-        "unarchiveList - Unarchive a list",
-      ],
-      parameters: {
-        boardId: boardId || "not provided",
-        filter: filter,
-      },
+      lists: response.data,
+      boardId: boardId,
+      filter: filter,
     });
   } catch (error) {
     console.error("Error in lists API:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        success: false,
+        error: "Failed to fetch lists",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, boardId } = body;
+
+    if (!name || !boardId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "name and boardId are required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.TRELLO_API_KEY;
+    const apiToken = process.env.TRELLO_API_TOKEN;
+
+    if (!apiKey || !apiToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Trello API credentials not configured. Please set TRELLO_API_KEY and TRELLO_API_TOKEN environment variables.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const baseUrl = "https://api.trello.com/1/lists";
+    const params = new URLSearchParams({
+      key: apiKey,
+      token: apiToken,
+      name,
+      idBoard: boardId,
+    });
+
+    const response = await axios.post(`${baseUrl}?${params.toString()}`);
+
+    return NextResponse.json({
+      success: true,
+      list: {
+        id: response.data.id,
+        name: response.data.name,
+        desc: response.data.desc,
+        closed: response.data.closed,
+        idBoard: response.data.idBoard,
+        pos: response.data.pos,
+        subscribed: response.data.subscribed,
+        softLimit: response.data.softLimit,
+        status: response.data.status,
+      },
+      message: `Successfully created list "${name}" with ID: ${response.data.id}`,
+    });
+  } catch (error) {
+    console.error("Error creating list:", error);
+
+    let errorMessage = "Failed to create list";
+    let statusCode = 500;
+
+    if (error && typeof error === "object" && "response" in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string }; status?: number };
+      };
+      errorMessage = axiosError.response?.data?.message || errorMessage;
+      statusCode = axiosError.response?.status || statusCode;
+    } else if (error && typeof error === "object" && "message" in error) {
+      errorMessage = (error as { message: string }).message;
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMessage,
+        statusCode,
+        message: `Failed to create list "${name}". ${errorMessage}`,
+      },
+      { status: statusCode }
     );
   }
 }

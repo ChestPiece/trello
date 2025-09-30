@@ -6,7 +6,7 @@ const unarchiveListSchema = z.object({
   listId: z.string().describe("The ID of the list to unarchive (reopen)"),
 });
 
-export const unarchiveListTool = tool({
+export const unarchiveListTool = {
   description:
     "Unarchive (reopen) a Trello list. This restores a previously archived list and makes it active again.",
   inputSchema: unarchiveListSchema,
@@ -54,4 +54,4 @@ export const unarchiveListTool = tool({
       };
     }
   },
-});
+};

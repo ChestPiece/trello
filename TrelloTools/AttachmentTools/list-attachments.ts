@@ -6,19 +6,19 @@ const listAttachmentsSchema = z.object({
   cardId: z.string().describe("The ID of the card to list attachments from"),
   fields: z
     .array(z.string())
-    .nullable()
+    .optional()
     .describe("Specific fields to return (e.g., name,url,mimeType,bytes)"),
   filter: z
     .enum(["cover", "gallery", "all"])
-    .nullable()
+    .optional()
     .describe("Filter attachments by type"),
   limit: z
     .number()
-    .nullable()
+    .optional()
     .describe("Maximum number of attachments to return"),
 });
 
-export const listAttachmentsTool = tool({
+export const listAttachmentsTool = {
   description:
     "List all attachments on a Trello card with optional filtering and field selection",
   inputSchema: listAttachmentsSchema,
@@ -75,4 +75,4 @@ export const listAttachmentsTool = tool({
       };
     }
   },
-});
+};

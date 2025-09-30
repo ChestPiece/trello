@@ -7,7 +7,7 @@ const addLabelToCardSchema = z.object({
   labelId: z.string().describe("The ID of the label to add to the card"),
 });
 
-export const addLabelToCardTool = tool({
+export const addLabelToCardTool = {
   description:
     "Add a specific label to a Trello card. The label must exist in the same board as the card.",
   inputSchema: addLabelToCardSchema,
@@ -71,4 +71,4 @@ export const addLabelToCardTool = tool({
       };
     }
   },
-});
+};

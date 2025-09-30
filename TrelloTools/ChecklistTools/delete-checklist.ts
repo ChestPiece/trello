@@ -6,7 +6,7 @@ const deleteChecklistSchema = z.object({
   checklistId: z.string().describe("The ID of the checklist to delete"),
 });
 
-export const deleteChecklistTool = tool({
+export const deleteChecklistTool = {
   description:
     "Delete a Trello checklist permanently. This action cannot be undone.",
   inputSchema: deleteChecklistSchema,
@@ -52,4 +52,4 @@ export const deleteChecklistTool = tool({
       };
     }
   },
-});
+};

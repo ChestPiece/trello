@@ -1,26 +1,25 @@
-import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 
 const updateListSchema = z.object({
   listId: z.string().describe("The ID of the list to update"),
-  name: z.string().nullable().describe("New name for the list"),
-  closed: z.boolean().nullable().describe("Whether the list should be closed"),
+  name: z.string().optional().describe("New name for the list"),
+  closed: z.boolean().optional().describe("Whether the list should be closed"),
   pos: z
     .union([z.string(), z.number()])
-    .nullable()
+    .optional()
     .describe("New position of the list"),
   subscribed: z
     .boolean()
-    .nullable()
+    .optional()
     .describe("Whether to subscribe to the list"),
   idBoard: z
     .string()
-    .nullable()
+    .optional()
     .describe("ID of the board to move the list to"),
 });
 
-export const updateListTool = tool({
+export const updateListTool = {
   description:
     "Update an existing Trello list with new name, position, or other settings",
   inputSchema: updateListSchema,
@@ -88,4 +87,4 @@ export const updateListTool = tool({
       };
     }
   },
-});
+};

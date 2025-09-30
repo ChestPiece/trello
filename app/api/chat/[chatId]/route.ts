@@ -3,10 +3,10 @@ import { loadMessages } from "@/lib/message-persistence";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { chatId: string } }
+  { params }: { params: Promise<{ chatId: string }> }
 ) {
   try {
-    const { chatId } = params;
+    const { chatId } = await params;
 
     if (!chatId) {
       return new Response("Chat ID is required", { status: 400 });
