@@ -8,6 +8,7 @@ import {
 import { openai } from "@ai-sdk/openai"; // ✅ v2 import
 import { NextRequest } from "next/server";
 import { systemPrompt } from "@/components/Prompts/system-prompt";
+import { saveMessages } from "@/lib/message-persistence";
 
 import {
   createBoardTool,
@@ -85,7 +86,7 @@ if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages }: { messages: UIMessage[] } = await req.json();
+    const { messages, chatId }: { messages: UIMessage[]; chatId?: string } = await req.json();
 
     // Validate messages format
     if (!messages || !Array.isArray(messages)) {
@@ -194,6 +195,17 @@ export async function POST(req: NextRequest) {
 
     return result.toUIMessageStreamResponse({
       originalMessages: messages,
+      onFinish: async ({ messages: finalMessages }) => {
+        // Save messages to persistence layer
+        if (chatId && finalMessages) {
+          try {
+            await saveMessages(chatId, finalMessages);
+            console.log(`Messages saved for chat ${chatId}`);
+          } catch (error) {
+            console.error("Failed to save messages:", error);
+          }
+        }
+      },
       onError: (error: unknown) => {
         console.error("Stream error:", error);
 

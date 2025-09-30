@@ -77,9 +77,17 @@ export function ConversationProvider({
   // Chat hook for the current conversation - using new AI SDK UI v5 pattern
   const chatHelpers = useChat({
     id: currentConversationId || undefined,
-    // Configure transport with API endpoint
+    // Configure transport with API endpoint and chat ID
     transport: new DefaultChatTransport({
       api: "/api/chat",
+      prepareSendMessagesRequest: ({ id, messages }) => {
+        return {
+          body: {
+            messages,
+            chatId: id, // Include chat ID for message persistence
+          },
+        };
+      },
     }),
     // Throttle UI updates to improve performance
     experimental_throttle: 50,

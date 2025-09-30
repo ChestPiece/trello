@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Save, X } from "lucide-react";
+import { useConversation } from "@/components/conversation-provider";
 
 interface FormField {
   name: string;
@@ -29,7 +30,7 @@ interface FormField {
   required: boolean;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
-  defaultValue?: any;
+  defaultValue?: unknown;
   description?: string;
 }
 
@@ -42,7 +43,7 @@ interface TrelloFormCardProps {
     | "input-available"
     | "output-available"
     | "output-error";
-  onSubmit?: (formData: Record<string, any>) => void;
+  onSubmit?: (formData: Record<string, unknown>) => void;
   onCancel?: () => void;
 }
 
@@ -54,6 +55,8 @@ export function TrelloFormCard({
   onSubmit,
   onCancel,
 }: TrelloFormCardProps) {
+  const { addToolResult } = useConversation();
+  
   // Get form configuration from the client-side tool execution
   const formConfig = input as
     | {
@@ -64,8 +67,8 @@ export function TrelloFormCard({
       }
     | undefined;
 
-  const [formData, setFormData] = useState<Record<string, any>>(() => {
-    const initialData: Record<string, any> = {};
+  const [formData, setFormData] = useState<Record<string, unknown>>(() => {
+    const initialData: Record<string, unknown> = {};
     if (formConfig?.fields) {
       formConfig.fields.forEach((field) => {
         if (field.defaultValue !== undefined) {
@@ -106,7 +109,7 @@ export function TrelloFormCard({
     );
   }
 
-  const handleInputChange = (fieldName: string, value: any) => {
+  const handleInputChange = (fieldName: string, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       [fieldName]: value,
@@ -131,18 +134,38 @@ export function TrelloFormCard({
         }
       }
 
+      // Use addToolResult to submit form data
+      addToolResult({
+        tool: formType,
+        toolCallId: toolCallId,
+        output: {
+          success: true,
+          formData: formData,
+          message: `${formConfig.title} form submitted successfully`,
+        },
+      });
+
+      // Also call the optional onSubmit callback if provided
       if (onSubmit) {
         await onSubmit(formData);
       }
     } catch (error) {
       console.error("Form submission error:", error);
+      
+      // Handle error with addToolResult
+      addToolResult({
+        tool: formType,
+        toolCallId: toolCallId,
+        state: "output-error",
+        errorText: `Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const renderField = (field: FormField) => {
-    const value = formData[field.name] || "";
+    const value = (formData[field.name] as string) || "";
 
     switch (field.type) {
       case "text":
