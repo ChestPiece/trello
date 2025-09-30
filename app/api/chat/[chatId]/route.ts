@@ -7,13 +7,13 @@ export async function GET(
 ) {
   try {
     const { chatId } = params;
-    
+
     if (!chatId) {
       return new Response("Chat ID is required", { status: 400 });
     }
 
     const messages = await loadMessages(chatId);
-    
+
     return new Response(JSON.stringify({ messages }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

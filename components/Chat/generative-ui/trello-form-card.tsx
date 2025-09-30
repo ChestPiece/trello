@@ -56,7 +56,7 @@ export function TrelloFormCard({
   onCancel,
 }: TrelloFormCardProps) {
   const { addToolResult } = useConversation();
-  
+
   // Get form configuration from the client-side tool execution
   const formConfig = input as
     | {
@@ -151,13 +151,15 @@ export function TrelloFormCard({
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      
+
       // Handle error with addToolResult
       addToolResult({
         tool: formType,
         toolCallId: toolCallId,
         state: "output-error",
-        errorText: `Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        errorText: `Failed to submit form: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       });
     } finally {
       setIsSubmitting(false);
@@ -222,7 +224,7 @@ export function TrelloFormCard({
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             <Select
-              value={value}
+              value={value as string}
               onValueChange={(val) => handleInputChange(field.name, val)}
             >
               <SelectTrigger>
@@ -249,7 +251,7 @@ export function TrelloFormCard({
           <div key={field.name} className="flex items-center space-x-2">
             <Checkbox
               id={field.name}
-              checked={value}
+              checked={formData[field.name] as boolean}
               onCheckedChange={(checked) =>
                 handleInputChange(field.name, checked)
               }

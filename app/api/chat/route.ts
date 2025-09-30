@@ -86,7 +86,8 @@ if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, chatId }: { messages: UIMessage[]; chatId?: string } = await req.json();
+    const { messages, chatId }: { messages: UIMessage[]; chatId?: string } =
+      await req.json();
 
     // Validate messages format
     if (!messages || !Array.isArray(messages)) {
