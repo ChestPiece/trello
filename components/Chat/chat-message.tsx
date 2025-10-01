@@ -20,7 +20,7 @@ export interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  // Check if this message contains form tools
+  // Check if this message contains form tools or display cards
   const hasFormTools = message.parts.some(
     (part) =>
       part.type.startsWith("tool-") &&
@@ -50,7 +50,43 @@ export function ChatMessage({ message }: ChatMessageProps) {
         part.type === "tool-addMemberToBoardForm" ||
         part.type === "tool-removeMemberFromBoardForm" ||
         part.type === "tool-addLabelToCardForm" ||
-        part.type === "tool-removeLabelFromCardForm")
+        part.type === "tool-removeLabelFromCardForm" ||
+        part.type === "tool-bulkBoardOperations" ||
+        part.type === "tool-advancedCardSearch" ||
+        part.type === "tool-smartCardCreation" ||
+        part.type === "tool-workspaceAnalytics" ||
+        part.type === "tool-automatedWorkflow")
+  );
+
+  // Check if this message contains display cards (to suppress redundant text)
+  const hasDisplayCards = message.parts.some(
+    (part) =>
+      part.type.startsWith("tool-") &&
+      (part.type === "tool-createBoard" ||
+        part.type === "tool-getBoard" ||
+        part.type === "tool-updateBoard" ||
+        part.type === "tool-createCard" ||
+        part.type === "tool-getCard" ||
+        part.type === "tool-updateCard" ||
+        part.type === "tool-createList" ||
+        part.type === "tool-getList" ||
+        part.type === "tool-updateList" ||
+        part.type === "tool-createWorkspace" ||
+        part.type === "tool-getWorkspace" ||
+        part.type === "tool-updateWorkspace" ||
+        part.type === "tool-createLabel" ||
+        part.type === "tool-getLabel" ||
+        part.type === "tool-updateLabel" ||
+        part.type === "tool-createChecklist" ||
+        part.type === "tool-getChecklist" ||
+        part.type === "tool-updateChecklist" ||
+        part.type === "tool-createAttachment" ||
+        part.type === "tool-getAttachment" ||
+        part.type === "tool-getMember" ||
+        part.type === "tool-listBoards" ||
+        part.type === "tool-listCards" ||
+        part.type === "tool-listLists" ||
+        part.type === "tool-listWorkspaces")
   );
 
   return (
@@ -72,8 +108,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {message.parts.map((part, index) => {
             switch (part.type) {
               case "text":
-                // Suppress text content when form tools are present to avoid redundant text
-                if (hasFormTools) {
+                // Suppress text content when form tools or display cards are present to avoid redundant text
+                if (hasFormTools || hasDisplayCards) {
                   return null;
                 }
                 return (
@@ -734,7 +770,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-addMemberToBoardForm":
               case "tool-removeMemberFromBoardForm":
               case "tool-addLabelToCardForm":
-              case "tool-removeLabelFromCardForm": {
+              case "tool-removeLabelFromCardForm":
+              case "tool-bulkBoardOperations":
+              case "tool-advancedCardSearch":
+              case "tool-smartCardCreation":
+              case "tool-workspaceAnalytics":
+              case "tool-automatedWorkflow": {
                 const toolPart = part as {
                   state:
                     | "input-streaming"

@@ -25,11 +25,21 @@ interface FormField {
     | "select"
     | "dynamic-select"
     | "checkbox"
+    | "checkbox-group"
+    | "radio-group"
     | "datetime-local"
+    | "date"
+    | "time"
     | "url"
+    | "email"
+    | "number"
+    | "range"
     | "color"
     | "file"
-    | "hidden";
+    | "hidden"
+    | "password"
+    | "search"
+    | "tel";
   required?: boolean;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
@@ -37,6 +47,27 @@ interface FormField {
   description?: string;
   dependsOn?: string;
   value?: unknown;
+  multiple?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  validation?: {
+    required?: boolean;
+    min?: number;
+    max?: number;
+    pattern?: string;
+    custom?: (value: unknown) => string | null;
+  };
+  conditional?: {
+    field: string;
+    operator: "equals" | "notEquals" | "contains" | "greaterThan" | "lessThan";
+    value: unknown;
+  };
+  helpText?: string;
+  errorText?: string;
 }
 
 interface TrelloFormCardProps {
@@ -367,20 +398,20 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       // Clear any previous errors
       setFormError(null);
 
-          let result: {
-            success: boolean;
-            board?: {
-              id: string;
-              name: string;
-              url?: string;
-              [key: string]: unknown;
-            };
-            list?: { id: string; name: string; [key: string]: unknown };
-            card?: { id: string; name: string; [key: string]: unknown };
-            member?: { id: string; name: string; [key: string]: unknown };
-            label?: { id: string; name: string; [key: string]: unknown };
-            error?: string;
-          };
+      let result: {
+        success: boolean;
+        board?: {
+          id: string;
+          name: string;
+          url?: string;
+          [key: string]: unknown;
+        };
+        list?: { id: string; name: string; [key: string]: unknown };
+        card?: { id: string; name: string; [key: string]: unknown };
+        member?: { id: string; name: string; [key: string]: unknown };
+        label?: { id: string; name: string; [key: string]: unknown };
+        error?: string;
+      };
       let successMessage: string;
 
       // Handle different form types using API routes
@@ -535,156 +566,162 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
           message: successMessage,
           data: result.card,
         });
-          } else if (formType === "archiveList") {
-            const listId = String(formData.listId || "");
-            const response = await fetch(`/api/lists?id=${listId}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                closed: true,
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to archive list");
-            if (!result.list) throw new Error("List data not returned");
-            successMessage = `List "${result.list.name}" archived successfully!`;
+      } else if (formType === "archiveList") {
+        const listId = String(formData.listId || "");
+        const response = await fetch(`/api/lists?id=${listId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            closed: true,
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to archive list");
+        if (!result.list) throw new Error("List data not returned");
+        successMessage = `List "${result.list.name}" archived successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.list,
-            });
-          } else if (formType === "unarchiveList") {
-            const listId = String(formData.listId || "");
-            const response = await fetch(`/api/lists?id=${listId}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                closed: false,
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to unarchive list");
-            if (!result.list) throw new Error("List data not returned");
-            successMessage = `List "${result.list.name}" unarchived successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.list,
+        });
+      } else if (formType === "unarchiveList") {
+        const listId = String(formData.listId || "");
+        const response = await fetch(`/api/lists?id=${listId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            closed: false,
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to unarchive list");
+        if (!result.list) throw new Error("List data not returned");
+        successMessage = `List "${result.list.name}" unarchived successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.list,
-            });
-          } else if (formType === "addMemberToBoard") {
-            const response = await fetch("/api/members", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                boardId: String(formData.boardId || ""),
-                memberId: String(formData.memberId || ""),
-                type: String(formData.type || "normal"),
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to add member to board");
-            successMessage = `Member added to board successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.list,
+        });
+      } else if (formType === "addMemberToBoard") {
+        const response = await fetch("/api/members", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            boardId: String(formData.boardId || ""),
+            memberId: String(formData.memberId || ""),
+            type: String(formData.type || "normal"),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to add member to board");
+        successMessage = `Member added to board successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.member,
-            });
-          } else if (formType === "removeMemberFromBoard") {
-            const response = await fetch("/api/members", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                boardId: String(formData.boardId || ""),
-                memberId: String(formData.memberId || ""),
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to remove member from board");
-            successMessage = `Member removed from board successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.member,
+        });
+      } else if (formType === "removeMemberFromBoard") {
+        const response = await fetch("/api/members", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            boardId: String(formData.boardId || ""),
+            memberId: String(formData.memberId || ""),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to remove member from board");
+        successMessage = `Member removed from board successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.member,
-            });
-          } else if (formType === "addLabelToCard") {
-            const response = await fetch("/api/labels", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                cardId: String(formData.cardId || ""),
-                labelId: String(formData.labelId || ""),
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to add label to card");
-            successMessage = `Label added to card successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.member,
+        });
+      } else if (formType === "addLabelToCard") {
+        const response = await fetch("/api/labels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cardId: String(formData.cardId || ""),
+            labelId: String(formData.labelId || ""),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to add label to card");
+        successMessage = `Label added to card successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.label,
-            });
-          } else if (formType === "removeLabelFromCard") {
-            const response = await fetch("/api/labels", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                cardId: String(formData.cardId || ""),
-                labelId: String(formData.labelId || ""),
-              }),
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to remove label from card");
-            successMessage = `Label removed from card successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.label,
+        });
+      } else if (formType === "removeLabelFromCard") {
+        const response = await fetch("/api/labels", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cardId: String(formData.cardId || ""),
+            labelId: String(formData.labelId || ""),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to remove label from card");
+        successMessage = `Label removed from card successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: result.label,
-            });
-          } else if (formType === "deleteAttachment") {
-            const attachmentId = String(formData.attachmentId || "");
-            const response = await fetch(`/api/attachments?id=${attachmentId}`, {
-              method: "DELETE",
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to delete attachment");
-            successMessage = `Attachment deleted successfully!`;
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.label,
+        });
+      } else if (formType === "deleteAttachment") {
+        const attachmentId = String(formData.attachmentId || "");
+        const response = await fetch(`/api/attachments?id=${attachmentId}`, {
+          method: "DELETE",
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to delete attachment");
+        successMessage = `Attachment deleted successfully!`;
 
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: { id: attachmentId, name: `Attachment ${attachmentId}` },
-            });
-          } else if (formType === "deleteChecklistItem") {
-            const checklistItemId = String(formData.checklistItemId || "");
-            const response = await fetch(`/api/checklists/item?id=${checklistItemId}`, {
-              method: "DELETE",
-            });
-            result = await response.json();
-            if (!result.success)
-              throw new Error(result.error || "Failed to delete checklist item");
-            successMessage = `Checklist item deleted successfully!`;
-
-            setSubmissionResult({
-              success: true,
-              message: successMessage,
-              data: { id: checklistItemId, name: `Checklist Item ${checklistItemId}` },
-            });
-          } else {
-            throw new Error(`Unknown form type: ${formType}`);
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: { id: attachmentId, name: `Attachment ${attachmentId}` },
+        });
+      } else if (formType === "deleteChecklistItem") {
+        const checklistItemId = String(formData.checklistItemId || "");
+        const response = await fetch(
+          `/api/checklists/item?id=${checklistItemId}`,
+          {
+            method: "DELETE",
           }
+        );
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to delete checklist item");
+        successMessage = `Checklist item deleted successfully!`;
+
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: {
+            id: checklistItemId,
+            name: `Checklist Item ${checklistItemId}`,
+          },
+        });
+      } else {
+        throw new Error(`Unknown form type: ${formType}`);
+      }
 
       // Use addToolResult to submit the API result
       const outputData: Record<string, unknown> = {
@@ -747,8 +784,77 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
     }
   };
 
+  // Helper function to check if a field should be shown based on dependencies
+  const shouldShowField = (field: FormField): boolean => {
+    if (!field.dependsOn) return true;
+    const dependentValue = formData[field.dependsOn];
+    return !!dependentValue;
+  };
+
+  // Helper function to check conditional field visibility
+  const isFieldVisible = (field: FormField): boolean => {
+    if (!field.conditional) return true;
+
+    const { field: conditionalField, operator, value } = field.conditional;
+    const fieldValue = formData[conditionalField];
+
+    switch (operator) {
+      case "equals":
+        return fieldValue === value;
+      case "notEquals":
+        return fieldValue !== value;
+      case "contains":
+        return String(fieldValue).includes(String(value));
+      case "greaterThan":
+        return Number(fieldValue) > Number(value);
+      case "lessThan":
+        return Number(fieldValue) < Number(value);
+      default:
+        return true;
+    }
+  };
+
+  // Helper function to validate field value
+  const validateField = (field: FormField, value: unknown): string | null => {
+    if (!field.validation) return null;
+
+    const { required, min, max, pattern, custom } = field.validation;
+
+    if (required && (!value || (typeof value === "string" && !value.trim()))) {
+      return `${field.label || field.name} is required`;
+    }
+
+    if (min !== undefined && Number(value) < min) {
+      return `${field.label || field.name} must be at least ${min}`;
+    }
+
+    if (max !== undefined && Number(value) > max) {
+      return `${field.label || field.name} must be at most ${max}`;
+    }
+
+    if (
+      pattern &&
+      typeof value === "string" &&
+      !new RegExp(pattern).test(value)
+    ) {
+      return `${field.label || field.name} format is invalid`;
+    }
+
+    if (custom) {
+      return custom(value);
+    }
+
+    return null;
+  };
+
   const renderField = (field: FormField) => {
+    // Skip field if it shouldn't be shown
+    if (!shouldShowField(field) || !isFieldVisible(field)) {
+      return null;
+    }
+
     const value = (formData[field.name] as string) || "";
+    const fieldError = validateField(field, value);
 
     switch (field.type) {
       case "hidden":
@@ -1050,6 +1156,327 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
                 {field.description}
               </p>
             )}
+          </div>
+        );
+
+      case "email":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="email"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              required={field.required}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+            {fieldError && <p className="text-xs text-red-500">{fieldError}</p>}
+          </div>
+        );
+
+      case "number":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="number"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              required={field.required}
+              min={field.min}
+              max={field.max}
+              step={field.step}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+            {fieldError && <p className="text-xs text-red-500">{fieldError}</p>}
+          </div>
+        );
+
+      case "range":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <div className="space-y-2">
+              <Input
+                id={field.name}
+                type="range"
+                value={value}
+                onChange={(e) => handleInputChange(field.name, e.target.value)}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{field.min}</span>
+                <span className="font-medium">{value}</span>
+                <span>{field.max}</span>
+              </div>
+            </div>
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "date":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="date"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              required={field.required}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "time":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="time"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              required={field.required}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "checkbox-group":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <div className="space-y-2">
+              {field.options?.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`${field.name}-${option.value}`}
+                    checked={
+                      Array.isArray(formData[field.name])
+                        ? (formData[field.name] as string[]).includes(
+                            option.value
+                          )
+                        : false
+                    }
+                    onCheckedChange={(checked) => {
+                      const currentValues = Array.isArray(formData[field.name])
+                        ? (formData[field.name] as string[])
+                        : [];
+                      if (checked) {
+                        handleInputChange(field.name, [
+                          ...currentValues,
+                          option.value,
+                        ]);
+                      } else {
+                        handleInputChange(
+                          field.name,
+                          currentValues.filter((v) => v !== option.value)
+                        );
+                      }
+                    }}
+                  />
+                  <Label
+                    htmlFor={`${field.name}-${option.value}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "radio-group":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <div className="space-y-2">
+              {field.options?.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id={`${field.name}-${option.value}`}
+                    name={field.name}
+                    value={option.value}
+                    checked={value === option.value}
+                    onChange={(e) =>
+                      handleInputChange(field.name, e.target.value)
+                    }
+                    className="h-4 w-4 text-primary focus:ring-primary border-border"
+                  />
+                  <Label
+                    htmlFor={`${field.name}-${option.value}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "password":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="password"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              required={field.required}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+            {fieldError && <p className="text-xs text-red-500">{fieldError}</p>}
+          </div>
+        );
+
+      case "search":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="search"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              required={field.required}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+          </div>
+        );
+
+      case "tel":
+        return (
+          <div key={field.name} className="space-y-3">
+            <Label
+              htmlFor={field.name}
+              className="text-sm font-medium text-foreground"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            <Input
+              id={field.name}
+              type="tel"
+              value={value}
+              onChange={(e) => handleInputChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              required={field.required}
+              pattern={field.pattern}
+              className="h-11 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+            />
+            {field.description && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {field.description}
+              </p>
+            )}
+            {fieldError && <p className="text-xs text-red-500">{fieldError}</p>}
           </div>
         );
 

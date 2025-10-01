@@ -189,3 +189,4 @@ export function TrelloMemberCard({ data, state }: TrelloMemberCardProps) {
     </Card>
   );
 }
+
