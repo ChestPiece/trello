@@ -49,29 +49,22 @@ export const deleteListTool = {
         // Now delete the closed list
         await axios.delete(`${baseUrl}?${params.toString()}`);
 
+        // Return the deleted list data directly for UI components
         return {
-          success: true,
+          id: listId,
+          deleted: true,
           message: `Successfully deleted list ${listId}${
             archiveAllCards ? " and archived all cards" : ""
           }`,
-          listId: listId,
         };
       } else {
-        return {
-          success: false,
-          error: "Failed to close list before deletion",
-          message: "Failed to delete list: Could not close the list first",
-        };
+        throw new Error("Failed to close list before deletion");
       }
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to delete list";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to delete list: ${errorMessage}`,
-      };
+      throw new Error(`Failed to delete list: ${errorMessage}`);
     }
   },
 };

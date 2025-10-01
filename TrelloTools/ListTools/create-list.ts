@@ -61,30 +61,23 @@ export const createListTool = {
 
       const response = await axios.post(`${baseUrl}?${params.toString()}`);
 
+      // Return the list data directly for UI components
       return {
-        success: true,
-        list: {
-          id: response.data.id,
-          name: response.data.name,
-          closed: response.data.closed,
-          boardId: response.data.idBoard,
-          position: response.data.pos,
-          subscribed: response.data.subscribed,
-          softLimit: response.data.softLimit,
-          status: response.data.status,
-          creationMethod: response.data.creationMethod,
-        },
-        message: `Successfully created list "${name}" in board ${boardId}`,
+        id: response.data.id,
+        name: response.data.name,
+        closed: response.data.closed,
+        boardId: response.data.idBoard,
+        position: response.data.pos,
+        subscribed: response.data.subscribed,
+        softLimit: response.data.softLimit,
+        status: response.data.status,
+        creationMethod: response.data.creationMethod,
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to create list";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to create list: ${errorMessage}`,
-      };
+      throw new Error(`Failed to create list: ${errorMessage}`);
     }
   },
 };

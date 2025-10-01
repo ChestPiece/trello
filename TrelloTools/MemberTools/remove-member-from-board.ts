@@ -37,14 +37,12 @@ export const removeMemberFromBoardTool = {
 
       await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the removed member data directly for UI components
       return {
-        success: true,
+        id: memberId,
+        boardId,
+        removed: true,
         message: `Successfully removed member ${memberId} from board ${boardId}`,
-        removedMember: {
-          id: memberId,
-          boardId,
-          removed: true,
-        },
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -53,11 +51,9 @@ export const removeMemberFromBoardTool = {
         (error as { message?: string })?.message ||
         "Failed to remove member from board";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to remove member "${memberId}" from board "${boardId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to remove member "${memberId}" from board "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

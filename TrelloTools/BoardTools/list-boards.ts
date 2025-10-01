@@ -122,30 +122,26 @@ export const listBoardsTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        boards: response.data.map((board: TrelloBoardResponse) => ({
-          id: board.id,
-          name: board.name,
-          description: board.desc,
-          url: board.url,
-          shortUrl: board.shortUrl,
-          visibility: board.prefs?.permissionLevel,
-          organizationId: board.idOrganization,
-          closed: board.closed,
-          pinned: board.pinned,
-          starred: board.starred,
-          dateLastActivity: board.dateLastActivity,
-          dateLastView: board.dateLastView,
-          idShort: board.idShort,
-          limits: board.limits,
-          prefs: board.prefs,
-          organization: board.organization,
-          lists: board.lists,
-        })),
-        count: response.data.length,
-        message: `Successfully retrieved ${response.data.length} board(s)`,
-      };
+      // Return the boards array directly for UI components
+      return response.data.map((board: TrelloBoardResponse) => ({
+        id: board.id,
+        name: board.name,
+        description: board.desc,
+        url: board.url,
+        shortUrl: board.shortUrl,
+        visibility: board.prefs?.permissionLevel,
+        organizationId: board.idOrganization,
+        closed: board.closed,
+        pinned: board.pinned,
+        starred: board.starred,
+        dateLastActivity: board.dateLastActivity,
+        dateLastView: board.dateLastView,
+        idShort: board.idShort,
+        limits: board.limits,
+        prefs: board.prefs,
+        organization: board.organization,
+        lists: board.lists,
+      }));
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -153,11 +149,7 @@ export const listBoardsTool = {
         (error as { message?: string })?.message ||
         "Failed to list boards";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to list boards. ${errorMessage}`,
-      };
+      throw new Error(`Failed to list boards: ${errorMessage}`);
     }
   },
 };

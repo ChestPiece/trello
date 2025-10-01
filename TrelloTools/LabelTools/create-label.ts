@@ -109,9 +109,9 @@ export const createLabelTool = {
         }
       }
 
+      // Return the created label data directly for UI components
       return {
-        success: true,
-        label: labelData,
+        ...labelData,
         message: `Successfully created label "${name}" with color ${color} in board ${boardId}${
           additionalActions.length > 0
             ? `. ${additionalActions.join(", ")}`
@@ -126,11 +126,7 @@ export const createLabelTool = {
         (error as { message?: string })?.message ||
         "Failed to create label";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to create label "${name}". ${errorMessage}`,
-      };
+      throw new Error(`Failed to create label "${name}": ${errorMessage}`);
     }
   },
 };

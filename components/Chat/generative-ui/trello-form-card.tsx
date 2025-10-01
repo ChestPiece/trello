@@ -12,13 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useConversation } from "@/components/conversation-provider";
 
 interface FormField {
   name: string;
-  label: string;
+  label?: string;
   type:
     | "text"
     | "textarea"
@@ -28,13 +28,15 @@ interface FormField {
     | "datetime-local"
     | "url"
     | "color"
-    | "file";
-  required: boolean;
+    | "file"
+    | "hidden";
+  required?: boolean;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   defaultValue?: unknown;
   description?: string;
   dependsOn?: string;
+  value?: unknown;
 }
 
 interface TrelloFormCardProps {
@@ -110,7 +112,12 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
   const [submissionResult, setSubmissionResult] = useState<{
     success: boolean;
     message: string;
-    data?: any;
+    data?: {
+      id: string;
+      name: string;
+      url?: string;
+      [key: string]: unknown;
+    };
   } | null>(null);
 
   // Function to fetch dynamic options (e.g., lists for a selected board)
@@ -124,22 +131,22 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
 
     try {
       if (fieldName === "idList" && dependsOnValue) {
-        // Fetch lists for the selected board
-        const { listListsTool } = await import(
-          "@/TrelloTools/ListTools/list-lists"
+        // Fetch lists for the selected board using API route
+        const response = await fetch(
+          `/api/lists?boardId=${dependsOnValue}&filter=open&fields=id,name`
         );
-        const result = await listListsTool.execute({
-          boardId: dependsOnValue,
-          filter: "open",
-          fields: ["id", "name"],
-        });
+        const result = await response.json();
 
         if (result.success) {
-          const listOptions = result.lists.map((list: any) => ({
-            value: list.id,
-            label: list.name,
-          }));
+          const listOptions = result.lists.map(
+            (list: { id: string; name: string }) => ({
+              value: list.id,
+              label: list.name,
+            })
+          );
           setDynamicOptions((prev) => ({ ...prev, [fieldName]: listOptions }));
+        } else {
+          console.error(`Failed to fetch lists:`, result.error);
         }
       }
     } catch (error) {
@@ -281,7 +288,7 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              Create Another
+              {formType.startsWith("create") ? "Create Another" : "Done"}
             </Button>
             {onCancel && (
               <Button
@@ -335,7 +342,7 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
     try {
       // Validate required fields
       if (!formConfig?.fields) {
-        alert("Form configuration is not available");
+        setFormError("Form configuration is not available");
         setIsSubmitting(false);
         return;
       }
@@ -343,15 +350,37 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
       const requiredFields = formConfig.fields.filter(
         (field) => field.required
       );
-      for (const field of requiredFields) {
-        if (!formData[field.name] || formData[field.name] === "") {
-          alert(`Please fill in the ${field.label} field`);
-          setIsSubmitting(false);
-          return;
-        }
+      const missingFields = requiredFields.filter(
+        (field) => !formData[field.name] || formData[field.name] === ""
+      );
+
+      if (missingFields.length > 0) {
+        setFormError(
+          `Please fill in all required fields: ${missingFields
+            .map((f) => f.label)
+            .join(", ")}`
+        );
+        setIsSubmitting(false);
+        return;
       }
 
-      let result: any;
+      // Clear any previous errors
+      setFormError(null);
+
+          let result: {
+            success: boolean;
+            board?: {
+              id: string;
+              name: string;
+              url?: string;
+              [key: string]: unknown;
+            };
+            list?: { id: string; name: string; [key: string]: unknown };
+            card?: { id: string; name: string; [key: string]: unknown };
+            member?: { id: string; name: string; [key: string]: unknown };
+            label?: { id: string; name: string; [key: string]: unknown };
+            error?: string;
+          };
       let successMessage: string;
 
       // Handle different form types using API routes
@@ -374,7 +403,38 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
         result = await response.json();
         if (!result.success)
           throw new Error(result.error || "Failed to create board");
+        if (!result.board) throw new Error("Board data not returned");
         successMessage = `Board "${result.board.name}" created successfully!`;
+
+        // Set success state
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.board,
+        });
+      } else if (formType === "updateBoard") {
+        const boardId = String(formData.boardId || "");
+        const response = await fetch(`/api/boards?id=${boardId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name ? String(formData.name) : undefined,
+            description: formData.description
+              ? String(formData.description)
+              : undefined,
+            visibility: formData.visibility as
+              | "private"
+              | "public"
+              | "org"
+              | undefined,
+            closed: Boolean(formData.closed),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to update board");
+        if (!result.board) throw new Error("Board data not returned");
+        successMessage = `Board "${result.board.name}" updated successfully!`;
 
         // Set success state
         setSubmissionResult({
@@ -394,7 +454,31 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
         result = await response.json();
         if (!result.success)
           throw new Error(result.error || "Failed to create list");
+        if (!result.list) throw new Error("List data not returned");
         successMessage = `List "${result.list.name}" created successfully!`;
+
+        // Set success state
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.list,
+        });
+      } else if (formType === "updateList") {
+        const listId = String(formData.listId || "");
+        const response = await fetch(`/api/lists?id=${listId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name ? String(formData.name) : undefined,
+            closed: Boolean(formData.closed),
+            pos: formData.pos ? String(formData.pos) : undefined,
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to update list");
+        if (!result.list) throw new Error("List data not returned");
+        successMessage = `List "${result.list.name}" updated successfully!`;
 
         // Set success state
         setSubmissionResult({
@@ -416,6 +500,7 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
         result = await response.json();
         if (!result.success)
           throw new Error(result.error || "Failed to create card");
+        if (!result.card) throw new Error("Card data not returned");
         successMessage = `Card "${result.card.name}" created successfully!`;
 
         // Set success state
@@ -424,20 +509,210 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
           message: successMessage,
           data: result.card,
         });
-      } else {
-        throw new Error(`Unknown form type: ${formType}`);
-      }
+      } else if (formType === "updateCard") {
+        const cardId = String(formData.cardId || "");
+        const response = await fetch(`/api/cards?id=${cardId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name ? String(formData.name) : undefined,
+            desc: formData.desc ? String(formData.desc) : undefined,
+            idList: formData.idList ? String(formData.idList) : undefined,
+            idBoard: formData.idBoard ? String(formData.idBoard) : undefined,
+            due: formData.due ? String(formData.due) : undefined,
+            closed: Boolean(formData.closed),
+          }),
+        });
+        result = await response.json();
+        if (!result.success)
+          throw new Error(result.error || "Failed to update card");
+        if (!result.card) throw new Error("Card data not returned");
+        successMessage = `Card "${result.card.name}" updated successfully!`;
+
+        // Set success state
+        setSubmissionResult({
+          success: true,
+          message: successMessage,
+          data: result.card,
+        });
+          } else if (formType === "archiveList") {
+            const listId = String(formData.listId || "");
+            const response = await fetch(`/api/lists?id=${listId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                closed: true,
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to archive list");
+            if (!result.list) throw new Error("List data not returned");
+            successMessage = `List "${result.list.name}" archived successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.list,
+            });
+          } else if (formType === "unarchiveList") {
+            const listId = String(formData.listId || "");
+            const response = await fetch(`/api/lists?id=${listId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                closed: false,
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to unarchive list");
+            if (!result.list) throw new Error("List data not returned");
+            successMessage = `List "${result.list.name}" unarchived successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.list,
+            });
+          } else if (formType === "addMemberToBoard") {
+            const response = await fetch("/api/members", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                boardId: String(formData.boardId || ""),
+                memberId: String(formData.memberId || ""),
+                type: String(formData.type || "normal"),
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to add member to board");
+            successMessage = `Member added to board successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.member,
+            });
+          } else if (formType === "removeMemberFromBoard") {
+            const response = await fetch("/api/members", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                boardId: String(formData.boardId || ""),
+                memberId: String(formData.memberId || ""),
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to remove member from board");
+            successMessage = `Member removed from board successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.member,
+            });
+          } else if (formType === "addLabelToCard") {
+            const response = await fetch("/api/labels", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cardId: String(formData.cardId || ""),
+                labelId: String(formData.labelId || ""),
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to add label to card");
+            successMessage = `Label added to card successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.label,
+            });
+          } else if (formType === "removeLabelFromCard") {
+            const response = await fetch("/api/labels", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cardId: String(formData.cardId || ""),
+                labelId: String(formData.labelId || ""),
+              }),
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to remove label from card");
+            successMessage = `Label removed from card successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: result.label,
+            });
+          } else if (formType === "deleteAttachment") {
+            const attachmentId = String(formData.attachmentId || "");
+            const response = await fetch(`/api/attachments?id=${attachmentId}`, {
+              method: "DELETE",
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to delete attachment");
+            successMessage = `Attachment deleted successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: { id: attachmentId, name: `Attachment ${attachmentId}` },
+            });
+          } else if (formType === "deleteChecklistItem") {
+            const checklistItemId = String(formData.checklistItemId || "");
+            const response = await fetch(`/api/checklists/item?id=${checklistItemId}`, {
+              method: "DELETE",
+            });
+            result = await response.json();
+            if (!result.success)
+              throw new Error(result.error || "Failed to delete checklist item");
+            successMessage = `Checklist item deleted successfully!`;
+
+            setSubmissionResult({
+              success: true,
+              message: successMessage,
+              data: { id: checklistItemId, name: `Checklist Item ${checklistItemId}` },
+            });
+          } else {
+            throw new Error(`Unknown form type: ${formType}`);
+          }
 
       // Use addToolResult to submit the API result
+      const outputData: Record<string, unknown> = {
+        success: true,
+        message: successMessage,
+      };
+
+      if (
+        (formType === "createBoard" || formType === "updateBoard") &&
+        result.board
+      ) {
+        outputData.board = result.board;
+      } else if (
+        (formType === "createList" || formType === "updateList") &&
+        result.list
+      ) {
+        outputData.list = result.list;
+      } else if (
+        (formType === "createCard" || formType === "updateCard") &&
+        result.card
+      ) {
+        outputData.card = result.card;
+      }
+
       addToolResult({
         tool: formType,
         toolCallId: toolCallId,
-        output: {
-          success: true,
-          [formType.replace("create", "").toLowerCase()]:
-            result[formType.replace("create", "").toLowerCase()],
-          message: successMessage,
-        },
+        output: outputData,
       });
 
       // Also call the optional onSubmit callback if provided
@@ -450,11 +725,14 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
         error instanceof Error ? error.message : "Unknown error"
       }`;
 
+      // Set form error for display
+      setFormError(errorMessage);
+
       // Set error state
       setSubmissionResult({
         success: false,
         message: errorMessage,
-        data: null,
+        data: undefined,
       });
 
       // Handle error with addToolResult
@@ -473,6 +751,16 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
     const value = (formData[field.name] as string) || "";
 
     switch (field.type) {
+      case "hidden":
+        return (
+          <input
+            key={field.name}
+            type="hidden"
+            name={field.name}
+            value={field.value as string}
+          />
+        );
+
       case "text":
         return (
           <div key={field.name} className="space-y-3">
@@ -807,7 +1095,9 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
+                  {formType.startsWith("create")
+                    ? "Creating..."
+                    : "Updating..."}
                 </>
               ) : (
                 <>
@@ -821,10 +1111,16 @@ export const TrelloFormCard = React.memo(function TrelloFormCard({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      d={
+                        formType.startsWith("create")
+                          ? "M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          : "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      }
                     />
                   </svg>
-                  Create {formType.replace("create", "")}
+                  {formType.startsWith("create")
+                    ? `Create ${formType.replace("create", "")}`
+                    : `Update ${formType.replace("update", "")}`}
                 </>
               )}
             </Button>

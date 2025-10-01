@@ -65,15 +65,13 @@ export const updateLabelTool = {
 
       const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
+      // Return the updated label data directly for UI components
       return {
-        success: true,
-        label: {
-          id: response.data.id,
-          name: response.data.name,
-          color: response.data.color,
-          boardId: response.data.idBoard,
-          uses: response.data.uses,
-        },
+        id: response.data.id,
+        name: response.data.name,
+        color: response.data.color,
+        boardId: response.data.idBoard,
+        uses: response.data.uses,
         message: `Successfully updated label "${response.data.name}" (ID: ${labelId})`,
       };
     } catch (error: unknown) {
@@ -83,11 +81,9 @@ export const updateLabelTool = {
         (error as { message?: string })?.message ||
         "Failed to update label";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to update label with ID "${labelId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to update label with ID "${labelId}": ${errorMessage}`
+      );
     }
   },
 };

@@ -32,8 +32,8 @@ export const addLabelToCardTool = {
 
       const response = await axios.post(`${baseUrl}?${params.toString()}`);
 
+      // Return the added label data directly for UI components
       return {
-        success: true,
         cardId,
         labelId,
         message: `Successfully added label ${labelId} to card ${cardId}`,
@@ -55,20 +55,9 @@ export const addLabelToCardTool = {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to add label ${labelId} to card ${cardId}. ${errorMessage}`,
-        suggestions: [
-          "Check if the card ID is valid and exists",
-          "Verify that the label ID is valid and exists",
-          "Ensure the label and card are in the same board",
-          "Check if you have permission to modify this card",
-          "Verify that the label hasn't already been added to the card",
-          "Ensure API credentials are properly configured",
-        ],
-      };
+      throw new Error(
+        `Failed to add label ${labelId} to card ${cardId}: ${errorMessage}`
+      );
     }
   },
 };

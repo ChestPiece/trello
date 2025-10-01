@@ -187,13 +187,8 @@ export const getWorkspaceTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        workspace: response.data,
-        message: `Successfully retrieved workspace "${
-          response.data.displayName || response.data.name
-        }" (ID: ${workspaceId})`,
-      };
+      // Return the workspace data directly for UI components
+      return response.data;
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -201,11 +196,9 @@ export const getWorkspaceTool = {
         (error as { message?: string })?.message ||
         "Failed to retrieve workspace";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve workspace with ID "${workspaceId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to retrieve workspace with ID "${workspaceId}": ${errorMessage}`
+      );
     }
   },
 };

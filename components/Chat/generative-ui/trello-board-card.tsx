@@ -17,16 +17,23 @@ interface TrelloBoardCardProps {
     id?: string;
     name?: string;
     description?: string;
+    desc?: string; // Trello API uses 'desc' field
     visibility?: "private" | "public" | "org";
     url?: string;
     closed?: boolean;
     starred?: boolean;
+    pinned?: boolean;
     prefs?: {
       background?: string;
       backgroundColor?: string;
+      permissionLevel?: string;
     };
   };
-  state?: "input-streaming" | "input-available" | "output-available";
+  state?:
+    | "input-streaming"
+    | "input-available"
+    | "output-available"
+    | "output-error";
 }
 
 export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
@@ -52,10 +59,18 @@ export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
   // Full rendered component
   const backgroundColor =
     data.prefs?.backgroundColor || data.prefs?.background || "#0079bf";
+
+  // Use description or desc field
+  const description = data.description || data.desc;
+
+  // Determine visibility from prefs.permissionLevel or visibility field
+  const visibility =
+    data.prefs?.permissionLevel || data.visibility || "private";
+
   const visibilityIcon =
-    data.visibility === "private" ? (
+    visibility === "private" ? (
       <Lock className="h-3 w-3" />
-    ) : data.visibility === "org" ? (
+    ) : visibility === "org" ? (
       <Users className="h-3 w-3" />
     ) : (
       <Globe className="h-3 w-3" />
@@ -72,7 +87,7 @@ export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
       >
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         <div className="absolute top-2 right-2">
-          {data.starred && (
+          {(data.starred || data.pinned) && (
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
           )}
         </div>
@@ -140,5 +155,3 @@ export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
     </Card>
   );
 }
-
-

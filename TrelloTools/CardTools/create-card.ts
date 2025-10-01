@@ -129,39 +129,32 @@ export const createCardTool = {
 
       const response = await axios.post(`${baseUrl}?${params.toString()}`);
 
+      // Return the card data directly for UI components
       return {
-        success: true,
-        card: {
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.desc,
-          listId: response.data.idList,
-          boardId: response.data.idBoard,
-          position: response.data.pos,
-          closed: response.data.closed,
-          due: response.data.due,
-          dueComplete: response.data.dueComplete,
-          start: response.data.start,
-          url: response.data.url,
-          shortUrl: response.data.shortUrl,
-          labels: response.data.labels || [],
-          members: response.data.members || [],
-          attachments: response.data.attachments || [],
-          checklists: response.data.checklists || [],
-          badges: response.data.badges || {},
-          cover: response.data.cover || {},
-        },
-        message: `Successfully created card "${name}" in list ${idList}`,
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.desc,
+        listId: response.data.idList,
+        boardId: response.data.idBoard,
+        position: response.data.pos,
+        closed: response.data.closed,
+        due: response.data.due,
+        dueComplete: response.data.dueComplete,
+        start: response.data.start,
+        url: response.data.url,
+        shortUrl: response.data.shortUrl,
+        labels: response.data.labels || [],
+        members: response.data.members || [],
+        attachments: response.data.attachments || [],
+        checklists: response.data.checklists || [],
+        badges: response.data.badges || {},
+        cover: response.data.cover || {},
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to create card";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to create card: ${errorMessage}`,
-      };
+      throw new Error(`Failed to create card: ${errorMessage}`);
     }
   },
 };

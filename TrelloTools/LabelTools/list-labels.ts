@@ -99,51 +99,25 @@ export const listLabelsTool = {
         labels = labels.slice(0, limit);
       }
 
-      return {
-        success: true,
-        labels,
-        count: labels.length,
-        totalCount: response.data.length,
-        filters: {
-          color: color || null,
-          filter: filter || null,
-          limit: limit || null,
-        },
-        message: `Successfully retrieved ${
-          labels.length
-        } labels from board ${boardId}${
-          color ? ` (filtered by color: ${color})` : ""
-        }${filter ? ` (filtered by usage: ${filter})` : ""}`,
-      };
+      // Return the labels data directly for UI components
+      return labels;
     } catch (error: unknown) {
       console.error("List labels error:", error);
 
       let errorMessage = "Failed to list labels";
-      let statusCode = 500;
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
           response?: { data?: { message?: string }; status?: number };
         };
         errorMessage = axiosError.response?.data?.message || errorMessage;
-        statusCode = axiosError.response?.status || statusCode;
       } else if (error && typeof error === "object" && "message" in error) {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to list labels for board "${boardId}". ${errorMessage}`,
-        suggestions: [
-          "Check if the board ID is valid and exists",
-          "Verify that you have permission to access this board",
-          "Ensure API credentials are properly configured",
-          "Check if the board has any labels",
-          "Verify that filter parameters are valid",
-        ],
-      };
+      throw new Error(
+        `Failed to list labels for board "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

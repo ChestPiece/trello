@@ -9,6 +9,10 @@ import {
   TrelloListCard,
   TrelloWorkspaceCard,
   TrelloFormCard,
+  TrelloLabelCard,
+  TrelloChecklistCard,
+  TrelloAttachmentCard,
+  TrelloMemberCard,
 } from "./generative-ui";
 
 export interface ChatMessageProps {
@@ -27,7 +31,26 @@ export function ChatMessage({ message }: ChatMessageProps) {
         part.type === "tool-createWorkspaceForm" ||
         part.type === "tool-createLabelForm" ||
         part.type === "tool-createChecklistForm" ||
-        part.type === "tool-createAttachmentForm")
+        part.type === "tool-createAttachmentForm" ||
+        part.type === "tool-updateBoardForm" ||
+        part.type === "tool-updateCardForm" ||
+        part.type === "tool-updateListForm" ||
+        part.type === "tool-updateLabelForm" ||
+        part.type === "tool-updateChecklistForm" ||
+        part.type === "tool-updateChecklistItemForm" ||
+        part.type === "tool-updateWorkspaceForm" ||
+        part.type === "tool-deleteBoardForm" ||
+        part.type === "tool-deleteCardForm" ||
+        part.type === "tool-deleteListForm" ||
+        part.type === "tool-deleteWorkspaceForm" ||
+        part.type === "tool-deleteAttachmentForm" ||
+        part.type === "tool-deleteChecklistItemForm" ||
+        part.type === "tool-archiveListForm" ||
+        part.type === "tool-unarchiveListForm" ||
+        part.type === "tool-addMemberToBoardForm" ||
+        part.type === "tool-removeMemberFromBoardForm" ||
+        part.type === "tool-addLabelToCardForm" ||
+        part.type === "tool-removeLabelFromCardForm")
   );
 
   return (
@@ -228,6 +251,179 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 return (
                   <div key={index} className="mt-3">
                     <TrelloWorkspaceCard
+                      data={
+                        toolPart.state === "output-available"
+                          ? (toolPart.output as Record<string, unknown>)
+                          : {}
+                      }
+                      state={toolPart.state}
+                    />
+                  </div>
+                );
+              }
+
+              // Label tools - render TrelloLabelCard component
+              case "tool-createLabel":
+              case "tool-getLabel":
+              case "tool-updateLabel": {
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error with label operation
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={index} className="mt-3">
+                    <TrelloLabelCard
+                      data={
+                        toolPart.state === "output-available"
+                          ? (toolPart.output as Record<string, unknown>)
+                          : {}
+                      }
+                      state={toolPart.state}
+                    />
+                  </div>
+                );
+              }
+
+              // Checklist tools - render TrelloChecklistCard component
+              case "tool-createChecklist":
+              case "tool-getChecklist":
+              case "tool-updateChecklist": {
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error with checklist operation
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={index} className="mt-3">
+                    <TrelloChecklistCard
+                      data={
+                        toolPart.state === "output-available"
+                          ? (toolPart.output as Record<string, unknown>)
+                          : {}
+                      }
+                      state={toolPart.state}
+                    />
+                  </div>
+                );
+              }
+
+              // Attachment tools - render TrelloAttachmentCard component
+              case "tool-createAttachment":
+              case "tool-getAttachment": {
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error with attachment operation
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={index} className="mt-3">
+                    <TrelloAttachmentCard
+                      data={
+                        toolPart.state === "output-available"
+                          ? (toolPart.output as Record<string, unknown>)
+                          : {}
+                      }
+                      state={toolPart.state}
+                    />
+                  </div>
+                );
+              }
+
+              // Member tools - render TrelloMemberCard component
+              case "tool-getMember": {
+                const toolPart = part as {
+                  state:
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error";
+                  output?: unknown;
+                  errorText?: string;
+                };
+
+                if (toolPart.state === "output-error") {
+                  return (
+                    <div
+                      key={index}
+                      className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
+                    >
+                      <p className="text-sm text-destructive font-semibold">
+                        Error fetching member
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {toolPart.errorText || "Unknown error occurred"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={index} className="mt-3">
+                    <TrelloMemberCard
                       data={
                         toolPart.state === "output-available"
                           ? (toolPart.output as Record<string, unknown>)
@@ -519,7 +715,26 @@ export function ChatMessage({ message }: ChatMessageProps) {
               case "tool-createWorkspaceForm":
               case "tool-createLabelForm":
               case "tool-createChecklistForm":
-              case "tool-createAttachmentForm": {
+              case "tool-createAttachmentForm":
+              case "tool-updateBoardForm":
+              case "tool-updateCardForm":
+              case "tool-updateListForm":
+              case "tool-updateLabelForm":
+              case "tool-updateChecklistForm":
+              case "tool-updateChecklistItemForm":
+              case "tool-updateWorkspaceForm":
+              case "tool-deleteBoardForm":
+              case "tool-deleteCardForm":
+              case "tool-deleteListForm":
+              case "tool-deleteWorkspaceForm":
+              case "tool-deleteAttachmentForm":
+              case "tool-deleteChecklistItemForm":
+              case "tool-archiveListForm":
+              case "tool-unarchiveListForm":
+              case "tool-addMemberToBoardForm":
+              case "tool-removeMemberFromBoardForm":
+              case "tool-addLabelToCardForm":
+              case "tool-removeLabelFromCardForm": {
                 const toolPart = part as {
                   state:
                     | "input-streaming"

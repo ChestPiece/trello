@@ -127,32 +127,24 @@ export const listListsTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        lists: response.data.map((list: TrelloListResponse) => ({
-          id: list.id,
-          name: list.name,
-          closed: list.closed,
-          boardId: list.idBoard,
-          position: list.pos,
-          subscribed: list.subscribed,
-          softLimit: list.softLimit,
-          status: list.status,
-          creationMethod: list.creationMethod,
-          cards: list.cards || [],
-        })),
-        count: response.data.length,
-        message: `Successfully retrieved ${response.data.length} list(s) from board ${boardId}`,
-      };
+      // Return the lists array directly for UI components
+      return response.data.map((list: TrelloListResponse) => ({
+        id: list.id,
+        name: list.name,
+        closed: list.closed,
+        boardId: list.idBoard,
+        position: list.pos,
+        subscribed: list.subscribed,
+        softLimit: list.softLimit,
+        status: list.status,
+        creationMethod: list.creationMethod,
+        cards: list.cards || [],
+      }));
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to retrieve lists";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve lists: ${errorMessage}`,
-      };
+      throw new Error(`Failed to retrieve lists: ${errorMessage}`);
     }
   },
 };

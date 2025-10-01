@@ -5,22 +5,26 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const boardId = searchParams.get("boardId");
+    const memberId = searchParams.get("memberId");
     const fields = searchParams.get("fields")?.split(",") || [
       "id",
-      "name",
-      "color",
-      "idBoard",
+      "username",
+      "fullName",
+      "initials",
+      "avatarHash",
+      "avatarUrl",
+      "email",
+      "idBoards",
+      "idOrganizations",
+      "loginTypes",
+      "memberType",
+      "oneTimeMessagesDismissed",
+      "prefs",
+      "trophies",
+      "uploadedAvatarHash",
+      "url",
+      "status",
     ];
-
-    if (!boardId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "boardId parameter is required",
-        },
-        { status: 400 }
-      );
-    }
 
     const apiKey = process.env.TRELLO_API_KEY;
     const apiToken = process.env.TRELLO_API_TOKEN;
@@ -36,7 +40,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const baseUrl = `https://api.trello.com/1/boards/${boardId}/labels`;
+    let baseUrl: string;
+    if (memberId) {
+      baseUrl = `https://api.trello.com/1/members/${memberId}`;
+    } else if (boardId) {
+      baseUrl = `https://api.trello.com/1/boards/${boardId}/members`;
+    } else {
+      baseUrl = "https://api.trello.com/1/members/me";
+    }
+
     const params = new URLSearchParams({
       key: apiKey,
       token: apiToken,
@@ -47,15 +59,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      labels: response.data,
-      boardId: boardId,
+      members: memberId ? [response.data] : response.data,
+      boardId: boardId || null,
+      memberId: memberId || null,
     });
   } catch (error) {
-    console.error("Error in labels API:", error);
+    console.error("Error in members API:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch labels",
+        error: "Failed to fetch members",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
@@ -66,13 +79,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { boardId, name, color } = body;
+    const { boardId, memberId, email, fullName, type = "normal" } = body;
 
-    if (!boardId || !name) {
+    if (!boardId || (!memberId && !email)) {
       return NextResponse.json(
         {
           success: false,
-          error: "boardId and name are required",
+          error: "boardId and either memberId or email are required",
         },
         { status: 400 }
       );
@@ -92,34 +105,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = "https://api.trello.com/1/labels";
+    const baseUrl = `https://api.trello.com/1/boards/${boardId}/members`;
     const params = new URLSearchParams({
       key: apiKey,
       token: apiToken,
-      name,
-      idBoard: boardId,
+      type: type,
     });
 
-    if (color) {
-      params.append("color", color);
+    if (memberId) {
+      params.append("idMember", memberId);
+    } else if (email) {
+      params.append("email", email);
     }
 
-    const response = await axios.post(`${baseUrl}?${params.toString()}`);
+    if (fullName) {
+      params.append("fullName", fullName);
+    }
+
+    const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
     return NextResponse.json({
       success: true,
-      label: {
+      member: {
         id: response.data.id,
-        name: response.data.name,
-        color: response.data.color,
-        idBoard: response.data.idBoard,
+        username: response.data.username,
+        fullName: response.data.fullName,
+        initials: response.data.initials,
+        avatarHash: response.data.avatarHash,
+        avatarUrl: response.data.avatarUrl,
+        email: response.data.email,
+        memberType: response.data.memberType,
+        status: response.data.status,
       },
-      message: `Successfully created label "${name}" with ID: ${response.data.id}`,
+      message: `Successfully added member to board`,
     });
   } catch (error) {
-    console.error("Error creating label:", error);
+    console.error("Error adding member:", error);
 
-    let errorMessage = "Failed to create label";
+    let errorMessage = "Failed to add member";
     let statusCode = 500;
 
     if (error && typeof error === "object" && "response" in error) {
@@ -137,7 +160,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: errorMessage,
         statusCode,
-        message: `Failed to create label. ${errorMessage}`,
+        message: `Failed to add member. ${errorMessage}`,
       },
       { status: statusCode }
     );
@@ -147,15 +170,16 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const labelId = searchParams.get("labelId");
+    const boardId = searchParams.get("boardId");
+    const memberId = searchParams.get("memberId");
     const body = await request.json();
-    const { name, color } = body;
+    const { type, fullName } = body;
 
-    if (!labelId) {
+    if (!boardId || !memberId) {
       return NextResponse.json(
         {
           success: false,
-          error: "labelId parameter is required",
+          error: "boardId and memberId parameters are required",
         },
         { status: 400 }
       );
@@ -175,36 +199,41 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const baseUrl = `https://api.trello.com/1/labels/${labelId}`;
+    const baseUrl = `https://api.trello.com/1/boards/${boardId}/members/${memberId}`;
     const params = new URLSearchParams({
       key: apiKey,
       token: apiToken,
     });
 
-    if (name) {
-      params.append("name", name);
+    if (type) {
+      params.append("type", type);
     }
 
-    if (color) {
-      params.append("color", color);
+    if (fullName) {
+      params.append("fullName", fullName);
     }
 
     const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
     return NextResponse.json({
       success: true,
-      label: {
+      member: {
         id: response.data.id,
-        name: response.data.name,
-        color: response.data.color,
-        idBoard: response.data.idBoard,
+        username: response.data.username,
+        fullName: response.data.fullName,
+        initials: response.data.initials,
+        avatarHash: response.data.avatarHash,
+        avatarUrl: response.data.avatarUrl,
+        email: response.data.email,
+        memberType: response.data.memberType,
+        status: response.data.status,
       },
-      message: `Successfully updated label with ID: ${labelId}`,
+      message: `Successfully updated member on board`,
     });
   } catch (error) {
-    console.error("Error updating label:", error);
+    console.error("Error updating member:", error);
 
-    let errorMessage = "Failed to update label";
+    let errorMessage = "Failed to update member";
     let statusCode = 500;
 
     if (error && typeof error === "object" && "response" in error) {
@@ -222,7 +251,7 @@ export async function PUT(request: NextRequest) {
         success: false,
         error: errorMessage,
         statusCode,
-        message: `Failed to update label. ${errorMessage}`,
+        message: `Failed to update member. ${errorMessage}`,
       },
       { status: statusCode }
     );
@@ -232,13 +261,14 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const labelId = searchParams.get("labelId");
+    const boardId = searchParams.get("boardId");
+    const memberId = searchParams.get("memberId");
 
-    if (!labelId) {
+    if (!boardId || !memberId) {
       return NextResponse.json(
         {
           success: false,
-          error: "labelId parameter is required",
+          error: "boardId and memberId parameters are required",
         },
         { status: 400 }
       );
@@ -258,7 +288,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const baseUrl = `https://api.trello.com/1/labels/${labelId}`;
+    const baseUrl = `https://api.trello.com/1/boards/${boardId}/members/${memberId}`;
     const params = new URLSearchParams({
       key: apiKey,
       token: apiToken,
@@ -268,12 +298,12 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully deleted label with ID: ${labelId}`,
+      message: `Successfully removed member from board`,
     });
   } catch (error) {
-    console.error("Error deleting label:", error);
+    console.error("Error removing member:", error);
 
-    let errorMessage = "Failed to delete label";
+    let errorMessage = "Failed to remove member";
     let statusCode = 500;
 
     if (error && typeof error === "object" && "response" in error) {
@@ -291,7 +321,7 @@ export async function DELETE(request: NextRequest) {
         success: false,
         error: errorMessage,
         statusCode,
-        message: `Failed to delete label. ${errorMessage}`,
+        message: `Failed to remove member. ${errorMessage}`,
       },
       { status: statusCode }
     );

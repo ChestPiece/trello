@@ -141,31 +141,28 @@ export const createBoardTool = {
 
       const response = await axios.post(`${baseUrl}?${params.toString()}`);
 
+      // Return the board data directly for UI components
       return {
-        success: true,
-        board: {
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.desc,
-          url: response.data.url,
-          shortUrl: response.data.shortUrl,
-          visibility: response.data.prefs?.permissionLevel,
-          organizationId: response.data.idOrganization,
-          closed: response.data.closed,
-          pinned: response.data.pinned,
-          starred: response.data.starred,
-          dateLastActivity: response.data.dateLastActivity,
-          dateLastView: response.data.dateLastView,
-          idTags: response.data.idTags,
-          idLabels: response.data.idLabels,
-          idMembers: response.data.idMembers,
-          idMemberships: response.data.idMemberships,
-          idShort: response.data.idShort,
-          limits: response.data.limits,
-          memberships: response.data.memberships,
-          prefs: response.data.prefs,
-        },
-        message: `Successfully created board "${name}" with ID: ${response.data.id}`,
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.desc,
+        url: response.data.url,
+        shortUrl: response.data.shortUrl,
+        visibility: response.data.prefs?.permissionLevel,
+        organizationId: response.data.idOrganization,
+        closed: response.data.closed,
+        pinned: response.data.pinned,
+        starred: response.data.starred,
+        dateLastActivity: response.data.dateLastActivity,
+        dateLastView: response.data.dateLastView,
+        idTags: response.data.idTags,
+        idLabels: response.data.idLabels,
+        idMembers: response.data.idMembers,
+        idMemberships: response.data.idMemberships,
+        idShort: response.data.idShort,
+        limits: response.data.limits,
+        memberships: response.data.memberships,
+        prefs: response.data.prefs,
       };
     } catch (error: unknown) {
       console.error("Create board error:", error);
@@ -183,18 +180,7 @@ export const createBoardTool = {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to create board "${name}". ${errorMessage}`,
-        suggestions: [
-          "Check if the board name is valid and not too long",
-          "Verify that the organization ID exists if provided",
-          "Ensure API credentials are properly configured",
-          "Check if you have permission to create boards in the organization",
-        ],
-      };
+      throw new Error(`Failed to create board "${name}": ${errorMessage}`);
     }
   },
 };

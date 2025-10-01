@@ -40,9 +40,9 @@ export const getLabelTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
+      // Return the label data directly for UI components
       return {
-        success: true,
-        label: response.data,
+        ...response.data,
         message: `Successfully retrieved label "${response.data.name}" (ID: ${labelId})`,
       };
     } catch (error: unknown) {
@@ -52,11 +52,9 @@ export const getLabelTool = {
         (error as { message?: string })?.message ||
         "Failed to retrieve label";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve label with ID "${labelId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to retrieve label with ID "${labelId}": ${errorMessage}`
+      );
     }
   },
 };

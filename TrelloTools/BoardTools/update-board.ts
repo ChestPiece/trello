@@ -172,25 +172,22 @@ export const updateBoardTool = {
 
       const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
+      // Return the board data directly for UI components
       return {
-        success: true,
-        board: {
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.desc,
-          url: response.data.url,
-          shortUrl: response.data.shortUrl,
-          visibility: response.data.prefs?.permissionLevel,
-          organizationId: response.data.idOrganization,
-          closed: response.data.closed,
-          pinned: response.data.pinned,
-          starred: response.data.starred,
-          dateLastActivity: response.data.dateLastActivity,
-          dateLastView: response.data.dateLastView,
-          prefs: response.data.prefs,
-          labelNames: response.data.labelNames,
-        },
-        message: `Successfully updated board "${response.data.name}" (ID: ${boardId})`,
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.desc,
+        url: response.data.url,
+        shortUrl: response.data.shortUrl,
+        visibility: response.data.prefs?.permissionLevel,
+        organizationId: response.data.idOrganization,
+        closed: response.data.closed,
+        pinned: response.data.pinned,
+        starred: response.data.starred,
+        dateLastActivity: response.data.dateLastActivity,
+        dateLastView: response.data.dateLastView,
+        prefs: response.data.prefs,
+        labelNames: response.data.labelNames,
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -199,11 +196,9 @@ export const updateBoardTool = {
         (error as { message?: string })?.message ||
         "Failed to update board";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to update board with ID "${boardId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to update board with ID "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

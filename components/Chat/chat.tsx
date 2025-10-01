@@ -38,11 +38,19 @@ export function Chat() {
     }
   };
 
-  // Show typing indicator when loading but not streaming
-  const showTypingIndicator = isLoading && !isStreaming;
+  // Show skeleton loading for AI responses
+  // Only show loading when we're submitted but not yet streaming content
+  // Don't show if we already have a message being streamed
+  const showSkeletonLoading =
+    status === "submitted" &&
+    messages.length > 0 &&
+    messages[messages.length - 1]?.role === "user";
 
-  // Show skeleton loading for every AI response
-  const showSkeletonLoading = status === "submitted" || status === "streaming";
+  // Check if the current response contains tool calls (UI components)
+  const lastMessage = messages[messages.length - 1];
+  const hasToolCalls =
+    lastMessage?.role === "assistant" &&
+    lastMessage.parts.some((part) => part.type.startsWith("tool-"));
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
@@ -69,51 +77,50 @@ export function Chat() {
               {/* Skeleton loading for AI responses */}
               {showSkeletonLoading && (
                 <div className="flex w-full items-start gap-4 py-4 justify-start">
-                  <div className="flex max-w-[80%] flex-col gap-4 rounded-2xl px-6 py-5 bg-gradient-to-br from-background to-muted/30 border border-border/40 shadow-lg backdrop-blur-sm">
-                    {/* AI Avatar and name */}
-                    <div className="flex items-center gap-3 mb-1">
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                        <div className="w-4 h-4 bg-primary/60 rounded-full animate-pulse"></div>
+                  {hasToolCalls ? (
+                    // Detailed UI component skeleton for tool calls
+                    <div className="flex max-w-[80%] flex-col gap-4 rounded-2xl px-6 py-5 bg-gradient-to-br from-background to-muted/30 border border-border/40 shadow-lg backdrop-blur-sm">
+                      {/* AI Avatar and name */}
+                      <div className="flex items-center gap-3 mb-1">
+                        <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 bg-primary/60 rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="h-4 bg-gradient-to-r from-primary/30 to-primary/10 rounded-full animate-pulse w-24"></div>
                       </div>
-                      <div className="h-4 bg-gradient-to-r from-primary/30 to-primary/10 rounded-full animate-pulse w-24"></div>
-                    </div>
 
-                    {/* Content skeleton */}
-                    <div className="space-y-3">
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-full"></div>
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-4/5"></div>
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-3/4"></div>
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-5/6"></div>
-                    </div>
+                      {/* Content skeleton */}
+                      <div className="space-y-3">
+                        <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-full"></div>
+                        <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-4/5"></div>
+                        <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-3/4"></div>
+                        <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded-lg animate-pulse w-5/6"></div>
+                      </div>
 
-                    {/* Action buttons skeleton */}
-                    <div className="mt-4 flex gap-2">
-                      <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-20"></div>
-                      <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-24"></div>
-                    </div>
+                      {/* Action buttons skeleton */}
+                      <div className="mt-4 flex gap-2">
+                        <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-20"></div>
+                        <div className="h-9 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg animate-pulse w-24"></div>
+                      </div>
 
-                    {/* Subtle shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite] rounded-2xl"></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Typing indicator */}
-              {showTypingIndicator && (
-                <div className="chat-message flex w-full items-start gap-4 py-4 justify-start">
-                  <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-muted">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
+                      {/* Subtle shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite] rounded-2xl"></div>
                     </div>
-                  </div>
+                  ) : (
+                    // Simple loading indicator for text messages
+                    <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-muted">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

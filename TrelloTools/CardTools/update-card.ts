@@ -154,39 +154,32 @@ export const updateCardTool = {
 
       const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
+      // Return the card data directly for UI components
       return {
-        success: true,
-        card: {
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.desc,
-          listId: response.data.idList,
-          boardId: response.data.idBoard,
-          position: response.data.pos,
-          closed: response.data.closed,
-          due: response.data.due,
-          dueComplete: response.data.dueComplete,
-          start: response.data.start,
-          url: response.data.url,
-          shortUrl: response.data.shortUrl,
-          labels: response.data.labels || [],
-          members: response.data.members || [],
-          attachments: response.data.attachments || [],
-          checklists: response.data.checklists || [],
-          badges: response.data.badges || {},
-          cover: response.data.cover || {},
-        },
-        message: `Successfully updated card "${response.data.name}"`,
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.desc,
+        listId: response.data.idList,
+        boardId: response.data.idBoard,
+        position: response.data.pos,
+        closed: response.data.closed,
+        due: response.data.due,
+        dueComplete: response.data.dueComplete,
+        start: response.data.start,
+        url: response.data.url,
+        shortUrl: response.data.shortUrl,
+        labels: response.data.labels || [],
+        members: response.data.members || [],
+        attachments: response.data.attachments || [],
+        checklists: response.data.checklists || [],
+        badges: response.data.badges || {},
+        cover: response.data.cover || {},
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to update card";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to update card: ${errorMessage}`,
-      };
+      throw new Error(`Failed to update card: ${errorMessage}`);
     }
   },
 };

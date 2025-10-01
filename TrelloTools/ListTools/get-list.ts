@@ -117,31 +117,24 @@ export const getListTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
+      // Return the list data directly for UI components
       return {
-        success: true,
-        list: {
-          id: response.data.id,
-          name: response.data.name,
-          closed: response.data.closed,
-          boardId: response.data.idBoard,
-          position: response.data.pos,
-          subscribed: response.data.subscribed,
-          softLimit: response.data.softLimit,
-          status: response.data.status,
-          creationMethod: response.data.creationMethod,
-          cards: response.data.cards || [],
-        },
-        message: `Successfully retrieved list "${response.data.name}"`,
+        id: response.data.id,
+        name: response.data.name,
+        closed: response.data.closed,
+        boardId: response.data.idBoard,
+        position: response.data.pos,
+        subscribed: response.data.subscribed,
+        softLimit: response.data.softLimit,
+        status: response.data.status,
+        creationMethod: response.data.creationMethod,
+        cards: response.data.cards || [],
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to retrieve list";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve list: ${errorMessage}`,
-      };
+      throw new Error(`Failed to retrieve list: ${errorMessage}`);
     }
   },
 };

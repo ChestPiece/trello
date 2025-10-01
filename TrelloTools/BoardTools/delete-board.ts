@@ -30,14 +30,11 @@ export const deleteBoardTool = {
 
       const response = await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the deleted board data directly for UI components
       return {
-        success: true,
-        message: `Successfully deleted board with ID: ${boardId}`,
-        deletedBoard: {
-          id: boardId,
-          name: response.data?.name || "Unknown",
-          deleted: true,
-        },
+        id: boardId,
+        name: response.data?.name || "Unknown",
+        deleted: true,
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -46,11 +43,9 @@ export const deleteBoardTool = {
         (error as { message?: string })?.message ||
         "Failed to delete board";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to delete board with ID "${boardId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to delete board with ID "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

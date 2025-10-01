@@ -30,13 +30,11 @@ export const deleteLabelTool = {
 
       await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the deleted label data directly for UI components
       return {
-        success: true,
+        id: labelId,
+        deleted: true,
         message: `Successfully deleted label with ID: ${labelId}`,
-        deletedLabel: {
-          id: labelId,
-          deleted: true,
-        },
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -45,11 +43,9 @@ export const deleteLabelTool = {
         (error as { message?: string })?.message ||
         "Failed to delete label";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to delete label with ID "${labelId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to delete label with ID "${labelId}": ${errorMessage}`
+      );
     }
   },
 };

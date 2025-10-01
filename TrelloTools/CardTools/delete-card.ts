@@ -30,20 +30,16 @@ export const deleteCardTool = {
 
       await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the deleted card data directly for UI components
       return {
-        success: true,
-        message: `Successfully deleted card ${cardId}`,
-        cardId: cardId,
+        id: cardId,
+        deleted: true,
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to delete card";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to delete card: ${errorMessage}`,
-      };
+      throw new Error(`Failed to delete card: ${errorMessage}`);
     }
   },
 };

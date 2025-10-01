@@ -55,12 +55,8 @@ export const listMembersTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        members: response.data,
-        count: response.data.length,
-        message: `Successfully retrieved ${response.data.length} members from board ${boardId}`,
-      };
+      // Return the members data directly for UI components
+      return response.data;
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -68,11 +64,9 @@ export const listMembersTool = {
         (error as { message?: string })?.message ||
         "Failed to list members";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to list members for board "${boardId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to list members for board "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

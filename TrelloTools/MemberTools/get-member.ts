@@ -157,13 +157,8 @@ export const getMemberTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        member: response.data,
-        message: `Successfully retrieved member "${
-          response.data.fullName || response.data.username
-        }" (ID: ${memberId})`,
-      };
+      // Return the member data directly for UI components
+      return response.data;
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -171,11 +166,9 @@ export const getMemberTool = {
         (error as { message?: string })?.message ||
         "Failed to retrieve member";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve member with ID "${memberId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to retrieve member with ID "${memberId}": ${errorMessage}`
+      );
     }
   },
 };

@@ -218,11 +218,8 @@ export const getBoardTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        board: response.data,
-        message: `Successfully retrieved board "${response.data.name}" (ID: ${boardId})`,
-      };
+      // Return the board data directly for UI components
+      return response.data;
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -230,11 +227,9 @@ export const getBoardTool = {
         (error as { message?: string })?.message ||
         "Failed to retrieve board";
 
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve board with ID "${boardId}". ${errorMessage}`,
-      };
+      throw new Error(
+        `Failed to retrieve board with ID "${boardId}": ${errorMessage}`
+      );
     }
   },
 };

@@ -379,41 +379,23 @@ export const listWorkspacesTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
-      return {
-        success: true,
-        workspaces: response.data,
-        count: response.data.length,
-        message: `Successfully retrieved ${response.data.length} workspace(s)`,
-      };
+      // Return the workspaces array directly for UI components
+      return response.data;
     } catch (error: unknown) {
       console.error("List workspaces error:", error);
 
       let errorMessage = "Failed to list workspaces";
-      let statusCode = 500;
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
           response?: { data?: { message?: string }; status?: number };
         };
         errorMessage = axiosError.response?.data?.message || errorMessage;
-        statusCode = axiosError.response?.status || statusCode;
       } else if (error && typeof error === "object" && "message" in error) {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to list workspaces. ${errorMessage}`,
-        suggestions: [
-          "Check if API credentials are properly configured",
-          "Verify that you have permission to access workspaces",
-          "Ensure the filter parameters are valid",
-          "Check if the field names are correct",
-          "Verify that pagination parameters are within valid ranges",
-        ],
-      };
+      throw new Error(`Failed to list workspaces: ${errorMessage}`);
     }
   },
 };

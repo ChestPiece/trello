@@ -30,44 +30,30 @@ export const deleteWorkspaceTool = {
 
       const response = await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the deleted workspace data directly for UI components
       return {
-        success: true,
+        id: workspaceId,
+        name: response.data?.displayName || response.data?.name || "Unknown",
+        deleted: true,
         message: `Successfully deleted workspace with ID: ${workspaceId}`,
-        deletedWorkspace: {
-          id: workspaceId,
-          name: response.data?.displayName || response.data?.name || "Unknown",
-          deleted: true,
-        },
       };
     } catch (error: unknown) {
       console.error("Delete workspace error:", error);
 
       let errorMessage = "Failed to delete workspace";
-      let statusCode = 500;
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
           response?: { data?: { message?: string }; status?: number };
         };
         errorMessage = axiosError.response?.data?.message || errorMessage;
-        statusCode = axiosError.response?.status || statusCode;
       } else if (error && typeof error === "object" && "message" in error) {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to delete workspace with ID "${workspaceId}". ${errorMessage}`,
-        suggestions: [
-          "Check if the workspace ID is valid and exists",
-          "Verify that you have admin permissions to delete this workspace",
-          "Ensure all boards in the workspace are deleted first if required",
-          "Check if there are any active memberships that need to be removed",
-          "Verify that the workspace is not being used by other services",
-        ],
-      };
+      throw new Error(
+        `Failed to delete workspace with ID "${workspaceId}": ${errorMessage}`
+      );
     }
   },
 };

@@ -31,8 +31,8 @@ export const removeLabelFromCardTool = {
 
       await axios.delete(`${baseUrl}?${params.toString()}`);
 
+      // Return the removed label data directly for UI components
       return {
-        success: true,
         cardId,
         labelId,
         message: `Successfully removed label ${labelId} from card ${cardId}`,
@@ -54,20 +54,9 @@ export const removeLabelFromCardTool = {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to remove label ${labelId} from card ${cardId}. ${errorMessage}`,
-        suggestions: [
-          "Check if the card ID is valid and exists",
-          "Verify that the label ID is valid and exists",
-          "Ensure the label is currently attached to the card",
-          "Check if you have permission to modify this card",
-          "Verify that the label hasn't already been removed from the card",
-          "Ensure API credentials are properly configured",
-        ],
-      };
+      throw new Error(
+        `Failed to remove label ${labelId} from card ${cardId}: ${errorMessage}`
+      );
     }
   },
 };

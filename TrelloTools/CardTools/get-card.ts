@@ -218,43 +218,36 @@ export const getCardTool = {
 
       const response = await axios.get(`${baseUrl}?${params.toString()}`);
 
+      // Return the card data directly for UI components
       return {
-        success: true,
-        card: {
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.desc,
-          listId: response.data.idList,
-          boardId: response.data.idBoard,
-          position: response.data.pos,
-          closed: response.data.closed,
-          due: response.data.due,
-          dueComplete: response.data.dueComplete,
-          start: response.data.start,
-          url: response.data.url,
-          shortUrl: response.data.shortUrl,
-          labels: response.data.labels || [],
-          members: response.data.members || [],
-          attachments: response.data.attachments || [],
-          checklists: response.data.checklists || [],
-          badges: response.data.badges || {},
-          cover: response.data.cover || {},
-          actions: response.data.actions || [],
-          checkItemStates: response.data.checkItemStates || [],
-          stickers: response.data.stickers || [],
-          customFieldItems: response.data.customFieldItems || [],
-        },
-        message: `Successfully retrieved card "${response.data.name}"`,
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.desc,
+        listId: response.data.idList,
+        boardId: response.data.idBoard,
+        position: response.data.pos,
+        closed: response.data.closed,
+        due: response.data.due,
+        dueComplete: response.data.dueComplete,
+        start: response.data.start,
+        url: response.data.url,
+        shortUrl: response.data.shortUrl,
+        labels: response.data.labels || [],
+        members: response.data.members || [],
+        attachments: response.data.attachments || [],
+        checklists: response.data.checklists || [],
+        badges: response.data.badges || {},
+        cover: response.data.cover || {},
+        actions: response.data.actions || [],
+        checkItemStates: response.data.checkItemStates || [],
+        stickers: response.data.stickers || [],
+        customFieldItems: response.data.customFieldItems || [],
       };
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
           ?.data?.message || "Failed to retrieve card";
-      return {
-        success: false,
-        error: errorMessage,
-        message: `Failed to retrieve card: ${errorMessage}`,
-      };
+      throw new Error(`Failed to retrieve card: ${errorMessage}`);
     }
   },
 };

@@ -67,6 +67,13 @@ import {
   createLabelFormTool,
   createChecklistFormTool,
   createAttachmentFormTool,
+  updateBoardFormTool,
+  updateCardFormTool,
+  updateListFormTool,
+  updateLabelFormTool,
+  updateChecklistFormTool,
+  updateChecklistItemFormTool,
+  updateWorkspaceFormTool,
 } from "@/TrelloTools/ClientSideTools";
 
 // Allow streaming responses up to 30 seconds
@@ -172,6 +179,7 @@ export async function POST(req: NextRequest) {
         listWorkspaces: listWorkspacesTool,
 
         // Client-side Form Tools (for interactive UI generation)
+        // Create Forms
         createBoardForm: createBoardFormTool,
         createCardForm: createCardFormTool,
         createListForm: createListFormTool,
@@ -179,6 +187,15 @@ export async function POST(req: NextRequest) {
         createLabelForm: createLabelFormTool,
         createChecklistForm: createChecklistFormTool,
         createAttachmentForm: createAttachmentFormTool,
+
+        // Update Forms
+        updateBoardForm: updateBoardFormTool,
+        updateCardForm: updateCardFormTool,
+        updateListForm: updateListFormTool,
+        updateLabelForm: updateLabelFormTool,
+        updateChecklistForm: updateChecklistFormTool,
+        updateChecklistItemForm: updateChecklistItemFormTool,
+        updateWorkspaceForm: updateWorkspaceFormTool,
       },
       onFinish: ({ finishReason, usage, toolCalls, toolResults }) => {
         // Log completion for monitoring

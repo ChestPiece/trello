@@ -185,27 +185,25 @@ export const updateWorkspaceTool = {
 
       const response = await axios.put(`${baseUrl}?${params.toString()}`);
 
+      // Return the updated workspace data directly for UI components
       return {
-        success: true,
-        workspace: {
-          id: response.data.id,
-          name: response.data.name,
-          displayName: response.data.displayName,
-          description: response.data.desc,
-          website: response.data.website,
-          logo: response.data.logo,
-          url: response.data.url,
-          products: response.data.products,
-          powerUps: response.data.powerUps,
-          dateLastActivity: response.data.dateLastActivity,
-          dateLastView: response.data.dateLastView,
-          idTags: response.data.idTags,
-          idMembers: response.data.idMembers,
-          idMemberships: response.data.idMemberships,
-          limits: response.data.limits,
-          memberships: response.data.memberships,
-          prefs: response.data.prefs,
-        },
+        id: response.data.id,
+        name: response.data.name,
+        displayName: response.data.displayName,
+        description: response.data.desc,
+        website: response.data.website,
+        logo: response.data.logo,
+        url: response.data.url,
+        products: response.data.products,
+        powerUps: response.data.powerUps,
+        dateLastActivity: response.data.dateLastActivity,
+        dateLastView: response.data.dateLastView,
+        idTags: response.data.idTags,
+        idMembers: response.data.idMembers,
+        idMemberships: response.data.idMemberships,
+        limits: response.data.limits,
+        memberships: response.data.memberships,
+        prefs: response.data.prefs,
         message: `Successfully updated workspace "${
           response.data.displayName || response.data.name
         }" with ID: ${workspaceId}`,
@@ -214,31 +212,19 @@ export const updateWorkspaceTool = {
       console.error("Update workspace error:", error);
 
       let errorMessage = "Failed to update workspace";
-      let statusCode = 500;
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
           response?: { data?: { message?: string }; status?: number };
         };
         errorMessage = axiosError.response?.data?.message || errorMessage;
-        statusCode = axiosError.response?.status || statusCode;
       } else if (error && typeof error === "object" && "message" in error) {
         errorMessage = (error as { message: string }).message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-        statusCode,
-        message: `Failed to update workspace with ID "${workspaceId}". ${errorMessage}`,
-        suggestions: [
-          "Check if the workspace ID is valid and exists",
-          "Verify that you have permission to update this workspace",
-          "Ensure all preference values are valid",
-          "Check if the new name or display name is unique",
-          "Verify that all URLs (website, logo) are valid",
-        ],
-      };
+      throw new Error(
+        `Failed to update workspace with ID "${workspaceId}": ${errorMessage}`
+      );
     }
   },
 };

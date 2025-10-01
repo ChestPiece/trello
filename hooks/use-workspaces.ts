@@ -7,7 +7,7 @@ export interface Workspace {
   name: string;
   displayName: string;
   desc?: string;
-  descData?: any;
+  descData?: Record<string, unknown>;
   url?: string;
   website?: string;
   logo?: string;
