@@ -101,7 +101,7 @@ export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
       >
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:16px_16px]" />
-        
+
         {/* Board icon and name overlay */}
         <div className="relative z-10 flex items-center gap-2 px-3 py-2 bg-black/20 backdrop-blur-sm rounded-lg">
           <Layout className="h-4 w-4 text-white" />
@@ -126,12 +126,16 @@ export function TrelloBoardCard({ data, state }: TrelloBoardCardProps) {
 
         {/* Status badges */}
         <div className="flex flex-wrap gap-1.5">
-          <Badge 
-            variant={visibility === "public" ? "default" : "secondary"} 
+          <Badge
+            variant={visibility === "public" ? "default" : "secondary"}
             className="text-xs h-5 px-2 gap-1"
           >
             {visibilityIcon}
-            {visibility === "public" ? "Public" : visibility === "org" ? "Team" : "Private"}
+            {visibility === "public"
+              ? "Public"
+              : visibility === "org"
+              ? "Team"
+              : "Private"}
           </Badge>
 
           {data.closed && (

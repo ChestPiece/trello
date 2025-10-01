@@ -100,9 +100,31 @@ export function ConversationProvider({
         return;
       }
 
-      // For now, we'll let server-side tools handle execution
-      // Client-side tools can be added here if needed
-      console.log("Tool call received:", toolCall.toolName);
+      // Simple logging of all tool calls for debugging
+      console.log(`Tool call ${toolCall.toolCallId}: ${toolCall.toolName}`);
+
+      // Special handling for specific client-side tools
+      // These tools can be handled directly on the client
+      // Add more client-side tools as needed
+      if (toolCall.toolName === "getLocation") {
+        const cities = [
+          "New York",
+          "Los Angeles",
+          "Chicago",
+          "San Francisco",
+          "Miami",
+        ];
+        const randomCity = cities[Math.floor(Math.random() * cities.length)];
+
+        // Use setTimeout to simulate async nature but don't make it too long
+        setTimeout(() => {
+          addToolResult({
+            tool: toolCall.toolName,
+            toolCallId: toolCall.toolCallId,
+            output: randomCity,
+          });
+        }, 500);
+      }
     },
     onFinish: ({ messages: finishedMessages }) => {
       // Set streaming to false when the response is complete
@@ -221,19 +243,32 @@ export function ConversationProvider({
               errorText: string;
             }
       ) => {
+        // Provide visual feedback about the tool execution
+        console.log(`Adding tool result for ${options.tool}`);
+
         if ("output" in options) {
+          // First, provide feedback in the UI by setting streaming state
+          setIsStreaming(true);
+
+          // Then add the actual tool result to the conversation
           addToolResult({
             tool: options.tool,
             toolCallId: options.toolCallId,
             output: options.output,
           });
+
+          // Show a toast or some visual indicator
+          // You could add a toast library here
         } else {
+          // Handle error case
           addToolResult({
             tool: options.tool,
             toolCallId: options.toolCallId,
             state: "output-error",
             errorText: options.errorText,
           });
+
+          console.error(`Tool error for ${options.tool}: ${options.errorText}`);
         }
       },
     }),

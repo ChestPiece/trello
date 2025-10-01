@@ -1,98 +1,102 @@
-# Trello AI Assistant
+# Trello Chat Assistant
 
-An intelligent Trello management assistant built with Next.js, Vercel AI SDK, and OpenAI. This application provides a conversational interface for managing Trello boards, lists, cards, workspaces, and more through natural language interactions.
+An AI-powered chat assistant for Trello that helps you manage boards, cards, lists, and more through natural language conversations.
 
 ## Features
 
-- **AI-Powered Trello Management**: Create, update, delete, and manage Trello resources through natural language
-- **Real-time Streaming**: Live responses from OpenAI with streaming capabilities
-- **Interactive Forms**: Smart form detection and generation for complex operations
-- **Comprehensive Tool Suite**: Full CRUD operations for boards, lists, cards, labels, attachments, checklists, and workspaces
-- **Error Recovery**: Intelligent error handling with automatic repair mechanisms
-- **Performance Optimized**: UI throttling and efficient state management
-- **Modern UI**: Clean, accessible interface built with shadcn/ui components
-- **Responsive Design**: Works seamlessly on mobile and desktop
-- **Chat History**: Persistent conversation management with sidebar navigation
-- **Enhanced UX**: Stop/regenerate controls, loading states, and keyboard shortcuts
+- 💬 **Natural Language Interface**: Interact with Trello using everyday language
+- 🔄 **Real-time AI Responses**: Get immediate responses through streaming
+- 🛠️ **Tool Integration**: Direct integration with Trello API for creating, reading, updating and deleting Trello resources
+- 🎮 **Interactive UI**: Dynamic form generation for complex operations
+- 🎭 **Theme Support**: Light and dark mode
+- ⚙️ **Configurable**: Settings panel for API keys, model selection and transport options
+- 📊 **Visual Cards**: Rich visual representations of Trello objects
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.x or later
+- Node.js 18+ and npm/yarn
+- Trello account and API credentials
 - OpenAI API key
-- Trello API credentials (optional, for full functionality)
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+TRELLO_API_KEY=your_trello_api_key
+TRELLO_API_TOKEN=your_trello_token
+```
 
 ### Installation
 
 1. Clone the repository
 2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Create a `.env.local` file in the root directory and add your API keys:
-
-```env
-# Required
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Optional - for Trello functionality
-TRELLO_API_KEY=your_trello_api_key_here
-TRELLO_API_TOKEN=your_trello_api_token_here
-```
-
-4. Get Trello API credentials (optional):
-
-   - Visit [Trello App Key](https://trello.com/app-key)
-   - Copy your API Key
-   - Generate a token by visiting: `https://trello.com/1/authorize?key=YOUR_API_KEY&response_type=token&scope=read,write&expiration=never&name=TrelloAI`
-   - Replace `YOUR_API_KEY` with your actual API key and authorize the application
-
-5. Start the development server:
-
-```bash
-npm run dev
-```
-
-6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+   ```
+   npm install
+   ```
+3. Run the development server:
+   ```
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Usage
 
-Once the application is running, you can interact with the Trello AI Assistant using natural language:
+1. **Start a Conversation**: Type natural language requests like "Show me all my boards" or "Create a new card for the Marketing board"
+2. **Interactive Forms**: For creation/update operations, the assistant will generate interactive forms
+3. **Visual Results**: View rich visual representations of your Trello data
+4. **Settings**: Configure your API keys and preferences via the Settings panel
 
-- **"Create a new board called 'Project Planning'"** - Creates a new Trello board
-- **"Add a list to my board for 'In Progress' tasks"** - Creates a new list
-- **"Create a card for 'Review design mockups'"** - Creates a new card
-- **"Show me all my boards"** - Lists all accessible boards
-- **"Update the board description"** - Shows an update form
+## Recent Improvements
 
-The assistant will automatically detect your intent and show the appropriate interactive form or execute the requested action.
+- ✅ Added cancel button for streaming responses
+- ✅ Enhanced error message display with more details and better retry functionality
+- ✅ Fixed dynamic data loading in form components
+- ✅ Improved error handling in API routes
+- ✅ Fixed feedback loop for tool results in conversation
+- ✅ Added Settings panel for configuring API keys and transport options
+- ✅ Optimized rendering of Trello objects to prevent timeouts
+- ✅ Fixed controlled/uncontrolled component state transitions
 
-## Deployment
+## Technical Stack
 
-This application can be easily deployed on Vercel. Make sure to add your environment variables in your Vercel project settings:
+- **Framework**: Next.js 15
+- **UI**: React 19 with Tailwind CSS
+- **AI**: Vercel AI SDK v5 with OpenAI integration
+- **API Integration**: Trello REST API
+- **State Management**: React Context API
+- **Styling**: Tailwind CSS with shadcn/ui components
 
-- `OPENAI_API_KEY` (required)
-- `TRELLO_API_KEY` (optional)
-- `TRELLO_API_TOKEN` (optional)
+## Project Structure
 
-## Architecture
+```
+/
+├── app/             # Next.js app directory
+│   ├── api/         # API routes for AI and tools
+│   └── page.tsx     # Main page
+├── components/      # React components
+│   ├── Chat/        # Chat components
+│   │   └── generative-ui/  # Trello object UI components
+│   ├── Settings/    # Settings panel
+│   └── ui/          # UI components (buttons, inputs, etc.)
+├── hooks/           # Custom React hooks
+├── lib/             # Utility functions
+├── public/          # Static assets
+└── TrelloTools/     # Trello API integration tools
+```
 
-The application is built with a modular architecture:
+## Error Handling and Debugging
 
-- **API Route**: `/app/api/chat/route.ts` - Handles AI conversations and tool calls
-- **Trello Tools**: `/TrelloTools/` - Comprehensive suite of Trello management tools
-- **UI Components**: `/components/` - Reusable React components with shadcn/ui
-- **Form Detection**: Smart form generation based on user intent
-- **Error Handling**: Robust error recovery and user feedback
+If you encounter any issues:
 
-## Built With
+1. Check the browser console for errors
+2. Verify your API keys in the Settings panel
+3. Ensure your Trello API keys have the necessary permissions
+4. Look for detailed error messages in the chat interface
 
-- [Next.js](https://nextjs.org/) - React framework
-- [Vercel AI SDK](https://v5.ai-sdk.dev/) - AI integration
-- [OpenAI](https://openai.com/) - Language model
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [shadcn/ui](https://ui.shadcn.com/) - UI components
-- [Trello API](https://developer.atlassian.com/cloud/trello/) - Trello integration
+## License
+
+[MIT](LICENSE)

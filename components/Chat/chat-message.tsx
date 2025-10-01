@@ -21,73 +21,22 @@ export interface ChatMessageProps {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   // Check if this message contains form tools or display cards
-  const hasFormTools = message.parts.some(
-    (part) =>
-      part.type.startsWith("tool-") &&
-      (part.type.includes("Form") ||
-        part.type === "tool-createBoardForm" ||
-        part.type === "tool-createCardForm" ||
-        part.type === "tool-createListForm" ||
-        part.type === "tool-createWorkspaceForm" ||
-        part.type === "tool-createLabelForm" ||
-        part.type === "tool-createChecklistForm" ||
-        part.type === "tool-createAttachmentForm" ||
-        part.type === "tool-updateBoardForm" ||
-        part.type === "tool-updateCardForm" ||
-        part.type === "tool-updateListForm" ||
-        part.type === "tool-updateLabelForm" ||
-        part.type === "tool-updateChecklistForm" ||
-        part.type === "tool-updateChecklistItemForm" ||
-        part.type === "tool-updateWorkspaceForm" ||
-        part.type === "tool-deleteBoardForm" ||
-        part.type === "tool-deleteCardForm" ||
-        part.type === "tool-deleteListForm" ||
-        part.type === "tool-deleteWorkspaceForm" ||
-        part.type === "tool-deleteAttachmentForm" ||
-        part.type === "tool-deleteChecklistItemForm" ||
-        part.type === "tool-archiveListForm" ||
-        part.type === "tool-unarchiveListForm" ||
-        part.type === "tool-addMemberToBoardForm" ||
-        part.type === "tool-removeMemberFromBoardForm" ||
-        part.type === "tool-addLabelToCardForm" ||
-        part.type === "tool-removeLabelFromCardForm" ||
-        part.type === "tool-bulkBoardOperations" ||
-        part.type === "tool-advancedCardSearch" ||
-        part.type === "tool-smartCardCreation" ||
-        part.type === "tool-workspaceAnalytics" ||
-        part.type === "tool-automatedWorkflow")
-  );
+  // Using a more efficient approach by checking if the part type includes "Form"
+  const hasFormTools = React.useMemo(() => {
+    return message.parts.some(
+      (part) => part.type.startsWith("tool-") && part.type.includes("Form")
+    );
+  }, [message.parts]);
 
   // Check if this message contains display cards (to suppress redundant text)
-  const hasDisplayCards = message.parts.some(
-    (part) =>
-      part.type.startsWith("tool-") &&
-      (part.type === "tool-createBoard" ||
-        part.type === "tool-getBoard" ||
-        part.type === "tool-updateBoard" ||
-        part.type === "tool-createCard" ||
-        part.type === "tool-getCard" ||
-        part.type === "tool-updateCard" ||
-        part.type === "tool-createList" ||
-        part.type === "tool-getList" ||
-        part.type === "tool-updateList" ||
-        part.type === "tool-createWorkspace" ||
-        part.type === "tool-getWorkspace" ||
-        part.type === "tool-updateWorkspace" ||
-        part.type === "tool-createLabel" ||
-        part.type === "tool-getLabel" ||
-        part.type === "tool-updateLabel" ||
-        part.type === "tool-createChecklist" ||
-        part.type === "tool-getChecklist" ||
-        part.type === "tool-updateChecklist" ||
-        part.type === "tool-createAttachment" ||
-        part.type === "tool-getAttachment" ||
-        part.type === "tool-getMember" ||
-        part.type === "tool-listBoards" ||
-        part.type === "tool-listCards" ||
-        part.type === "tool-listLists" ||
-        part.type === "tool-listWorkspaces")
-  );
+  // Using a more efficient approach with a regular expression check
+  const hasDisplayCards = React.useMemo(() => {
+    const displayCardPatterns = /^tool-(create|get|update|list)(?!.*Form)/;
+    return message.parts.some(
+      (part) =>
+        part.type.startsWith("tool-") && displayCardPatterns.test(part.type)
+    );
+  }, [message.parts]);
 
   return (
     <div
@@ -505,20 +454,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   toolPart.state === "output-available" ? toolPart.output : [];
 
                 if (Array.isArray(outputData) && outputData.length > 0) {
+                  // Limit the number of items we render to improve performance
+                  const MAX_VISIBLE_ITEMS = 3;
+                  const visibleData = outputData.slice(0, MAX_VISIBLE_ITEMS);
+                  const remainingCount = outputData.length - MAX_VISIBLE_ITEMS;
+
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData
-                        .slice(0, 5)
-                        .map((board: unknown, idx: number) => (
-                          <TrelloBoardCard
-                            key={(board as { id?: string })?.id || idx}
-                            data={board as Record<string, unknown>}
-                            state="output-available"
-                          />
-                        ))}
-                      {outputData.length > 5 && (
+                      {visibleData.map((board: unknown, idx: number) => (
+                        <TrelloBoardCard
+                          key={(board as { id?: string })?.id || idx}
+                          data={board as Record<string, unknown>}
+                          state="output-available"
+                        />
+                      ))}
+                      {remainingCount > 0 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
-                          + {outputData.length - 5} more boards
+                          + {remainingCount} more boards
                         </div>
                       )}
                     </div>
@@ -573,20 +525,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   toolPart.state === "output-available" ? toolPart.output : [];
 
                 if (Array.isArray(outputData) && outputData.length > 0) {
+                  // Limit the number of items we render to improve performance
+                  const MAX_VISIBLE_ITEMS = 3;
+                  const visibleData = outputData.slice(0, MAX_VISIBLE_ITEMS);
+                  const remainingCount = outputData.length - MAX_VISIBLE_ITEMS;
+
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData
-                        .slice(0, 5)
-                        .map((card: unknown, idx: number) => (
-                          <TrelloCardCard
-                            key={(card as { id?: string })?.id || idx}
-                            data={card as Record<string, unknown>}
-                            state="output-available"
-                          />
-                        ))}
-                      {outputData.length > 5 && (
+                      {visibleData.map((card: unknown, idx: number) => (
+                        <TrelloCardCard
+                          key={(card as { id?: string })?.id || idx}
+                          data={card as Record<string, unknown>}
+                          state="output-available"
+                        />
+                      ))}
+                      {remainingCount > 0 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
-                          + {outputData.length - 5} more cards
+                          + {remainingCount} more cards
                         </div>
                       )}
                     </div>
@@ -641,20 +596,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   toolPart.state === "output-available" ? toolPart.output : [];
 
                 if (Array.isArray(outputData) && outputData.length > 0) {
+                  // Limit the number of items we render to improve performance
+                  const MAX_VISIBLE_ITEMS = 3;
+                  const visibleData = outputData.slice(0, MAX_VISIBLE_ITEMS);
+                  const remainingCount = outputData.length - MAX_VISIBLE_ITEMS;
+
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData
-                        .slice(0, 5)
-                        .map((list: unknown, idx: number) => (
-                          <TrelloListCard
-                            key={(list as { id?: string })?.id || idx}
-                            data={list as Record<string, unknown>}
-                            state="output-available"
-                          />
-                        ))}
-                      {outputData.length > 5 && (
+                      {visibleData.map((list: unknown, idx: number) => (
+                        <TrelloListCard
+                          key={(list as { id?: string })?.id || idx}
+                          data={list as Record<string, unknown>}
+                          state="output-available"
+                        />
+                      ))}
+                      {remainingCount > 0 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
-                          + {outputData.length - 5} more lists
+                          + {remainingCount} more lists
                         </div>
                       )}
                     </div>
@@ -709,20 +667,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   toolPart.state === "output-available" ? toolPart.output : [];
 
                 if (Array.isArray(outputData) && outputData.length > 0) {
+                  // Limit the number of items we render to improve performance
+                  const MAX_VISIBLE_ITEMS = 3;
+                  const visibleData = outputData.slice(0, MAX_VISIBLE_ITEMS);
+                  const remainingCount = outputData.length - MAX_VISIBLE_ITEMS;
+
                   return (
                     <div key={index} className="mt-3 space-y-3">
-                      {outputData
-                        .slice(0, 5)
-                        .map((workspace: unknown, idx: number) => (
-                          <TrelloWorkspaceCard
-                            key={(workspace as { id?: string })?.id || idx}
-                            data={workspace as Record<string, unknown>}
-                            state="output-available"
-                          />
-                        ))}
-                      {outputData.length > 5 && (
+                      {visibleData.map((workspace: unknown, idx: number) => (
+                        <TrelloWorkspaceCard
+                          key={(workspace as { id?: string })?.id || idx}
+                          data={workspace as Record<string, unknown>}
+                          state="output-available"
+                        />
+                      ))}
+                      {remainingCount > 0 && (
                         <div className="text-sm text-muted-foreground text-center p-2 bg-muted/50 rounded">
-                          + {outputData.length - 5} more workspaces
+                          + {remainingCount} more workspaces
                         </div>
                       )}
                     </div>
@@ -788,19 +749,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   errorText?: string;
                 };
 
-                // Debug logging (only log when state changes to avoid infinite loops)
-                if (toolPart.state === "output-available") {
-                  console.log("Form tool part:", {
-                    type: part.type,
-                    state: toolPart.state,
-                    input: toolPart.input,
-                    output: toolPart.output,
-                    hasOutput: !!toolPart.output,
-                    outputKeys: toolPart.output
-                      ? Object.keys(toolPart.output)
-                      : [],
-                  });
-                }
+                // Remove excessive logging - only log errors for debugging
+                // Following AI SDK best practices: avoid console.log in production
 
                 if (toolPart.state === "output-error") {
                   return (
@@ -835,6 +785,54 @@ export function ChatMessage({ message }: ChatMessageProps) {
                       return "createChecklist";
                     case "tool-createAttachmentForm":
                       return "createAttachment";
+                    case "tool-updateBoardForm":
+                      return "updateBoard";
+                    case "tool-updateCardForm":
+                      return "updateCard";
+                    case "tool-updateListForm":
+                      return "updateList";
+                    case "tool-updateLabelForm":
+                      return "updateLabel";
+                    case "tool-updateChecklistForm":
+                      return "updateChecklist";
+                    case "tool-updateChecklistItemForm":
+                      return "updateChecklistItem";
+                    case "tool-updateWorkspaceForm":
+                      return "updateWorkspace";
+                    case "tool-deleteBoardForm":
+                      return "deleteBoard";
+                    case "tool-deleteCardForm":
+                      return "deleteCard";
+                    case "tool-deleteListForm":
+                      return "deleteList";
+                    case "tool-deleteWorkspaceForm":
+                      return "deleteWorkspace";
+                    case "tool-deleteAttachmentForm":
+                      return "deleteAttachment";
+                    case "tool-deleteChecklistItemForm":
+                      return "deleteChecklistItem";
+                    case "tool-archiveListForm":
+                      return "archiveList";
+                    case "tool-unarchiveListForm":
+                      return "unarchiveList";
+                    case "tool-addMemberToBoardForm":
+                      return "addMemberToBoard";
+                    case "tool-removeMemberFromBoardForm":
+                      return "removeMemberFromBoard";
+                    case "tool-addLabelToCardForm":
+                      return "addLabelToCard";
+                    case "tool-removeLabelFromCardForm":
+                      return "removeLabelFromCard";
+                    case "tool-bulkBoardOperations":
+                      return "bulkBoardOperations";
+                    case "tool-advancedCardSearch":
+                      return "advancedCardSearch";
+                    case "tool-smartCardCreation":
+                      return "smartCardCreation";
+                    case "tool-workspaceAnalytics":
+                      return "workspaceAnalytics";
+                    case "tool-automatedWorkflow":
+                      return "automatedWorkflow";
                     default:
                       return toolType.replace("tool-", "");
                   }

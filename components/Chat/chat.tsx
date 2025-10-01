@@ -9,16 +9,8 @@ import { ScrollArea } from "../ui/scroll-area";
 export function Chat() {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const {
-    messages,
-    input,
-    setInput,
-    sendMessage,
-    status,
-    isStreaming,
-    error,
-    regenerate,
-  } = useConversation();
+  const { messages, input, setInput, sendMessage, status, error, regenerate } =
+    useConversation();
 
   const isLoading = status !== "ready";
 
@@ -119,8 +111,68 @@ export function Chat() {
                           style={{ animationDelay: "0.2s" }}
                         ></div>
                       </div>
+
+                      {/* Add cancel button for streaming */}
+                      <button
+                        onClick={stop}
+                        className="mt-2 text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded flex items-center gap-1.5"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect
+                            x="3"
+                            y="3"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          ></rect>
+                        </svg>
+                        Cancel
+                      </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Streaming in progress cancel button (fixed position) */}
+              {status === "streaming" && (
+                <div className="sticky bottom-4 flex justify-center">
+                  <button
+                    onClick={stop}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-full shadow-lg flex items-center gap-2"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                    </svg>
+                    Cancel Response
+                  </button>
                 </div>
               )}
 
@@ -131,11 +183,30 @@ export function Chat() {
                     <div className="text-sm text-destructive">
                       <strong>Something went wrong.</strong> Please try again.
                     </div>
+                    <div className="text-xs text-destructive/80">
+                      {error.message || "An unexpected error occurred."}
+                    </div>
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={regenerate}
-                        className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                        className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 flex items-center gap-1.5"
                       >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                          <path d="M3 3v5h5"></path>
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                          <path d="M16 16h5v5"></path>
+                        </svg>
                         Retry
                       </button>
                     </div>

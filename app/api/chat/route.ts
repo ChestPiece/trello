@@ -5,94 +5,52 @@ import {
   stepCountIs,
   smoothStream,
 } from "ai";
-import { openai } from "@ai-sdk/openai"; // ✅ v2 import
+import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 import { systemPrompt } from "@/components/Prompts/system-prompt";
 import { saveMessages } from "@/lib/message-persistence";
 
-import {
-  createBoardTool,
-  getBoardTool,
-  updateBoardTool,
-  deleteBoardTool,
-  listBoardsTool,
-  createListTool,
-  getListTool,
-  updateListTool,
-  deleteListTool,
-  listListsTool,
-  archiveListTool,
-  unarchiveListTool,
-  createCardTool,
-  getCardTool,
-  updateCardTool,
-  deleteCardTool,
-  listCardsTool,
-  createLabelTool,
-  getLabelTool,
-  updateLabelTool,
-  deleteLabelTool,
-  listLabelsTool,
-  addLabelToCardTool,
-  removeLabelFromCardTool,
-  createAttachmentTool,
-  getAttachmentTool,
-  deleteAttachmentTool,
-  listAttachmentsTool,
-  createChecklistTool,
-  getChecklistTool,
-  updateChecklistTool,
-  deleteChecklistTool,
-  listChecklistsTool,
-  createChecklistItemTool,
-  updateChecklistItemTool,
-  deleteChecklistItemTool,
-  addMemberToBoardTool,
-  removeMemberFromBoardTool,
-  listMembersTool,
-  getMemberTool,
-  createWorkspaceTool,
-  getWorkspaceTool,
-  updateWorkspaceTool,
-  deleteWorkspaceTool,
-  listWorkspacesTool,
-} from "@/TrelloTools";
-
-// Import client-side form tools
-import {
-  createBoardFormTool,
-  createCardFormTool,
-  createListFormTool,
-  createWorkspaceFormTool,
-  createLabelFormTool,
-  createChecklistFormTool,
-  createAttachmentFormTool,
-  updateBoardFormTool,
-  updateCardFormTool,
-  updateListFormTool,
-  updateLabelFormTool,
-  updateChecklistFormTool,
-  updateChecklistItemFormTool,
-  updateWorkspaceFormTool,
-} from "@/TrelloTools/ClientSideTools";
-import { advancedTools } from "@/TrelloTools/AdvancedTools";
+// Import all tools from centralized location
+import { trelloTools } from "@/TrelloTools";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-// Environment checks
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing OPENAI_API_KEY environment variable");
-}
-if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
-  console.warn(
-    "Warning: Trello API credentials not configured. Trello tools will not work properly."
-  );
-}
+// Environment checks - don't throw immediately, handle gracefully in the route handler
+const checkRequiredEnvVars = () => {
+  const missingVars = [];
 
-// ✅ OpenAI client is automatically configured with OPENAI_API_KEY
+  if (!process.env.OPENAI_API_KEY) {
+    missingVars.push("OPENAI_API_KEY");
+  }
+
+  if (!process.env.TRELLO_API_KEY || !process.env.TRELLO_API_TOKEN) {
+    missingVars.push("TRELLO_API_KEY and/or TRELLO_API_TOKEN");
+  }
+
+  return missingVars;
+};
 
 export async function POST(req: NextRequest) {
+  // Check for missing environment variables first
+  const missingEnvVars = checkRequiredEnvVars();
+  if (missingEnvVars.length > 0) {
+    console.error(
+      `Missing required environment variables: ${missingEnvVars.join(", ")}`
+    );
+    return new Response(
+      JSON.stringify({
+        error: `Configuration error: Missing ${missingEnvVars.join(
+          ", "
+        )}. Please check your environment configuration.`,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
     const { messages, chatId }: { messages: UIMessage[]; chatId?: string } =
       await req.json();
@@ -116,91 +74,8 @@ export async function POST(req: NextRequest) {
       system: systemPrompt,
       temperature: 0, // Deterministic for tool calls
       stopWhen: stepCountIs(5), // Allow up to 5 steps for multi-step tool calls
-      experimental_transform: smoothStream(), // ✅ Add smooth streaming
-      tools: {
-        // Board Tools
-        createBoard: createBoardTool,
-        getBoard: getBoardTool,
-        updateBoard: updateBoardTool,
-        deleteBoard: deleteBoardTool,
-        listBoards: listBoardsTool,
-
-        // List Tools
-        createList: createListTool,
-        getList: getListTool,
-        updateList: updateListTool,
-        deleteList: deleteListTool,
-        listLists: listListsTool,
-        archiveList: archiveListTool,
-        unarchiveList: unarchiveListTool,
-
-        // Card Tools
-        createCard: createCardTool,
-        getCard: getCardTool,
-        updateCard: updateCardTool,
-        deleteCard: deleteCardTool,
-        listCards: listCardsTool,
-
-        // Label Tools
-        createLabel: createLabelTool,
-        getLabel: getLabelTool,
-        updateLabel: updateLabelTool,
-        deleteLabel: deleteLabelTool,
-        listLabels: listLabelsTool,
-        addLabelToCard: addLabelToCardTool,
-        removeLabelFromCard: removeLabelFromCardTool,
-
-        // Attachment Tools
-        createAttachment: createAttachmentTool,
-        getAttachment: getAttachmentTool,
-        deleteAttachment: deleteAttachmentTool,
-        listAttachments: listAttachmentsTool,
-
-        // Checklist Tools
-        createChecklist: createChecklistTool,
-        getChecklist: getChecklistTool,
-        updateChecklist: updateChecklistTool,
-        deleteChecklist: deleteChecklistTool,
-        listChecklists: listChecklistsTool,
-        createChecklistItem: createChecklistItemTool,
-        updateChecklistItem: updateChecklistItemTool,
-        deleteChecklistItem: deleteChecklistItemTool,
-
-        // Member Tools
-        addMemberToBoard: addMemberToBoardTool,
-        removeMemberFromBoard: removeMemberFromBoardTool,
-        listMembers: listMembersTool,
-        getMember: getMemberTool,
-
-        // Workspace Tools
-        createWorkspace: createWorkspaceTool,
-        getWorkspace: getWorkspaceTool,
-        updateWorkspace: updateWorkspaceTool,
-        deleteWorkspace: deleteWorkspaceTool,
-        listWorkspaces: listWorkspacesTool,
-
-        // Client-side Form Tools (for interactive UI generation)
-        // Create Forms
-        createBoardForm: createBoardFormTool,
-        createCardForm: createCardFormTool,
-        createListForm: createListFormTool,
-        createWorkspaceForm: createWorkspaceFormTool,
-        createLabelForm: createLabelFormTool,
-        createChecklistForm: createChecklistFormTool,
-        createAttachmentForm: createAttachmentFormTool,
-
-        // Update Forms
-        updateBoardForm: updateBoardFormTool,
-        updateCardForm: updateCardFormTool,
-        updateListForm: updateListFormTool,
-        updateLabelForm: updateLabelFormTool,
-        updateChecklistForm: updateChecklistFormTool,
-        updateChecklistItemForm: updateChecklistItemFormTool,
-        updateWorkspaceForm: updateWorkspaceFormTool,
-
-        // Advanced Tools
-        ...advancedTools,
-      },
+      experimental_transform: smoothStream(), // Add smooth streaming
+      tools: trelloTools,
       onFinish: ({ finishReason, usage, toolCalls, toolResults }) => {
         // Log completion for monitoring
         console.log("Chat completion finished:", {
@@ -251,17 +126,44 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Chat API error:", error);
 
-    // Return appropriate error response
+    // Return appropriate error response with detailed information
+    let errorMessage = "Internal Server Error";
+    let errorDetails = null;
+    let statusCode = 500;
+
     if (error instanceof Error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      errorMessage = error.message;
+
+      // Special case handling for common errors
+      if (errorMessage.includes("API key")) {
+        errorMessage = "Authentication error with the AI provider";
+        errorDetails = "Please check your API configuration";
+      } else if (errorMessage.includes("rate limit")) {
+        errorMessage = "Rate limit exceeded with the AI provider";
+        errorDetails = "Please try again in a moment";
+        statusCode = 429; // Too Many Requests
+      } else if (errorMessage.includes("Trello")) {
+        errorMessage = "Error connecting to Trello API";
+        errorDetails = "Please check your Trello configuration";
+      } else if (
+        errorMessage.includes("fetch") ||
+        errorMessage.includes("network")
+      ) {
+        errorMessage = "Network error while connecting to service";
+        errorDetails = "Please check your internet connection";
+      }
     }
 
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error: errorMessage,
+        details: errorDetails,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: statusCode,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

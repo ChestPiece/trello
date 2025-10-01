@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { PlusIcon, Menu } from "lucide-react";
+import { PlusIcon, Menu, Settings as SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SettingsPanel } from "@/components/Settings/settings-panel";
 
 interface SidebarProps {
   className?: string;
@@ -26,6 +27,7 @@ export function Sidebar({
   onSelectConversation,
 }: SidebarProps) {
   const [open, setOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   return (
     <>
@@ -49,6 +51,7 @@ export function Sidebar({
               onSelectConversation(id);
               setOpen(false);
             }}
+            onOpenSettings={() => setSettingsOpen(true)}
           />
         </SheetContent>
       </Sheet>
@@ -60,9 +63,13 @@ export function Sidebar({
             conversations={conversations}
             onNewConversation={onNewConversation}
             onSelectConversation={onSelectConversation}
+            onOpenSettings={() => setSettingsOpen(true)}
           />
         </div>
       </div>
+
+      {/* Settings panel */}
+      <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
 }
@@ -71,11 +78,20 @@ function MobileSidebar({
   conversations,
   onNewConversation,
   onSelectConversation,
-}: Omit<SidebarProps, "className">) {
+  onOpenSettings,
+}: Omit<SidebarProps, "className"> & { onOpenSettings: () => void }) {
   return (
     <div className="flex h-full flex-col bg-background min-h-0">
-      <div className="flex h-14 items-center px-4 border-b shrink-0">
+      <div className="flex h-14 items-center px-4 border-b shrink-0 justify-between">
         <h2 className="text-lg font-semibold">Conversations</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpenSettings}
+          title="Settings"
+        >
+          <SettingsIcon className="h-5 w-5" />
+        </Button>
       </div>
       <div className="shrink-0">
         <NewConversationButton
@@ -98,11 +114,20 @@ function DesktopSidebar({
   conversations,
   onNewConversation,
   onSelectConversation,
-}: Omit<SidebarProps, "className">) {
+  onOpenSettings,
+}: Omit<SidebarProps, "className"> & { onOpenSettings: () => void }) {
   return (
     <div className="flex h-full flex-col border-r min-h-0">
-      <div className="flex h-14 items-center px-4 border-b shrink-0">
+      <div className="flex h-14 items-center px-4 border-b shrink-0 justify-between">
         <h2 className="text-lg font-semibold">Conversations</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpenSettings}
+          title="Settings"
+        >
+          <SettingsIcon className="h-5 w-5" />
+        </Button>
       </div>
       <div className="shrink-0">
         <NewConversationButton

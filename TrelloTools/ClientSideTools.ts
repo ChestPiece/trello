@@ -4,26 +4,7 @@ import { z } from "zod";
 // Client-side form tools that generate interactive UI instead of executing immediately
 // These tools match the exact schemas from the existing Trello tools
 
-// Type for board objects from Trello API
-interface TrelloBoard {
-  id: string;
-  name: string;
-}
-
-// Type for member objects from Trello API
-interface TrelloMember {
-  id: string;
-  fullName?: string;
-  username: string;
-  email: string;
-}
-
-// Type for label objects from Trello API
-interface TrelloLabel {
-  id: string;
-  name: string;
-  color: string;
-}
+// ===== FORM TOOLS =====
 
 export const createBoardFormTool = tool({
   description:
@@ -95,17 +76,8 @@ export const createCardFormTool = tool({
       .describe("The user's request that triggered this form generation"),
   }),
   execute: async () => {
-    // Fetch boards dynamically using API route
-    const response = await fetch("/api/boards?filter=open&fields=id,name");
-    const boardsResult = await response.json();
-
-    const boardOptions = boardsResult.success
-      ? boardsResult.boards.map((board: TrelloBoard) => ({
-          value: board.id,
-          label: board.name,
-        }))
-      : [];
-
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
     return {
       formType: "createCard",
       title: "Create New Card",
@@ -128,9 +100,10 @@ export const createCardFormTool = tool({
         {
           name: "idBoard",
           label: "Board",
-          type: "select",
+          type: "dynamic-select",
           required: true,
-          options: boardOptions,
+          options: [],
+          dependsOn: null,
           description: "Select the board where the card will be created",
         },
         {
@@ -139,6 +112,7 @@ export const createCardFormTool = tool({
           type: "dynamic-select",
           required: true,
           dependsOn: "idBoard",
+          options: [],
           description: "Select the list where the card will be created",
           placeholder: "Select a board first...",
         },
@@ -163,16 +137,9 @@ export const createListFormTool = tool({
       .describe("The user's request that triggered this form generation"),
   }),
   execute: async () => {
-    // Fetch boards dynamically using API route
-    const response = await fetch("/api/boards?filter=open&fields=id,name");
-    const boardsResult = await response.json();
-
-    const boardOptions = boardsResult.success
-      ? boardsResult.boards.map((board: TrelloBoard) => ({
-          value: board.id,
-          label: board.name,
-        }))
-      : [];
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const boardOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "createList",
@@ -644,16 +611,9 @@ export const updateCardFormTool = tool({
     currentBoardId,
     currentDue,
   }) => {
-    // Fetch boards dynamically using API route
-    const response = await fetch("/api/boards?filter=open&fields=id,name");
-    const boardsResult = await response.json();
-
-    const boardOptions = boardsResult.success
-      ? boardsResult.boards.map((board: TrelloBoard) => ({
-          value: board.id,
-          label: board.name,
-        }))
-      : [];
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const boardOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "updateCard",
@@ -1183,7 +1143,9 @@ export const archiveListFormTool = tool({
     return {
       formType: "archiveList",
       title: "Archive List",
-      description: `Archive the list "${listName || listId}". Archived lists are hidden but can be restored later.`,
+      description: `Archive the list "${
+        listName || listId
+      }". Archived lists are hidden but can be restored later.`,
       fields: [
         {
           name: "listId",
@@ -1196,7 +1158,8 @@ export const archiveListFormTool = tool({
           type: "checkbox",
           required: true,
           defaultValue: false,
-          description: "I understand that this list will be archived and hidden from the board.",
+          description:
+            "I understand that this list will be archived and hidden from the board.",
         },
       ],
     };
@@ -1208,13 +1171,18 @@ export const unarchiveListFormTool = tool({
     "Generate an interactive form for unarchiving a Trello list. This tool should be called when the user wants to unarchive a list.",
   inputSchema: z.object({
     listId: z.string().describe("The ID of the list to unarchive"),
-    listName: z.string().optional().describe("The name of the list to unarchive"),
+    listName: z
+      .string()
+      .optional()
+      .describe("The name of the list to unarchive"),
   }),
   execute: async ({ listId, listName }) => {
     return {
       formType: "unarchiveList",
       title: "Unarchive List",
-      description: `Unarchive the list "${listName || listId}". This will make the list visible on the board again.`,
+      description: `Unarchive the list "${
+        listName || listId
+      }". This will make the list visible on the board again.`,
       fields: [
         {
           name: "listId",
@@ -1227,7 +1195,8 @@ export const unarchiveListFormTool = tool({
           type: "checkbox",
           required: true,
           defaultValue: false,
-          description: "I understand that this list will be restored and visible on the board.",
+          description:
+            "I understand that this list will be restored and visible on the board.",
         },
       ],
     };
@@ -1243,20 +1212,9 @@ export const addMemberToBoardFormTool = tool({
     boardName: z.string().optional().describe("The name of the board"),
   }),
   execute: async ({ boardId, boardName }) => {
-    // Fetch available members
-    let memberOptions: Array<{ value: string; label: string }> = [];
-    try {
-      const response = await fetch("/api/members");
-      const result = await response.json();
-      if (result.success && result.members) {
-        memberOptions = result.members.map((member: TrelloMember) => ({
-          value: member.id,
-          label: `${member.fullName || member.username} (${member.email})`,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch members:", error);
-    }
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const memberOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "addMemberToBoard",
@@ -1303,20 +1261,9 @@ export const removeMemberFromBoardFormTool = tool({
     boardName: z.string().optional().describe("The name of the board"),
   }),
   execute: async ({ boardId, boardName }) => {
-    // Fetch board members
-    let memberOptions: Array<{ value: string; label: string }> = [];
-    try {
-      const response = await fetch(`/api/members?boardId=${boardId}`);
-      const result = await response.json();
-      if (result.success && result.members) {
-        memberOptions = result.members.map((member: TrelloMember) => ({
-          value: member.id,
-          label: `${member.fullName || member.username} (${member.email})`,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch board members:", error);
-    }
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const memberOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "removeMemberFromBoard",
@@ -1343,7 +1290,8 @@ export const removeMemberFromBoardFormTool = tool({
           type: "checkbox",
           required: true,
           defaultValue: false,
-          description: "I understand that this member will be removed from the board.",
+          description:
+            "I understand that this member will be removed from the board.",
         },
       ],
     };
@@ -1359,20 +1307,9 @@ export const addLabelToCardFormTool = tool({
     cardName: z.string().optional().describe("The name of the card"),
   }),
   execute: async ({ cardId, cardName }) => {
-    // Fetch available labels
-    let labelOptions: Array<{ value: string; label: string }> = [];
-    try {
-      const response = await fetch("/api/labels");
-      const result = await response.json();
-      if (result.success && result.labels) {
-        labelOptions = result.labels.map((label: TrelloLabel) => ({
-          value: label.id,
-          label: `${label.name} (${label.color})`,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch labels:", error);
-    }
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const labelOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "addLabelToCard",
@@ -1406,20 +1343,9 @@ export const removeLabelFromCardFormTool = tool({
     cardName: z.string().optional().describe("The name of the card"),
   }),
   execute: async ({ cardId, cardName }) => {
-    // Fetch card labels
-    let labelOptions: Array<{ value: string; label: string }> = [];
-    try {
-      const response = await fetch(`/api/cards?id=${cardId}&fields=labels`);
-      const result = await response.json();
-      if (result.success && result.card && result.card.labels) {
-        labelOptions = result.card.labels.map((label: TrelloLabel) => ({
-          value: label.id,
-          label: `${label.name} (${label.color})`,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch card labels:", error);
-    }
+    // Note: Dynamic data fetching should be handled by the form component
+    // This tool only generates the form structure
+    const labelOptions: Array<{ value: string; label: string }> = [];
 
     return {
       formType: "removeLabelFromCard",
@@ -1446,7 +1372,8 @@ export const removeLabelFromCardFormTool = tool({
           type: "checkbox",
           required: true,
           defaultValue: false,
-          description: "I understand that this label will be removed from the card.",
+          description:
+            "I understand that this label will be removed from the card.",
         },
       ],
     };
@@ -1459,13 +1386,18 @@ export const deleteAttachmentFormTool = tool({
     "Generate an interactive form for deleting a Trello attachment. This tool should be called when the user wants to delete an attachment.",
   inputSchema: z.object({
     attachmentId: z.string().describe("The ID of the attachment to delete"),
-    attachmentName: z.string().optional().describe("The name of the attachment"),
+    attachmentName: z
+      .string()
+      .optional()
+      .describe("The name of the attachment"),
   }),
   execute: async ({ attachmentId, attachmentName }) => {
     return {
       formType: "deleteAttachment",
       title: "Delete Attachment",
-      description: `Are you sure you want to delete the attachment "${attachmentName || attachmentId}"? This action cannot be undone.`,
+      description: `Are you sure you want to delete the attachment "${
+        attachmentName || attachmentId
+      }"? This action cannot be undone.`,
       fields: [
         {
           name: "attachmentId",
@@ -1490,14 +1422,21 @@ export const deleteChecklistItemFormTool = tool({
   description:
     "Generate an interactive form for deleting a Trello checklist item. This tool should be called when the user wants to delete a checklist item.",
   inputSchema: z.object({
-    checklistItemId: z.string().describe("The ID of the checklist item to delete"),
-    checklistItemName: z.string().optional().describe("The name of the checklist item"),
+    checklistItemId: z
+      .string()
+      .describe("The ID of the checklist item to delete"),
+    checklistItemName: z
+      .string()
+      .optional()
+      .describe("The name of the checklist item"),
   }),
   execute: async ({ checklistItemId, checklistItemName }) => {
     return {
       formType: "deleteChecklistItem",
       title: "Delete Checklist Item",
-      description: `Are you sure you want to delete the checklist item "${checklistItemName || checklistItemId}"? This action cannot be undone.`,
+      description: `Are you sure you want to delete the checklist item "${
+        checklistItemName || checklistItemId
+      }"? This action cannot be undone.`,
       fields: [
         {
           name: "checklistItemId",
@@ -1510,7 +1449,8 @@ export const deleteChecklistItemFormTool = tool({
           type: "text",
           required: true,
           placeholder: "Type DELETE to confirm deletion...",
-          description: "This action will permanently delete the checklist item.",
+          description:
+            "This action will permanently delete the checklist item.",
         },
       ],
     };

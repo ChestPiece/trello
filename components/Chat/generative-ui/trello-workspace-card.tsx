@@ -4,13 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Briefcase,
-  ExternalLink,
   Clock,
   Lock,
   Globe,
   Users,
-  Image as ImageIcon,
   Link as LinkIcon,
+  ExternalLink,
 } from "lucide-react";
 
 interface TrelloWorkspaceCardProps {
