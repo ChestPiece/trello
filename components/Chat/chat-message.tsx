@@ -2,6 +2,8 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Message } from "ai";
 import { FormattedText } from "../formatted-text";
+import { ToolCallDisplay } from "./tool-call-display";
+import { ToolResultDisplay } from "./tool-result-display";
 import { format } from "date-fns";
 import {
   BoardCreationCard,
@@ -605,13 +607,73 @@ export function ChatMessage({ message }: ChatMessageProps) {
             />
           ) : (
             <>
-              {message.content.split("\n").map((text, i) => (
-                <React.Fragment key={i}>
-                  <p className={i > 0 ? "mt-2" : ""}>
-                    <FormattedText content={text} />
-                  </p>
-                </React.Fragment>
-              ))}
+              {/* ✅ Use message.parts instead of message.content */}
+              {message.parts ? (
+                message.parts.map((part, index) => {
+                  switch (part.type) {
+                    case 'text':
+                      return (
+                        <React.Fragment key={index}>
+                          {part.text.split("\n").map((text, i) => (
+                            <p key={i} className={i > 0 ? "mt-2" : ""}>
+                              <FormattedText content={text} />
+                            </p>
+                          ))}
+                        </React.Fragment>
+                      );
+                    
+                    case 'tool-call':
+                      return (
+                        <div key={index} className="tool-call-streaming mt-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span className="text-sm text-gray-600">
+                              Calling {part.toolName}...
+                            </span>
+                          </div>
+                          {part.input && (
+                            <pre className="text-xs bg-gray-100 p-2 rounded mt-2">
+                              {JSON.stringify(part.input, null, 2)}
+                            </pre>
+                          )}
+                        </div>
+                      );
+                    
+                    case 'tool-result':
+                      return (
+                        <div key={index} className="tool-result mt-2">
+                          <div className="text-sm font-medium text-green-700 mb-2">
+                            ✅ {part.toolName} completed
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <pre className="text-xs whitespace-pre-wrap">
+                              {typeof part.result === 'string' ? part.result : JSON.stringify(part.result, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      );
+                    
+                    case 'step-start':
+                      return index > 0 ? (
+                        <div key={index} className="text-gray-500 mt-2">
+                          <hr className="my-2 border-gray-300" />
+                        </div>
+                      ) : null;
+                    
+                    default:
+                      return null;
+                  }
+                })
+              ) : (
+                // Fallback for old message format
+                message.content.split("\n").map((text, i) => (
+                  <React.Fragment key={i}>
+                    <p className={i > 0 ? "mt-2" : ""}>
+                      <FormattedText content={text} />
+                    </p>
+                  </React.Fragment>
+                ))
+              )}
               <span className="text-xs text-left">
                 {formatDate(new Date().toISOString())}
               </span>
