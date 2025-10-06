@@ -1,7 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { UIMessage } from "ai";
-import { FormattedText } from "../formatted-text";
 import { format } from "date-fns";
 import {
   BoardCreationCard,
@@ -77,12 +76,10 @@ import {
   ChecklistDeleteCard,
   ChecklistDeleteData,
 } from "../ChecklistCards/checklist-delete-card";
-import { useConversation } from "../conversation-provider";
-import { useDataRefresh } from "../data-refresh-provider";
-import { detectFormType, shouldShowAnyForm } from "../form-detection";
 
 export interface ChatMessageProps {
   message: UIMessage;
+  onFormSubmit?: (data: unknown, action: string) => void;
 }
 
 const formatDate = (timestamp: string) => {
@@ -92,384 +89,746 @@ const formatDate = (timestamp: string) => {
   return format(date, "yyyy-M-d");
 };
 
-export function ChatMessage({ message }: ChatMessageProps) {
-  const { append } = useConversation();
-  const { refreshLists, refreshBoards, refreshCards } = useDataRefresh();
+export function ChatMessage({ message, onFormSubmit }: ChatMessageProps) {
+  const renderToolOutput = (
+    toolName: string,
+    output: unknown,
+    index: number
+  ) => {
+    // For creation/update/delete tools, render as components
+    const creationTools = [
+      "createBoard",
+      "updateBoard",
+      "deleteBoard",
+      "closeBoard",
+      "createList",
+      "updateList",
+      "deleteList",
+      "closeList",
+      "archiveList",
+      "createCard",
+      "updateCard",
+      "deleteCard",
+      "createWorkspace",
+      "updateWorkspace",
+      "deleteWorkspace",
+      "createLabel",
+      "updateLabel",
+      "deleteLabel",
+      "createAttachment",
+      "deleteAttachment",
+      "createChecklist",
+      "updateChecklist",
+      "deleteChecklist",
+      // UI Generation Tools
+      "generateBoardForm",
+      "generateListForm",
+      "generateCardForm",
+      "generateWorkspaceForm",
+      "generateLabelForm",
+      "generateAttachmentForm",
+      "generateChecklistForm",
+    ];
 
-  // Use enhanced form detection logic
-  const messageText =
-    message.parts
-      ?.filter((part) => part.type === "text")
-      ?.map((part) => part.text)
-      ?.join("") || "";
-
-  const formDetection = detectFormType(messageText, message.role);
-
-  // Helper function to convert content string to parts array
-  const createMessageWithParts = (content: string): UIMessage => ({
-    id: Date.now().toString(),
-    role: "user" as const,
-    content, // Keep content for backward compatibility
-    parts: [
-      {
-        type: "text" as const,
-        text: content,
-      },
-    ],
-  });
-
-  const handleBoardCreation = async (data: BoardCreationData) => {
-    try {
-      // Send a message to the AI to create the board using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`
-        )
+    if (creationTools.includes(toolName)) {
+      // Render as interactive components
+      switch (toolName) {
+        case "createBoard":
+          return (
+            <BoardCreationCard
+              key={index}
+              onSubmit={(data: BoardCreationData) => {
+                console.log("Board creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateBoard":
+          return (
+            <BoardUpdateCard
+              key={index}
+              onSubmit={(data: BoardUpdateData) => {
+                console.log("Board update submitted:", data);
+              }}
+              className="max-w-sm"
+            />
+          );
+        case "deleteBoard":
+          return (
+            <BoardDeleteCard
+              key={index}
+              onSubmit={(data: BoardDeleteData) => {
+                console.log("Board deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "closeBoard":
+          return (
+            <BoardCloseCard
+              key={index}
+              onSubmit={(data: BoardCloseData) => {
+                console.log("Board close submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createList":
+          return (
+            <ListCreationCard
+              key={index}
+              onSubmit={(data: ListCreationData) => {
+                console.log("List creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateList":
+          return (
+            <ListUpdateCard
+              key={index}
+              onSubmit={(data: ListUpdateData) => {
+                console.log("List update submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "deleteList":
+          return (
+            <ListDeleteCard
+              key={index}
+              onSubmit={(data: ListDeleteData) => {
+                console.log("List deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "closeList":
+          return (
+            <ListCloseCard
+              key={index}
+              onSubmit={(data: ListCloseData) => {
+                console.log("List close submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "archiveList":
+          return (
+            <ListArchiveCard
+              key={index}
+              onSubmit={(data: ListArchiveData) => {
+                console.log("List archive submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createCard":
+          return (
+            <CardCreationCard
+              key={index}
+              onSubmit={(data: CardCreationData) => {
+                console.log("Card creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateCard":
+          return (
+            <CardUpdateCard
+              key={index}
+              onSubmit={(data: CardUpdateData) => {
+                console.log("Card update submitted:", data);
+              }}
+              className="max-w-sm"
+            />
+          );
+        case "deleteCard":
+          return (
+            <CardDeleteCard
+              key={index}
+              onSubmit={(data: CardDeleteData) => {
+                console.log("Card deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createWorkspace":
+          return (
+            <WorkspaceCreationCard
+              key={index}
+              onSubmit={(data: WorkspaceCreationData) => {
+                console.log("Workspace creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateWorkspace":
+          return (
+            <WorkspaceUpdateCard
+              key={index}
+              onSubmit={(data: WorkspaceUpdateData) => {
+                console.log("Workspace update submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "deleteWorkspace":
+          return (
+            <WorkspaceDeleteCard
+              key={index}
+              onSubmit={(data: WorkspaceDeleteData) => {
+                console.log("Workspace deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createLabel":
+          return (
+            <LabelCreationCard
+              key={index}
+              onSubmit={(data: LabelCreationData) => {
+                console.log("Label creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateLabel":
+          return (
+            <LabelUpdateCard
+              key={index}
+              onSubmit={(data: LabelUpdateData) => {
+                console.log("Label update submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "deleteLabel":
+          return (
+            <LabelDeleteCard
+              key={index}
+              onSubmit={(data: LabelDeleteData) => {
+                console.log("Label deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createAttachment":
+          return (
+            <AttachmentCreationCard
+              key={index}
+              onSubmit={(data: AttachmentCreationData) => {
+                console.log("Attachment creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "deleteAttachment":
+          return (
+            <AttachmentDeleteCard
+              key={index}
+              onSubmit={(data: AttachmentDeleteData) => {
+                console.log("Attachment deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "createChecklist":
+          return (
+            <ChecklistCreationCard
+              key={index}
+              onSubmit={(data: ChecklistCreationData) => {
+                console.log("Checklist creation submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "updateChecklist":
+          return (
+            <ChecklistUpdateCard
+              key={index}
+              onSubmit={(data: ChecklistUpdateData) => {
+                console.log("Checklist update submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        case "deleteChecklist":
+          return (
+            <ChecklistDeleteCard
+              key={index}
+              onSubmit={(data: ChecklistDeleteData) => {
+                console.log("Checklist deletion submitted:", data);
+              }}
+              className="w-full"
+            />
+          );
+        // UI Generation Tools
+        case "generateBoardForm":
+          const boardFormOutput = output as {
+            ui: string;
+            message: string;
+            boardId?: string;
+          };
+          switch (boardFormOutput.ui) {
+            case "BoardCreationCard":
+              return (
+                <BoardCreationCard
+                  key={index}
+                  onSubmit={(data: BoardCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "BoardUpdateCard":
+              return (
+                <BoardUpdateCard
+                  key={index}
+                  onSubmit={(data: BoardUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="max-w-sm"
+                />
+              );
+            case "BoardDeleteCard":
+              return (
+                <BoardDeleteCard
+                  key={index}
+                  onSubmit={(data: BoardDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "BoardCloseCard":
+              return (
+                <BoardCloseCard
+                  key={index}
+                  onSubmit={(data: BoardCloseData) => {
+                    onFormSubmit?.(data, "close");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{boardFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateListForm":
+          const listFormOutput = output as {
+            ui: string;
+            message: string;
+            listId?: string;
+            boardId?: string;
+          };
+          switch (listFormOutput.ui) {
+            case "ListCreationCard":
+              return (
+                <ListCreationCard
+                  key={index}
+                  onSubmit={(data: ListCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ListUpdateCard":
+              return (
+                <ListUpdateCard
+                  key={index}
+                  onSubmit={(data: ListUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ListDeleteCard":
+              return (
+                <ListDeleteCard
+                  key={index}
+                  onSubmit={(data: ListDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ListCloseCard":
+              return (
+                <ListCloseCard
+                  key={index}
+                  onSubmit={(data: ListCloseData) => {
+                    onFormSubmit?.(data, "close");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ListArchiveCard":
+              return (
+                <ListArchiveCard
+                  key={index}
+                  onSubmit={(data: ListArchiveData) => {
+                    onFormSubmit?.(data, "archive");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{listFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateCardForm":
+          const cardFormOutput = output as {
+            ui: string;
+            message: string;
+            cardId?: string;
+            listId?: string;
+          };
+          switch (cardFormOutput.ui) {
+            case "CardCreationCard":
+              return (
+                <CardCreationCard
+                  key={index}
+                  onSubmit={(data: CardCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "CardUpdateCard":
+              return (
+                <CardUpdateCard
+                  key={index}
+                  onSubmit={(data: CardUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="max-w-sm"
+                />
+              );
+            case "CardDeleteCard":
+              return (
+                <CardDeleteCard
+                  key={index}
+                  onSubmit={(data: CardDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{cardFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateWorkspaceForm":
+          const workspaceFormOutput = output as {
+            ui: string;
+            message: string;
+            workspaceId?: string;
+          };
+          switch (workspaceFormOutput.ui) {
+            case "WorkspaceCreationCard":
+              return (
+                <WorkspaceCreationCard
+                  key={index}
+                  onSubmit={(data: WorkspaceCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "WorkspaceUpdateCard":
+              return (
+                <WorkspaceUpdateCard
+                  key={index}
+                  onSubmit={(data: WorkspaceUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "WorkspaceDeleteCard":
+              return (
+                <WorkspaceDeleteCard
+                  key={index}
+                  onSubmit={(data: WorkspaceDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{workspaceFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateLabelForm":
+          const labelFormOutput = output as {
+            ui: string;
+            message: string;
+            labelId?: string;
+            boardId?: string;
+          };
+          switch (labelFormOutput.ui) {
+            case "LabelCreationCard":
+              return (
+                <LabelCreationCard
+                  key={index}
+                  onSubmit={(data: LabelCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "LabelUpdateCard":
+              return (
+                <LabelUpdateCard
+                  key={index}
+                  onSubmit={(data: LabelUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "LabelDeleteCard":
+              return (
+                <LabelDeleteCard
+                  key={index}
+                  onSubmit={(data: LabelDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{labelFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateAttachmentForm":
+          const attachmentFormOutput = output as {
+            ui: string;
+            message: string;
+            attachmentId?: string;
+            cardId?: string;
+          };
+          switch (attachmentFormOutput.ui) {
+            case "AttachmentCreationCard":
+              return (
+                <AttachmentCreationCard
+                  key={index}
+                  onSubmit={(data: AttachmentCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "AttachmentDeleteCard":
+              return (
+                <AttachmentDeleteCard
+                  key={index}
+                  onSubmit={(data: AttachmentDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{attachmentFormOutput.message}</p>
+                </div>
+              );
+          }
+        case "generateChecklistForm":
+          const checklistFormOutput = output as {
+            ui: string;
+            message: string;
+            checklistId?: string;
+            cardId?: string;
+          };
+          switch (checklistFormOutput.ui) {
+            case "ChecklistCreationCard":
+              return (
+                <ChecklistCreationCard
+                  key={index}
+                  onSubmit={(data: ChecklistCreationData) => {
+                    onFormSubmit?.(data, "create");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ChecklistUpdateCard":
+              return (
+                <ChecklistUpdateCard
+                  key={index}
+                  onSubmit={(data: ChecklistUpdateData) => {
+                    onFormSubmit?.(data, "update");
+                  }}
+                  className="w-full"
+                />
+              );
+            case "ChecklistDeleteCard":
+              return (
+                <ChecklistDeleteCard
+                  key={index}
+                  onSubmit={(data: ChecklistDeleteData) => {
+                    onFormSubmit?.(data, "delete");
+                  }}
+                  className="w-full"
+                />
+              );
+            default:
+              return (
+                <div key={index} className="p-4 border rounded-lg bg-muted">
+                  <p className="text-sm">{checklistFormOutput.message}</p>
+                </div>
+              );
+          }
+        default:
+          return (
+            <div key={index} className="p-4 border rounded-lg bg-muted">
+              <p className="text-sm text-muted-foreground">
+                Tool call: {toolName}
+              </p>
+            </div>
+          );
+      }
+    } else {
+      // For data retrieval tools, render as formatted text
+      return (
+        <div key={index} className="p-4 border rounded-lg bg-muted">
+          <div className="text-sm">
+            <h4 className="font-semibold mb-2 capitalize">
+              {toolName.replace(/([A-Z])/g, " $1").trim()}
+            </h4>
+            <pre className="whitespace-pre-wrap text-xs">
+              {JSON.stringify(output, null, 2)}
+            </pre>
+          </div>
+        </div>
       );
-      // Trigger data refresh for boards
-      refreshBoards();
-    } catch (error) {
-      console.error("Error creating board:", error);
     }
   };
 
-  const handleBoardUpdate = async (data: BoardUpdateData) => {
-    try {
-      // Send a message to the AI to update the board using the Trello tools
-      const updateMessage = `Update board with ID: "${data.boardId}"${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.description ? `, description: "${data.description}"` : ""}${
-        data.visibility ? `, visibility: "${data.visibility}"` : ""
-      }`;
-
-      await append(createMessageWithParts(updateMessage));
-      // Trigger data refresh for boards
-      refreshBoards();
-    } catch (error) {
-      console.error("Error updating board:", error);
-    }
-  };
-
-  const handleBoardDelete = async (data: BoardDeleteData) => {
-    try {
-      // Send a message to the AI to delete the board using the Trello tools
-      await append(
-        createMessageWithParts(`Delete board with ID: "${data.boardId}"`)
+  const renderMessageContent = () => {
+    if (message.role === "user") {
+      // For user messages, render text content
+      return (
+        <div>
+          {message.parts.map((part, index) => {
+            if (part.type === "text") {
+              return <span key={index}>{part.text}</span>;
+            }
+            return null;
+          })}
+        </div>
       );
-      // Trigger data refresh for boards
-      refreshBoards();
-    } catch (error) {
-      console.error("Error deleting board:", error);
     }
-  };
 
-  const handleBoardClose = async (data: BoardCloseData) => {
-    try {
-      // Send a message to the AI to close/reopen the board using the Trello tools
-      const action = data.action === "close" ? "close" : "reopen";
-      await append(
-        createMessageWithParts(`${action} board with ID: "${data.boardId}"`)
-      );
-      // Trigger data refresh for boards
-      refreshBoards();
-    } catch (error) {
-      console.error("Error closing/reopening board:", error);
-    }
-  };
+    // For assistant messages, render both text and UI components
+    return (
+      <div>
+        {message.parts.map((part, index) => {
+          if (part.type === "text") {
+            return <div key={index}>{part.text}</div>;
+          }
 
-  const handleListCreation = async (data: ListCreationData) => {
-    try {
-      // Send a message to the AI to create the list using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`
-        )
-      );
-      // Trigger data refresh for lists
-      refreshLists(data.boardId);
-    } catch (error) {
-      console.error("Error creating list:", error);
-    }
-  };
+          // Handle tool invocations
+          if (part.type.startsWith("tool-")) {
+            const toolName = part.type.replace("tool-", "");
 
-  const handleListUpdate = async (data: ListUpdateData) => {
-    try {
-      // Send a message to the AI to update the list using the Trello tools
-      const updateMessage = `Update list with ID: "${data.listId}"${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.closed !== undefined ? `, closed: ${data.closed}` : ""}${
-        data.position ? `, position: "${data.position}"` : ""
-      }${data.subscribe !== undefined ? `, subscribe: ${data.subscribe}` : ""}${
-        data.idBoard ? `, move to board: "${data.idBoard}"` : ""
-      }`;
-      await append(createMessageWithParts(updateMessage));
-      // Trigger data refresh for lists
-      refreshLists(data.idBoard);
-    } catch (error) {
-      console.error("Error updating list:", error);
-    }
-  };
+            // Check if this is a tool invocation part with state
+            if ("state" in part) {
+              // Handle different tool states
+              switch (part.state) {
+                case "input-streaming":
+                  return (
+                    <div key={index} className="p-4 border rounded-lg bg-muted">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                        <span className="text-sm text-muted-foreground">
+                          Preparing {toolName}...
+                        </span>
+                      </div>
+                    </div>
+                  );
+                case "input-available":
+                  return (
+                    <div key={index} className="p-4 border rounded-lg bg-muted">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                        <span className="text-sm text-muted-foreground">
+                          Executing {toolName}...
+                        </span>
+                      </div>
+                    </div>
+                  );
+                case "output-available":
+                  if ("output" in part) {
+                    return renderToolOutput(toolName, part.output, index);
+                  }
+                  break;
+                case "output-error":
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 border rounded-lg bg-destructive/10 border-destructive/20"
+                    >
+                      <div className="text-sm text-destructive">
+                        <strong>Error executing {toolName}:</strong>
+                      </div>
+                      <div className="text-xs text-destructive/70 mt-1">
+                        {"errorText" in part
+                          ? part.errorText
+                          : "An unknown error occurred"}
+                      </div>
+                    </div>
+                  );
+                default:
+                  return (
+                    <div key={index} className="p-4 border rounded-lg bg-muted">
+                      <p className="text-sm text-muted-foreground">
+                        Tool call: {toolName}
+                      </p>
+                    </div>
+                  );
+              }
+            }
+          }
 
-  const handleListDelete = async (data: ListDeleteData) => {
-    try {
-      // Send a message to the AI to delete the list using the Trello tools
-      await append(
-        createMessageWithParts(`Delete list with ID: "${data.listId}"`)
-      );
-      // Trigger data refresh for lists
-      refreshLists();
-    } catch (error) {
-      console.error("Error deleting list:", error);
-    }
-  };
-
-  const handleListClose = async (data: ListCloseData) => {
-    try {
-      // Send a message to the AI to close/reopen the list using the Trello tools
-      const action = data.action === "close" ? "close" : "reopen";
-      await append(
-        createMessageWithParts(`${action} list with ID: "${data.listId}"`)
-      );
-      // Trigger data refresh for lists
-      refreshLists();
-    } catch (error) {
-      console.error("Error closing/reopening list:", error);
-    }
-  };
-
-  const handleListArchive = async (data: ListArchiveData) => {
-    try {
-      // Send a message to the AI to archive/unarchive the list using the Trello tools
-      const action = data.action === "archive" ? "archive" : "unarchive";
-      const archiveCards = data.archiveAllCards ? " and archive all cards" : "";
-      await append(
-        createMessageWithParts(
-          `${action} list with ID: "${data.listId}"${archiveCards}`
-        )
-      );
-      // Trigger data refresh for lists
-      refreshLists();
-    } catch (error) {
-      console.error("Error archiving/unarchiving list:", error);
-    }
-  };
-
-  const handleCardCreation = async (data: CardCreationData) => {
-    try {
-      // Send a message to the AI to create the card using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Create a card in list "${data.listId}" with name: "${data.name}"${
-            data.description ? `, description: "${data.description}"` : ""
-          }${data.position ? `, position: "${data.position}"` : ""}${
-            data.due ? `, due: "${data.due}"` : ""
-          }${data.urlSource ? `, copy from: "${data.urlSource}"` : ""}`
-        )
-      );
-      // Trigger data refresh for cards
-      refreshCards(undefined, data.listId);
-    } catch (error) {
-      console.error("Error creating card:", error);
-    }
-  };
-
-  const handleCardUpdate = async (data: CardUpdateData) => {
-    try {
-      // Send a message to the AI to update the card using the Trello tools
-      const updateMessage = `Update card with ID: "${data.cardId}"${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.description ? `, description: "${data.description}"` : ""}${
-        data.closed !== undefined ? `, closed: ${data.closed}` : ""
-      }${data.idList ? `, move to list: "${data.idList}"` : ""}${
-        data.position ? `, position: "${data.position}"` : ""
-      }${data.due ? `, due: "${data.due}"` : ""}${
-        data.dueComplete !== undefined
-          ? `, due complete: ${data.dueComplete}`
-          : ""
-      }${data.urlSource ? `, copy from: "${data.urlSource}"` : ""}`;
-      await append(createMessageWithParts(updateMessage));
-      // Trigger data refresh for cards
-      refreshCards();
-    } catch (error) {
-      console.error("Error updating card:", error);
-    }
-  };
-
-  const handleCardDelete = async (data: CardDeleteData) => {
-    try {
-      // Send a message to the AI to delete the card using the Trello tools
-      await append(
-        createMessageWithParts(`Delete card with ID: "${data.cardId}"`)
-      );
-      // Trigger data refresh for cards
-      refreshCards();
-    } catch (error) {
-      console.error("Error deleting card:", error);
-    }
-  };
-
-  const handleWorkspaceCreation = async (data: WorkspaceCreationData) => {
-    try {
-      // Send a message to the AI to create the workspace using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Create a workspace with display name: "${data.displayName}"${
-          data.description ? `, description: "${data.description}"` : ""
-        }${data.name ? `, name: "${data.name}"` : ""}${
-          data.website ? `, website: "${data.website}"` : ""
-        }${data.logo ? `, logo: "${data.logo}"` : ""}${
-          data.permissionLevel
-            ? `, permission level: "${data.permissionLevel}"`
-            : ""
-          }`
-        )
-      );
-    } catch (error) {
-      console.error("Error creating workspace:", error);
-    }
-  };
-
-  const handleWorkspaceUpdate = async (data: WorkspaceUpdateData) => {
-    try {
-      // Send a message to the AI to update the workspace using the Trello tools
-      const updateMessage = `Update workspace with ID: "${data.workspaceId}"${
-        data.displayName ? `, display name: "${data.displayName}"` : ""
-      }${data.description ? `, description: "${data.description}"` : ""}${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.website ? `, website: "${data.website}"` : ""}${
-        data.logo ? `, logo: "${data.logo}"` : ""
-      }${
-        data.permissionLevel
-          ? `, permission level: "${data.permissionLevel}"`
-          : ""
-      }`;
-      await append(createMessageWithParts(updateMessage));
-    } catch (error) {
-      console.error("Error updating workspace:", error);
-    }
-  };
-
-  const handleWorkspaceDelete = async (data: WorkspaceDeleteData) => {
-    try {
-      // Send a message to the AI to delete the workspace using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Delete workspace with ID: "${data.workspaceId}"`
-        )
-      );
-    } catch (error) {
-      console.error("Error deleting workspace:", error);
-    }
-  };
-
-  const handleLabelCreation = async (data: LabelCreationData) => {
-    try {
-      // Send a message to the AI to create the label using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Create a label in board "${data.boardId}" with name: "${data.name}" and color: "${data.color}"`
-        )
-      );
-    } catch (error) {
-      console.error("Error creating label:", error);
-    }
-  };
-
-  const handleLabelUpdate = async (data: LabelUpdateData) => {
-    try {
-      // Send a message to the AI to update the label using the Trello tools
-      const updateMessage = `Update label with ID: "${data.labelId}"${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.color ? `, color: "${data.color}"` : ""}`;
-      await append(createMessageWithParts(updateMessage));
-    } catch (error) {
-      console.error("Error updating label:", error);
-    }
-  };
-
-  const handleLabelDelete = async (data: LabelDeleteData) => {
-    try {
-      // Send a message to the AI to delete the label using the Trello tools
-      await append(
-        createMessageWithParts(`Delete label with ID: "${data.labelId}"`)
-      );
-    } catch (error) {
-      console.error("Error deleting label:", error);
-    }
-  };
-
-  const handleAttachmentCreation = async (data: AttachmentCreationData) => {
-    try {
-      // Send a message to the AI to create the attachment using the Trello tools
-      const attachmentMessage = `Add attachment to card "${
-        data.cardId
-      }" with name: "${data.name}" and URL: "${data.url}"${
-        data.mimeType ? `, mime type: "${data.mimeType}"` : ""
-      }${data.setCover ? ", set as cover" : ""}`;
-      await append(createMessageWithParts(attachmentMessage));
-    } catch (error) {
-      console.error("Error creating attachment:", error);
-    }
-  };
-
-  const handleAttachmentDelete = async (data: AttachmentDeleteData) => {
-    try {
-      // Send a message to the AI to delete the attachment using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Delete attachment with ID: "${data.attachmentId}"`
-        )
-      );
-    } catch (error) {
-      console.error("Error deleting attachment:", error);
-    }
-  };
-
-  const handleChecklistCreation = async (data: ChecklistCreationData) => {
-    try {
-      // Send a message to the AI to create the checklist using the Trello tools
-      const checklistMessage = `Create checklist in card "${
-        data.cardId
-      }" with name: "${data.name}"${
-        data.pos ? `, position: "${data.pos}"` : ""
-      }${
-        data.idChecklistSource ? `, copy from: "${data.idChecklistSource}"` : ""
-      }${
-        data.checkItems && data.checkItems.length > 0
-          ? `, with items: ${data.checkItems
-              .map((item) => item.name)
-              .join(", ")}`
-          : ""
-      }`;
-      await append(createMessageWithParts(checklistMessage));
-    } catch (error) {
-      console.error("Error creating checklist:", error);
-    }
-  };
-
-  const handleChecklistUpdate = async (data: ChecklistUpdateData) => {
-    try {
-      // Send a message to the AI to update the checklist using the Trello tools
-      const updateMessage = `Update checklist with ID: "${data.checklistId}"${
-        data.name ? `, name: "${data.name}"` : ""
-      }${data.pos ? `, position: "${data.pos}"` : ""}`;
-      await append(createMessageWithParts(updateMessage));
-    } catch (error) {
-      console.error("Error updating checklist:", error);
-    }
-  };
-
-  const handleChecklistDelete = async (data: ChecklistDeleteData) => {
-    try {
-      // Send a message to the AI to delete the checklist using the Trello tools
-      await append(
-        createMessageWithParts(
-          `Delete checklist with ID: "${data.checklistId}"`
-        )
-      );
-    } catch (error) {
-      console.error("Error deleting checklist:", error);
-    }
+          return null;
+        })}
+      </div>
+    );
   };
 
   return (
@@ -479,144 +838,19 @@ export function ChatMessage({ message }: ChatMessageProps) {
         message.role === "user" ? "justify-end" : "justify-start"
       )}
     >
-      {/* User Message */}
       <div
         className={cn(
           "flex flex-col gap-2 rounded-lg px-4 py-2",
           message.role === "user"
             ? "bg-primary text-primary-foreground max-w-[80%]"
-            : shouldShowAnyForm(formDetection)
-            ? "bg-muted w-full max-w-lg"
             : "bg-muted max-w-[80%]"
         )}
       >
         <div className="text-sm">
-          {formDetection.shouldShowBoardCreationForm ? (
-            <BoardCreationCard
-              onSubmit={handleBoardCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowBoardUpdateForm ? (
-            <BoardUpdateCard
-              onSubmit={handleBoardUpdate}
-              className="max-w-sm"
-            />
-          ) : formDetection.shouldShowBoardDeleteForm ? (
-            <BoardDeleteCard onSubmit={handleBoardDelete} className="w-full" />
-          ) : formDetection.shouldShowBoardCloseForm ? (
-            <BoardCloseCard onSubmit={handleBoardClose} className="w-full" />
-          ) : formDetection.shouldShowListCreationForm ? (
-            <ListCreationCard
-              onSubmit={handleListCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowListUpdateForm ? (
-            <ListUpdateCard onSubmit={handleListUpdate} className="w-full" />
-          ) : formDetection.shouldShowListDeleteForm ? (
-            <ListDeleteCard onSubmit={handleListDelete} className="w-full" />
-          ) : formDetection.shouldShowListCloseForm ? (
-            <ListCloseCard onSubmit={handleListClose} className="w-full" />
-          ) : formDetection.shouldShowListArchiveForm ? (
-            <ListArchiveCard onSubmit={handleListArchive} className="w-full" />
-          ) : formDetection.shouldShowCardCreationForm ? (
-            <CardCreationCard
-              onSubmit={handleCardCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowCardUpdateForm ? (
-            <CardUpdateCard onSubmit={handleCardUpdate} className="max-w-sm" />
-          ) : formDetection.shouldShowCardDeleteForm ? (
-            <CardDeleteCard onSubmit={handleCardDelete} className="w-full" />
-          ) : formDetection.shouldShowWorkspaceCreationForm ? (
-            <WorkspaceCreationCard
-              onSubmit={handleWorkspaceCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowWorkspaceUpdateForm ? (
-            <WorkspaceUpdateCard
-              onSubmit={handleWorkspaceUpdate}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowWorkspaceDeleteForm ? (
-            <WorkspaceDeleteCard
-              onSubmit={handleWorkspaceDelete}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowLabelCreationForm ? (
-            <LabelCreationCard
-              onSubmit={handleLabelCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowLabelUpdateForm ? (
-            <LabelUpdateCard onSubmit={handleLabelUpdate} className="w-full" />
-          ) : formDetection.shouldShowLabelDeleteForm ? (
-            <LabelDeleteCard onSubmit={handleLabelDelete} className="w-full" />
-          ) : formDetection.shouldShowAttachmentCreationForm ? (
-            <AttachmentCreationCard
-              onSubmit={handleAttachmentCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowAttachmentDeleteForm ? (
-            <AttachmentDeleteCard
-              onSubmit={handleAttachmentDelete}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowChecklistCreationForm ? (
-            <ChecklistCreationCard
-              onSubmit={handleChecklistCreation}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowChecklistUpdateForm ? (
-            <ChecklistUpdateCard
-              onSubmit={handleChecklistUpdate}
-              className="w-full"
-            />
-          ) : formDetection.shouldShowChecklistDeleteForm ? (
-            <ChecklistDeleteCard
-              onSubmit={handleChecklistDelete}
-              className="w-full"
-            />
-          ) : (
-            <>
-              {/* ✅ Use message.parts instead of message.content */}
-              {message.parts
-                ? message.parts.map((part, index) => {
-                    switch (part.type) {
-                      case "text":
-                        return (
-                          <React.Fragment key={index}>
-                            {part.text.split("\n").map((text, i) => (
-                              <p key={i} className={i > 0 ? "mt-2" : ""}>
-                                <FormattedText content={text} />
-                              </p>
-                            ))}
-                          </React.Fragment>
-                        );
-
-                      case "step-start":
-                        return index > 0 ? (
-                          <div key={index} className="text-gray-500 mt-2">
-                            <hr className="my-2 border-gray-300" />
-                          </div>
-                        ) : null;
-
-                      default:
-                        return null;
-                    }
-                  })
-                : // Fallback for old message format
-                  message.content.split("\n").map((text, i) => (
-                    <React.Fragment key={i}>
-                      <p className={i > 0 ? "mt-2" : ""}>
-                        <FormattedText content={text} />
-                      </p>
-                    </React.Fragment>
-                  ))}
-              <span className="text-xs text-left">
-                {formatDate(new Date().toISOString())}
-              </span>
-            </>
-          )}
+          {renderMessageContent()}
+          <span className="text-xs text-left">
+            {formatDate(new Date().toISOString())}
+          </span>
         </div>
       </div>
     </div>

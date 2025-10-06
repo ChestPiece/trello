@@ -21,7 +21,7 @@ const getChecklistSchema = z.object({
 export const getChecklistTool = tool({
   description:
     "Retrieve detailed information about a specific Trello checklist",
-  parameters: getChecklistSchema,
+  inputSchema: getChecklistSchema,
   execute: async ({ checklistId, fields, checkItems, checkItemFields }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

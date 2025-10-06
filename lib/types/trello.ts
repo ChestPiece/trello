@@ -1,7 +1,7 @@
 // Centralized Trello type definitions
 
 // Base response structure
-export interface TrelloResponse<T = any> {
+export interface TrelloResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -31,8 +31,8 @@ export interface Board {
   dateLastActivity?: string;
   dateLastView?: string;
   idShort?: number;
-  prefs?: Record<string, any>;
-  organization?: Record<string, any>;
+  prefs?: Record<string, unknown>;
+  organization?: Record<string, unknown>;
   lists?: List[];
 }
 
@@ -116,7 +116,7 @@ export interface Workspace {
   name: string;
   displayName: string;
   desc?: string;
-  descData?: any;
+  descData?: unknown;
   url?: string;
   website?: string;
   logo?: string;
@@ -234,7 +234,7 @@ export type TrelloOperation =
 export interface TrelloHookOptions {
   autoFetch?: boolean;
   refreshTriggers?: string[];
-  transform?: (data: any) => any;
+  transform?: (data: unknown) => unknown;
 }
 
 // Resource type mapping
@@ -277,7 +277,7 @@ export interface RateLimitInfo {
   retryAfter?: number;
 }
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   data: T;
   timestamp: number;
   ttl: number;
@@ -323,7 +323,7 @@ export interface RequestLog {
   }>;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

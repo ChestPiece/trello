@@ -24,7 +24,7 @@ const updateLabelSchema = z.object({
 
 export const updateLabelTool = tool({
   description: "Update an existing Trello label with new name or color",
-  parameters: updateLabelSchema,
+  inputSchema: updateLabelSchema,
   execute: async ({ labelId, name, color }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

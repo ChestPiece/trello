@@ -10,7 +10,7 @@ const deleteAttachmentSchema = z.object({
 export const deleteAttachmentTool = tool({
   description:
     "Delete a Trello attachment permanently. This action cannot be undone.",
-  parameters: deleteAttachmentSchema,
+  inputSchema: deleteAttachmentSchema,
   execute: async ({ cardId, attachmentId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

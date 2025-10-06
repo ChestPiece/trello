@@ -20,7 +20,7 @@ const createChecklistSchema = z.object({
 export const createChecklistTool = tool({
   description:
     "Create a new checklist in a Trello card with specified name and optional settings",
-  parameters: createChecklistSchema,
+  inputSchema: createChecklistSchema,
   execute: async ({ cardId, name, idChecklistSource, pos }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

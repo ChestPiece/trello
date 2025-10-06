@@ -10,7 +10,7 @@ const removeMemberFromBoardSchema = z.object({
 export const removeMemberFromBoardTool = tool({
   description:
     "Remove a member from a Trello board. This action cannot be undone.",
-  parameters: removeMemberFromBoardSchema,
+  inputSchema: removeMemberFromBoardSchema,
   execute: async ({ boardId, memberId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

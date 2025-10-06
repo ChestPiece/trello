@@ -13,7 +13,7 @@ const deleteListSchema = z.object({
 export const deleteListTool = tool({
   description:
     "Delete a Trello list permanently. Optionally archive all cards in the list first.",
-  parameters: deleteListSchema,
+  inputSchema: deleteListSchema,
   execute: async ({ listId, archiveAllCards = false }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

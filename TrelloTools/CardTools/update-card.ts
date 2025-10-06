@@ -68,7 +68,7 @@ const updateCardSchema = z.object({
 export const updateCardTool = tool({
   description:
     "Update an existing Trello card with new name, description, position, or other settings",
-  parameters: updateCardSchema,
+  inputSchema: updateCardSchema,
   execute: async ({
     cardId,
     name,

@@ -76,7 +76,7 @@ const createWorkspaceSchema = z.object({
 export const createWorkspaceTool = tool({
   description:
     "Create a new Trello workspace (organization) with specified display name, description, and settings. Supports comprehensive workspace configuration including permissions, visibility, and custom preferences.",
-  parameters: createWorkspaceSchema,
+  inputSchema: createWorkspaceSchema,
   execute: async ({ displayName, description, name, website, logo, prefs }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

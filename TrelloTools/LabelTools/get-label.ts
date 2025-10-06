@@ -12,7 +12,7 @@ const getLabelSchema = z.object({
 
 export const getLabelTool = tool({
   description: "Retrieve detailed information about a specific Trello label",
-  parameters: getLabelSchema,
+  inputSchema: getLabelSchema,
   execute: async ({ labelId, fields }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -32,7 +32,7 @@ const createLabelSchema = z.object({
 export const createLabelTool = tool({
   description:
     "Create a new label in a Trello board with specified name and color. Optionally associate with a specific list or add to a specific card immediately.",
-  parameters: createLabelSchema,
+  inputSchema: createLabelSchema,
   execute: async ({ boardId, name, color, listId: _listId, cardId }) => {
     // Note: listId is not used as Trello labels are board-level, not list-level
     try {

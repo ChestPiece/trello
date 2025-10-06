@@ -21,7 +21,7 @@ const listAttachmentsSchema = z.object({
 export const listAttachmentsTool = tool({
   description:
     "List all attachments on a Trello card with optional filtering and field selection",
-  parameters: listAttachmentsSchema,
+  inputSchema: listAttachmentsSchema,
   execute: async ({ cardId, fields, filter, limit }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -1,7 +1,34 @@
 "use client";
 
 import { useTrelloList } from "./use-trello-resource";
-import { Card } from "@/lib/types/trello";
+import { Card, Label, Member, Attachment, Checklist } from "@/lib/types/trello";
+
+// Type for raw Trello API response
+interface TrelloCardResponse {
+  id: string;
+  name: string;
+  desc?: string;
+  closed: boolean;
+  idList: string;
+  idBoard?: string;
+  pos: number;
+  due?: string;
+  dueComplete?: boolean;
+  idMembers?: string[];
+  idLabels?: string[];
+  url?: string;
+  shortUrl?: string;
+  idShort?: number;
+  dateLastActivity?: string;
+  idAttachmentCover?: string;
+  manualCoverAttachment?: boolean;
+  idChecklists?: string[];
+  idMembersVoted?: string[];
+  labels?: Label[];
+  members?: Member[];
+  attachments?: Attachment[];
+  checklists?: Checklist[];
+}
 
 export function useCards(boardId?: string, listId?: string) {
   const {
@@ -42,34 +69,41 @@ export function useCards(boardId?: string, listId?: string) {
     },
     {
       autoFetch: !!(boardId || listId),
-      transform: (data: unknown[]): Card[] =>
-        (data as Record<string, unknown>[]).map(
-          (card: Record<string, unknown>) => ({
-            id: card.id as string,
-            name: card.name as string,
-            desc: card.desc as string,
-            closed: card.closed as boolean,
-            idList: card.idList as string,
-            idBoard: card.idBoard as string,
-            pos: card.pos as number,
-            due: card.due as string,
-            dueComplete: card.dueComplete as boolean,
-            idMembers: card.idMembers as string[],
-            idLabels: card.idLabels as string[],
-            url: card.url as string,
-            shortUrl: card.shortUrl as string,
-            idShort: card.idShort as number,
-            dateLastActivity: card.dateLastActivity as string,
-            idAttachmentCover: card.idAttachmentCover as string,
-            manualCoverAttachment: card.manualCoverAttachment as boolean,
-            idChecklists: card.idChecklists as string[],
-            idMembersVoted: card.idMembersVoted as string[],
-            labels: (card.labels || []) as any[],
-            members: (card.members || []) as any[],
-            attachments: (card.attachments || []) as any[],
-            checklists: (card.checklists || []) as any[],
-          })
-        ),
+      transform: (data: unknown[]): Card[] => {
+        if (!Array.isArray(data)) {
+          return [];
+        }
+
+        return data.map((card: unknown): Card => {
+          const cardData = card as TrelloCardResponse;
+
+          return {
+            id: cardData.id,
+            name: cardData.name,
+            desc: cardData.desc,
+            closed: cardData.closed,
+            idList: cardData.idList,
+            idBoard: cardData.idBoard,
+            pos: cardData.pos,
+            due: cardData.due,
+            dueComplete: cardData.dueComplete,
+            idMembers: cardData.idMembers || [],
+            idLabels: cardData.idLabels || [],
+            url: cardData.url,
+            shortUrl: cardData.shortUrl,
+            idShort: cardData.idShort,
+            dateLastActivity: cardData.dateLastActivity,
+            idAttachmentCover: cardData.idAttachmentCover,
+            manualCoverAttachment: cardData.manualCoverAttachment,
+            idChecklists: cardData.idChecklists || [],
+            idMembersVoted: cardData.idMembersVoted || [],
+            labels: cardData.labels || [],
+            members: cardData.members || [],
+            attachments: cardData.attachments || [],
+            checklists: cardData.checklists || [],
+          };
+        });
+      },
     }
   );
 

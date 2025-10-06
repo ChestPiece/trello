@@ -28,65 +28,65 @@ export interface FormDetectionPatterns {
 
 // Define comprehensive regex patterns for form detection
 export const formDetectionPatterns: FormDetectionPatterns = {
-  // Board patterns
+  // Board patterns - Make them more specific to avoid false positives
   boardCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?board\b|board\s+(?:creation|create)\s+form/i,
+    /\b(?:board\s+creation\s+form|create\s+board\s+form|new\s+board\s+form)\b/i,
   boardUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?board\b|board\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:board\s+update\s+form|update\s+board\s+form|edit\s+board\s+form|modify\s+board\s+form)\b/i,
   boardDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?board\b|board\s+(?:delete|remove)\s+form/i,
+    /\b(?:board\s+delete\s+form|delete\s+board\s+form|remove\s+board\s+form)\b/i,
   boardClose:
-    /\b(?:close|reopen|archive)\s+(?:a\s+)?board\b|board\s+(?:close|reopen)\s+form/i,
+    /\b(?:board\s+close\s+form|close\s+board\s+form|reopen\s+board\s+form)\b/i,
 
-  // List patterns
+  // List patterns - Make them more specific
   listCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?list\b|list\s+(?:creation|create)\s+form/i,
+    /\b(?:list\s+creation\s+form|create\s+list\s+form|new\s+list\s+form)\b/i,
   listUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?list\b|list\s+(?:update|edit|modify)\s+form|list\s+update\s+form/i,
+    /\b(?:list\s+update\s+form|update\s+list\s+form|edit\s+list\s+form|modify\s+list\s+form)\b/i,
   listDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?list\b|list\s+(?:delete|remove)\s+form/i,
+    /\b(?:list\s+delete\s+form|delete\s+list\s+form|remove\s+list\s+form)\b/i,
   listClose:
-    /\b(?:close|reopen)\s+(?:a\s+)?list\b|list\s+(?:close|reopen)\s+form/i,
+    /\b(?:list\s+close\s+form|close\s+list\s+form|reopen\s+list\s+form)\b/i,
   listArchive:
-    /\b(?:archive|unarchive|hide|restore)\s+(?:a\s+)?list\b|list\s+(?:archive|unarchive)\s+form|list\s+archive\s+form/i,
+    /\b(?:list\s+archive\s+form|archive\s+list\s+form|unarchive\s+list\s+form)\b/i,
 
-  // Card patterns
+  // Card patterns - Make them more specific
   cardCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?card\b|card\s+(?:creation|create)\s+form/i,
+    /\b(?:card\s+creation\s+form|create\s+card\s+form|new\s+card\s+form)\b/i,
   cardUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?card\b|card\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:card\s+update\s+form|update\s+card\s+form|edit\s+card\s+form|modify\s+card\s+form)\b/i,
   cardDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?card\b|card\s+(?:delete|remove)\s+form/i,
+    /\b(?:card\s+delete\s+form|delete\s+card\s+form|remove\s+card\s+form)\b/i,
 
-  // Workspace patterns
+  // Workspace patterns - Make them more specific
   workspaceCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?workspace\b|workspace\s+(?:creation|create)\s+form/i,
+    /\b(?:workspace\s+creation\s+form|create\s+workspace\s+form|new\s+workspace\s+form)\b/i,
   workspaceUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?workspace\b|workspace\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:workspace\s+update\s+form|update\s+workspace\s+form|edit\s+workspace\s+form|modify\s+workspace\s+form)\b/i,
   workspaceDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?workspace\b|workspace\s+(?:delete|remove)\s+form/i,
+    /\b(?:workspace\s+delete\s+form|delete\s+workspace\s+form|remove\s+workspace\s+form)\b/i,
 
-  // Label patterns
+  // Label patterns - Make them more specific
   labelCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?label\b|label\s+(?:creation|create)\s+form/i,
+    /\b(?:label\s+creation\s+form|create\s+label\s+form|new\s+label\s+form)\b/i,
   labelUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?label\b|label\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:label\s+update\s+form|update\s+label\s+form|edit\s+label\s+form|modify\s+label\s+form)\b/i,
   labelDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?label\b|label\s+(?:delete|remove)\s+form/i,
+    /\b(?:label\s+delete\s+form|delete\s+label\s+form|remove\s+label\s+form)\b/i,
 
-  // Attachment patterns
+  // Attachment patterns - Make them more specific
   attachmentCreation:
-    /\b(?:add|attach|upload|create)\s+(?:an\s+)?(?:attachment|file)\b|attachment\s+(?:creation|create)\s+form/i,
+    /\b(?:attachment\s+creation\s+form|create\s+attachment\s+form|add\s+attachment\s+form)\b/i,
   attachmentDelete:
-    /\b(?:delete|remove|destroy)\s+(?:an\s+)?(?:attachment|file)\b|attachment\s+(?:delete|remove)\s+form/i,
+    /\b(?:attachment\s+delete\s+form|delete\s+attachment\s+form|remove\s+attachment\s+form)\b/i,
 
-  // Checklist patterns
+  // Checklist patterns - Make them more specific
   checklistCreation:
-    /\b(?:create|make|new|add)\s+(?:a\s+)?checklist\b|checklist\s+(?:creation|create)\s+form/i,
+    /\b(?:checklist\s+creation\s+form|create\s+checklist\s+form|new\s+checklist\s+form)\b/i,
   checklistUpdate:
-    /\b(?:update|edit|modify|change)\s+(?:a\s+)?checklist\b|checklist\s+(?:update|edit|modify)\s+form/i,
+    /\b(?:checklist\s+update\s+form|update\s+checklist\s+form|edit\s+checklist\s+form|modify\s+checklist\s+form)\b/i,
   checklistDelete:
-    /\b(?:delete|remove|destroy)\s+(?:a\s+)?checklist\b|checklist\s+(?:delete|remove)\s+form/i,
+    /\b(?:checklist\s+delete\s+form|delete\s+checklist\s+form|remove\s+checklist\s+form)\b/i,
 };
 
 // Form detection result interface

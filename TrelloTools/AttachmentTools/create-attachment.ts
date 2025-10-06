@@ -12,7 +12,7 @@ const createAttachmentSchema = z.object({
 
 export const createAttachmentTool = tool({
   description: "Create an attachment on a Trello card by URL or file data",
-  parameters: createAttachmentSchema,
+  inputSchema: createAttachmentSchema,
   execute: async ({ cardId, url, name, mimeType, file }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

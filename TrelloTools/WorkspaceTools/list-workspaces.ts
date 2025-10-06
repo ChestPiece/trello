@@ -175,7 +175,7 @@ const listWorkspacesSchema = z.object({
 export const listWorkspacesTool = tool({
   description:
     "List all Trello workspaces accessible to the authenticated user with optional filtering and field selection",
-  parameters: listWorkspacesSchema,
+  inputSchema: listWorkspacesSchema,
   execute: async ({
     fields,
     filter,

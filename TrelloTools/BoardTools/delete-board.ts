@@ -9,7 +9,7 @@ const deleteBoardSchema = z.object({
 export const deleteBoardTool = tool({
   description:
     "Delete a Trello board permanently. This action cannot be undone.",
-  parameters: deleteBoardSchema,
+  inputSchema: deleteBoardSchema,
   execute: async ({ boardId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

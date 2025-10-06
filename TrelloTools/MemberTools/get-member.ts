@@ -69,7 +69,7 @@ const getMemberSchema = z.object({
 
 export const getMemberTool = tool({
   description: "Retrieve detailed information about a specific Trello member",
-  parameters: getMemberSchema,
+  inputSchema: getMemberSchema,
   execute: async ({
     memberId,
     fields,

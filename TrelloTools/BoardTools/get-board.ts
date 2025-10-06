@@ -105,7 +105,7 @@ const getBoardSchema = z.object({
 export const getBoardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello board including cards, lists, members, and other data",
-  parameters: getBoardSchema,
+  inputSchema: getBoardSchema,
   execute: async ({
     boardId,
     fields,

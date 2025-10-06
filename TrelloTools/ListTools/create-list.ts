@@ -20,7 +20,7 @@ const createListSchema = z.object({
 export const createListTool = tool({
   description:
     "Create a new list in a Trello board with specified name and optional settings",
-  parameters: createListSchema,
+  inputSchema: createListSchema,
   execute: async ({
     boardId,
     name,

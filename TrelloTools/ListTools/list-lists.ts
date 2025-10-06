@@ -67,7 +67,7 @@ type TrelloListResponse = {
 export const listListsTool = tool({
   description:
     "List all lists in a Trello board with optional filtering and field selection",
-  parameters: listListsSchema,
+  inputSchema: listListsSchema,
   execute: async ({
     boardId,
     filter = "all",

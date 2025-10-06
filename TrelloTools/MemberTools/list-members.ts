@@ -21,7 +21,7 @@ const listMembersSchema = z.object({
 export const listMembersTool = tool({
   description:
     "List all members of a Trello board with optional filtering and field selection",
-  parameters: listMembersSchema,
+  inputSchema: listMembersSchema,
   execute: async ({ boardId, fields, filter, activity }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -13,7 +13,7 @@ const archiveListSchema = z.object({
 export const archiveListTool = tool({
   description:
     "Archive a Trello list. This closes the list and optionally archives all cards within it. Archived lists can be restored later.",
-  parameters: archiveListSchema,
+  inputSchema: archiveListSchema,
   execute: async ({ listId, archiveAllCards = false }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

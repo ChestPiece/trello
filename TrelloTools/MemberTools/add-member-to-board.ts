@@ -19,7 +19,7 @@ const addMemberToBoardSchema = z.object({
 export const addMemberToBoardTool = tool({
   description:
     "Add a member to a Trello board with specified email or full name",
-  parameters: addMemberToBoardSchema,
+  inputSchema: addMemberToBoardSchema,
   execute: async ({ boardId, email, fullName, type = "normal" }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

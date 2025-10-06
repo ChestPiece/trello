@@ -1,7 +1,16 @@
-import { TrelloResponse, TrelloError, TrelloOperation } from "./types/trello";
+import { TrelloResponse, TrelloOperation } from "../types/trello";
 import * as TrelloTools from "@/TrelloTools";
-import { cacheService } from "./cache-service";
+import { cacheService } from "../cache-service";
 import { monitoringService } from "./monitoring-service";
+import { Tool } from "ai";
+
+// Tool interface that matches AI SDK tool structure
+interface TrelloTool {
+  execute: (
+    args: Record<string, unknown>,
+    options: { toolCallId: string; messages: unknown[] }
+  ) => Promise<unknown>;
+}
 
 export class TrelloService {
   private static instance: TrelloService;
@@ -29,9 +38,9 @@ export class TrelloService {
   /**
    * Execute a Trello tool operation with standardized error handling and caching
    */
-  public async executeToolOperation<T = any>(
+  public async executeToolOperation<T = unknown>(
     operation: TrelloOperation,
-    params: Record<string, any> = {},
+    params: Record<string, unknown> = {},
     requestId?: string
   ): Promise<TrelloResponse<T>> {
     const startTime = Date.now();
@@ -49,15 +58,15 @@ export class TrelloService {
       // Get the tool from TrelloTools
       const tool = this.getToolByName(operation);
       if (!tool) {
-        return this.createErrorResponse(`Tool '${operation}' not found`);
+        return this.createErrorResponse<T>(`Tool '${operation}' not found`);
       }
 
       // Execute the tool
       const toolStartTime = Date.now();
-      const result = (await tool.execute(params, {
+      const result = await tool.execute(params, {
         toolCallId: `${operation}-${Date.now()}`,
         messages: [],
-      })) as any;
+      });
       const toolDuration = Date.now() - toolStartTime;
 
       // Log tool execution
@@ -70,18 +79,21 @@ export class TrelloService {
         );
       }
 
+      // Standardize the response first
+      const standardizedResult = this.standardizeResponse<T>(result);
+
       // Cache successful read operations
-      if (cacheService.shouldCache(operation) && result.success !== false) {
-        cacheService.set(operation, params, result);
+      if (
+        cacheService.shouldCache(operation) &&
+        standardizedResult.success !== false
+      ) {
+        cacheService.set(operation, params, standardizedResult);
       }
 
       // Invalidate cache for write operations
       if (!cacheService.shouldCache(operation)) {
         this.invalidateRelatedCache(operation);
       }
-
-      // Standardize the response
-      const standardizedResult = this.standardizeResponse(result);
 
       const totalDuration = Date.now() - startTime;
       console.log(
@@ -110,8 +122,8 @@ export class TrelloService {
   /**
    * Get tool by name from TrelloTools
    */
-  private getToolByName(operation: TrelloOperation) {
-    const toolMap: Record<string, any> = {
+  private getToolByName(operation: TrelloOperation): TrelloTool | null {
+    const toolMap: Record<string, Tool> = {
       // Board Tools
       listBoards: TrelloTools.listBoardsTool,
       getBoard: TrelloTools.getBoardTool,
@@ -174,18 +186,21 @@ export class TrelloService {
       deleteWorkspace: TrelloTools.deleteWorkspaceTool,
     };
 
-    return toolMap[operation];
+    const tool = toolMap[operation];
+    return tool ? (tool as unknown as TrelloTool) : null;
   }
 
   /**
    * Standardize tool response to consistent format
    */
-  private standardizeResponse<T>(result: any): TrelloResponse<T> {
-    if (result.success === false) {
+  private standardizeResponse<T>(result: unknown): TrelloResponse<T> {
+    const typedResult = result as Record<string, unknown>;
+
+    if (typedResult.success === false) {
       return {
         success: false,
-        error: (result as any).error || "Operation failed",
-        message: (result as any).message || "Unknown error occurred",
+        error: (typedResult.error as string) || "Operation failed",
+        message: (typedResult.message as string) || "Unknown error occurred",
       };
     }
 
@@ -193,46 +208,46 @@ export class TrelloService {
     let data: T;
     let count: number | undefined;
 
-    if ((result as any).boards) {
-      data = (result as any).boards as T;
-      count = (result as any).count;
-    } else if ((result as any).lists) {
-      data = (result as any).lists as T;
-      count = (result as any).count;
-    } else if ((result as any).cards) {
-      data = (result as any).cards as T;
-      count = (result as any).count;
-    } else if ((result as any).labels) {
-      data = (result as any).labels as T;
-      count = (result as any).count;
-    } else if ((result as any).attachments) {
-      data = (result as any).attachments as T;
-      count = (result as any).count;
-    } else if ((result as any).checklists) {
-      data = (result as any).checklists as T;
-      count = (result as any).count;
-    } else if ((result as any).members) {
-      data = (result as any).members as T;
-      count = (result as any).count;
-    } else if ((result as any).workspaces) {
-      data = (result as any).workspaces as T;
-      count = (result as any).count;
-    } else if ((result as any).board) {
-      data = (result as any).board as T;
-    } else if ((result as any).list) {
-      data = (result as any).list as T;
-    } else if ((result as any).card) {
-      data = (result as any).card as T;
-    } else if ((result as any).label) {
-      data = (result as any).label as T;
-    } else if ((result as any).attachment) {
-      data = (result as any).attachment as T;
-    } else if ((result as any).checklist) {
-      data = (result as any).checklist as T;
-    } else if ((result as any).member) {
-      data = (result as any).member as T;
-    } else if ((result as any).workspace) {
-      data = (result as any).workspace as T;
+    if (typedResult.boards) {
+      data = typedResult.boards as T;
+      count = typedResult.count as number;
+    } else if (typedResult.lists) {
+      data = typedResult.lists as T;
+      count = typedResult.count as number;
+    } else if (typedResult.cards) {
+      data = typedResult.cards as T;
+      count = typedResult.count as number;
+    } else if (typedResult.labels) {
+      data = typedResult.labels as T;
+      count = typedResult.count as number;
+    } else if (typedResult.attachments) {
+      data = typedResult.attachments as T;
+      count = typedResult.count as number;
+    } else if (typedResult.checklists) {
+      data = typedResult.checklists as T;
+      count = typedResult.count as number;
+    } else if (typedResult.members) {
+      data = typedResult.members as T;
+      count = typedResult.count as number;
+    } else if (typedResult.workspaces) {
+      data = typedResult.workspaces as T;
+      count = typedResult.count as number;
+    } else if (typedResult.board) {
+      data = typedResult.board as T;
+    } else if (typedResult.list) {
+      data = typedResult.list as T;
+    } else if (typedResult.card) {
+      data = typedResult.card as T;
+    } else if (typedResult.label) {
+      data = typedResult.label as T;
+    } else if (typedResult.attachment) {
+      data = typedResult.attachment as T;
+    } else if (typedResult.checklist) {
+      data = typedResult.checklist as T;
+    } else if (typedResult.member) {
+      data = typedResult.member as T;
+    } else if (typedResult.workspace) {
+      data = typedResult.workspace as T;
     } else {
       // For operations that don't return specific data
       data = result as T;
@@ -242,14 +257,15 @@ export class TrelloService {
       success: true,
       data,
       count,
-      message: result.message || "Operation completed successfully",
+      message:
+        (typedResult.message as string) || "Operation completed successfully",
     };
   }
 
   /**
    * Handle errors consistently
    */
-  private handleError(error: unknown): TrelloResponse {
+  private handleError<T = unknown>(error: unknown): TrelloResponse<T> {
     let errorMessage = "An unexpected error occurred";
     let status = 500;
 
@@ -269,7 +285,7 @@ export class TrelloService {
     } else if (typeof error === "string") {
       errorMessage = error;
     } else if (error && typeof error === "object" && "message" in error) {
-      errorMessage = (error as any).message;
+      errorMessage = (error as Error).message;
     }
 
     console.error("TrelloService Error:", {
@@ -288,7 +304,7 @@ export class TrelloService {
   /**
    * Create standardized error response
    */
-  private createErrorResponse(message: string): TrelloResponse {
+  private createErrorResponse<T>(message: string): TrelloResponse<T> {
     return {
       success: false,
       error: message,

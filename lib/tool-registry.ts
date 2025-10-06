@@ -52,6 +52,14 @@ import {
   updateWorkspaceTool,
   deleteWorkspaceTool,
   listWorkspacesTool,
+  // UI Generation Tools
+  generateBoardFormTool,
+  generateListFormTool,
+  generateCardFormTool,
+  generateWorkspaceFormTool,
+  generateLabelFormTool,
+  generateAttachmentFormTool,
+  generateChecklistFormTool,
 } from "@/TrelloTools";
 
 /**
@@ -119,6 +127,15 @@ export const trelloTools = {
   updateWorkspace: updateWorkspaceTool,
   deleteWorkspace: deleteWorkspaceTool,
   listWorkspaces: listWorkspacesTool,
+
+  // UI Generation Tools
+  generateBoardForm: generateBoardFormTool,
+  generateListForm: generateListFormTool,
+  generateCardForm: generateCardFormTool,
+  generateWorkspaceForm: generateWorkspaceFormTool,
+  generateLabelForm: generateLabelFormTool,
+  generateAttachmentForm: generateAttachmentFormTool,
+  generateChecklistForm: generateChecklistFormTool,
 } as const;
 
 /**

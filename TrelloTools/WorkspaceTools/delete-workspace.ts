@@ -9,7 +9,7 @@ const deleteWorkspaceSchema = z.object({
 export const deleteWorkspaceTool = tool({
   description:
     "Delete a Trello workspace permanently. This action cannot be undone and will remove all boards, members, and data associated with the workspace.",
-  parameters: deleteWorkspaceSchema,
+  inputSchema: deleteWorkspaceSchema,
   execute: async ({ workspaceId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

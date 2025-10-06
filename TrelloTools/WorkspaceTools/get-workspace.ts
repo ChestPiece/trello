@@ -92,7 +92,7 @@ const getWorkspaceSchema = z.object({
 export const getWorkspaceTool = tool({
   description:
     "Retrieve detailed information about a specific Trello workspace including boards, members, actions, and other data",
-  parameters: getWorkspaceSchema,
+  inputSchema: getWorkspaceSchema,
   execute: async ({
     workspaceId,
     fields,

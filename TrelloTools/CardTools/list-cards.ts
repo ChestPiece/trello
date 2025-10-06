@@ -136,7 +136,7 @@ const listCardsSchema = z.object({
 export const listCardsTool = tool({
   description:
     "List all cards in a Trello board or list with optional filtering and field selection",
-  parameters: listCardsSchema,
+  inputSchema: listCardsSchema,
   execute: async ({
     boardId,
     listId,

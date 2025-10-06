@@ -33,7 +33,7 @@ const listLabelsSchema = z.object({
 export const listLabelsTool = tool({
   description:
     "List all labels in a Trello board with optional filtering, field selection, and color filtering",
-  parameters: listLabelsSchema,
+  inputSchema: listLabelsSchema,
   execute: async ({ boardId, fields, limit, filter, color }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC001",
+    "title": "post_api_chat_should_stream_ai_responses_with_trello_integration",
+    "description": "Test the /api/chat POST endpoint to ensure it processes chat messages correctly and streams AI-generated responses integrated with Trello tools. Verify handling of valid messages, streaming response format, and correct tool call executions."
+  },
+  {
+    "id": "TC002",
+    "title": "post_api_trello_boards_should_create_new_board",
+    "description": "Test the /api/trello/boards POST endpoint to create a new Trello board with required and optional parameters. Validate successful creation and correct response structure."
+  },
+  {
+    "id": "TC003",
+    "title": "get_api_trello_boards_should_list_accessible_boards_with_filters",
+    "description": "Test the /api/trello/boards GET endpoint to list all accessible boards. Verify filtering options such as all, closed, none, open, starred, and unstarred work correctly."
+  },
+  {
+    "id": "TC004",
+    "title": "get_api_trello_boards_boardid_should_return_board_details",
+    "description": "Test the /api/trello/boards/{boardId} GET endpoint to retrieve details of a specific board by boardId. Validate response correctness and error handling for invalid boardId."
+  },
+  {
+    "id": "TC005",
+    "title": "put_api_trello_boards_boardid_should_update_board",
+    "description": "Test the /api/trello/boards/{boardId} PUT endpoint to update board details. Verify updates are applied correctly and response reflects changes."
+  },
+  {
+    "id": "TC006",
+    "title": "delete_api_trello_boards_boardid_should_delete_board",
+    "description": "Test the /api/trello/boards/{boardId} DELETE endpoint to delete a board. Confirm board is removed and appropriate response is returned."
+  },
+  {
+    "id": "TC007",
+    "title": "post_api_ui_generate_form_should_generate_ui_form_for_trello_resources",
+    "description": "Test the /api/ui/generate-form POST endpoint to generate UI forms for Trello resources. Validate form generation for different resource types and actions with correct metadata and React component code."
+  }
+]

@@ -25,7 +25,7 @@ const updateChecklistItemSchema = z.object({
 
 export const updateChecklistItemTool = tool({
   description: "Update an existing Trello checklist item with new properties",
-  parameters: updateChecklistItemSchema,
+  inputSchema: updateChecklistItemSchema,
   execute: async ({
     checklistId,
     checkItemId,

@@ -247,7 +247,7 @@ export function ChecklistDeleteCard({
                         <span>📋</span>
                         <span>{checklist.name}</span>
                         <span className="text-xs text-gray-500">
-                          ({checklist.checkItems.length} items)
+                          ({checklist.checkItems?.length || 0} items)
                         </span>
                       </div>
                     </SelectItem>
@@ -268,33 +268,29 @@ export function ChecklistDeleteCard({
                 <div className="mt-2">
                   <div className="text-sm">
                     <strong>Total Items:</strong>{" "}
-                    {selectedChecklist.checkItems.length}
+                    {selectedChecklist.checkItems?.length || 0}
                   </div>
                   <div className="text-sm">
                     <strong>Completed:</strong>{" "}
-                    {
-                      selectedChecklist.checkItems.filter(
-                        (item) => item.state === "complete"
-                      ).length
-                    }
+                    {selectedChecklist.checkItems?.filter(
+                      (item) => item.state === "complete"
+                    ).length || 0}
                   </div>
                   <div className="text-sm">
                     <strong>Remaining:</strong>{" "}
-                    {
-                      selectedChecklist.checkItems.filter(
-                        (item) => item.state === "incomplete"
-                      ).length
-                    }
+                    {selectedChecklist.checkItems?.filter(
+                      (item) => item.state === "incomplete"
+                    ).length || 0}
                   </div>
                 </div>
-                {selectedChecklist.checkItems.length > 0 && (
+                {(selectedChecklist.checkItems?.length || 0) > 0 && (
                   <div className="mt-2">
                     <div className="text-xs font-medium">
                       Items that will be deleted:
                     </div>
                     <div className="space-y-1 mt-1">
                       {selectedChecklist.checkItems
-                        .slice(0, 5)
+                        ?.slice(0, 5)
                         .map((item, index) => (
                           <div
                             key={index}
@@ -312,9 +308,10 @@ export function ChecklistDeleteCard({
                             </span>
                           </div>
                         ))}
-                      {selectedChecklist.checkItems.length > 5 && (
+                      {(selectedChecklist.checkItems?.length || 0) > 5 && (
                         <div className="text-xs text-gray-500">
-                          ... and {selectedChecklist.checkItems.length - 5} more
+                          ... and{" "}
+                          {(selectedChecklist.checkItems?.length || 0) - 5} more
                           items
                         </div>
                       )}

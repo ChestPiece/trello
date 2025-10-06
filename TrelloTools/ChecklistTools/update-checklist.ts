@@ -13,7 +13,7 @@ const updateChecklistSchema = z.object({
 
 export const updateChecklistTool = tool({
   description: "Update an existing Trello checklist with new name or position",
-  parameters: updateChecklistSchema,
+  inputSchema: updateChecklistSchema,
   execute: async ({ checklistId, name, pos }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

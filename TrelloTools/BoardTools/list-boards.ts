@@ -76,7 +76,7 @@ const listBoardsSchema = z.object({
 export const listBoardsTool = tool({
   description:
     "List all Trello boards accessible to the authenticated user with optional filtering and field selection",
-  parameters: listBoardsSchema,
+  inputSchema: listBoardsSchema,
   execute: async ({
     filter = "all",
     fields,

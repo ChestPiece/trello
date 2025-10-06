@@ -1,0 +1,1207 @@
+{
+  "meta": {
+    "project": "AI SDK RSC with Trello Integration",
+    "date": "2025-10-04",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "This product integrates AI-powered chat capabilities with comprehensive Trello resource management (boards, lists, cards, workspaces, labels, checklists, attachments, members) through a robust API and React framework using Next.js and the AI SDK RSC. It facilitates natural language-driven Trello board operations alongside streaming React Server Components for dynamic UI responses, enabling seamless generative user interfaces and advanced state management.",
+  "core_goals": [
+    "Provide an AI-powered chat interface that interacts with Trello workspace resources.",
+    "Enable full CRUD operations on Trello boards, lists, cards, workspaces, labels, checklists, attachments, and member management through natural language processing.",
+    "Implement real-time streaming of AI-generated UI components to enhance interactivity and user engagement.",
+    "Maintain synchronized AI and UI states between server and client to allow consistent chat histories and UI representations.",
+    "Support multi-step conversational interfaces with tool composition for complex task execution.",
+    "Ensure efficient loading state handling and error management in the UI streaming experience.",
+    "Facilitate future migrations by decoupling text generation from UI rendering, enabling stable production environments."
+  ],
+  "key_features": [
+    "AI-powered Chat API with Trello integration supporting streaming responses, rate limiting, and monitoring.",
+    "Full lifecycle management API endpoints for Trello resources including boards, lists, cards, workspaces, labels, checklists, attachments, and members.",
+    "AI SDK RSC powered streaming UI generation with React Server Components for dynamic and interactive user interfaces.",
+    "Advanced state management separating AI State (serializable conversation history) and UI State (rendered React components) with easy client-server synchronization.",
+    "Support for multistep conversational workflows with tool invocation and seamless transitions between AI chat and UI components.",
+    "Detailed loading state feedback mechanisms including streamed loading components and client/server side loading management.",
+    "Comprehensive error handling strategies for both streamed UI errors and streaming value errors.",
+    "Security considerations for server actions with authentication checks and validation before providing data.",
+    "UI form generation powered by AI for Trello resource management to speed up interface development."
+  ],
+  "user_flow_summary": [
+    "User initiates chat by sending messages through the AI-powered chat API or UI.",
+    "The AI model processes input messages, consulting Trello management tools as needed, and streams responses as React Server Components back to the client.",
+    "User views AI-generated UI components rendered dynamically in real-time, enabling interactions with Trello resources.",
+    "User performs Trello resource operations (create, update, delete, list) via natural language commands interpreted by AI and relayed through the API.",
+    "The AI and UI states are updated synchronously to maintain a consistent conversation history and UI rendering.",
+    "For complex tasks, multi-step tool calls guide the user through sub-tasks, managed via conversational turns and UI updates.",
+    "Loading states and error conditions are handled gracefully with streamed components and visual feedback.",
+    "Authentication and access control are enforced on server actions to protect sensitive operations.",
+    "User can save and restore chat and UI states for session persistence and multi-session continuity."
+  ],
+  "validation_criteria": [
+    "Successful integration with the Trello API supporting all CRUD operations on boards, lists, cards, workspaces, labels, checklists, attachments, and members.",
+    "AI chat API correctly streams React Server Components in response to inputs, including tool calls with accurate parameter handling.",
+    "AI state and UI state remain synchronized throughout interactions and are persisted and restored correctly across sessions.",
+    "Multi-step conversational flows involving tool composition execute smoothly without UI or state inconsistencies.",
+    "Loading state indicators are visible and updated accurately during lengthy AI or data fetch operations.",
+    "Error states in UI streaming or data fetching are captured and appropriate fallback UI or messages are displayed.",
+    "Security checks effectively block unauthorized server action calls and sensitive data is not exposed without authentication.",
+    "UI generation tools produce functional React forms for Trello resources matching the create, update, and delete actions.",
+    "System logs and monitoring tools correctly track API usage, rate limiting, and error occurrences for operational reliability."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "Next.js",
+      "React",
+      "AI SDK",
+      "OpenAI",
+      "Trello API",
+      "Zod",
+      "Axios",
+      "Tailwind CSS",
+      "Radix UI"
+    ],
+    "features": [
+      {
+        "name": "Chat API",
+        "description": "AI-powered chat endpoint that integrates with Trello API through various tools. Supports streaming responses, rate limiting, monitoring, and comprehensive Trello board management.",
+        "files": [
+          "app/api/chat/route.ts",
+          "lib/tool-registry.ts",
+          "lib/api-helpers.ts",
+          "lib/rate-limiter.ts",
+          "lib/Services/monitoring-service.ts",
+          "components/Prompts/system-prompt.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello AI Chat API",
+            "version": "1.0.0",
+            "description": "AI-powered chat API with Trello integration"
+          },
+          "servers": [
+            {
+              "url": "http://localhost:3000",
+              "description": "Development server"
+            }
+          ],
+          "paths": {
+            "/api/chat": {
+              "post": {
+                "summary": "Send chat message and get AI response",
+                "description": "Processes chat messages and returns AI-generated responses with Trello tool integration",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "messages": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "role": {
+                                  "type": "string",
+                                  "enum": [
+                                    "user",
+                                    "assistant",
+                                    "system"
+                                  ]
+                                },
+                                "parts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "text",
+                                          "tool-call",
+                                          "tool-result"
+                                        ]
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "required": [
+                                "role",
+                                "parts"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "messages"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "Streaming response with AI-generated content",
+                    "content": {
+                      "text/event-stream": {
+                        "schema": {
+                          "type": "string",
+                          "description": "Server-sent events stream"
+                        }
+                      }
+                    }
+                  },
+                  "400": {
+                    "description": "Bad request - invalid message format",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "error": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "requestId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "429": {
+                    "description": "Rate limit exceeded",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "error": {
+                              "type": "string"
+                            },
+                            "retryAfter": {
+                              "type": "number"
+                            },
+                            "requestId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "500": {
+                    "description": "Internal server error"
+                  }
+                }
+              }
+            }
+          },
+          "components": {
+            "securitySchemes": {
+              "OpenAI": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "OpenAI API key for AI model access"
+              },
+              "Trello": {
+                "type": "apiKey",
+                "in": "query",
+                "name": "key",
+                "description": "Trello API key and token for board management"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Board Management",
+        "description": "Comprehensive CRUD operations for Trello boards including creation, retrieval, updates, and deletion with AI-powered natural language processing.",
+        "files": [
+          "TrelloTools/BoardTools/create-board.ts",
+          "TrelloTools/BoardTools/get-board.ts",
+          "TrelloTools/BoardTools/update-board.ts",
+          "TrelloTools/BoardTools/delete-board.ts",
+          "TrelloTools/BoardTools/list-boards.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Board Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/boards": {
+              "post": {
+                "summary": "Create a new Trello board",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "desc": {
+                            "type": "string"
+                          },
+                          "defaultLists": {
+                            "type": "boolean"
+                          },
+                          "defaultLabels": {
+                            "type": "boolean"
+                          },
+                          "defaultCards": {
+                            "type": "boolean"
+                          },
+                          "prefs_permissionLevel": {
+                            "type": "string",
+                            "enum": [
+                              "org",
+                              "private",
+                              "public"
+                            ]
+                          },
+                          "prefs_background": {
+                            "type": "string"
+                          },
+                          "prefs_backgroundBrightness": {
+                            "type": "string",
+                            "enum": [
+                              "dark",
+                              "light",
+                              "unknown"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List all accessible boards",
+                "parameters": [
+                  {
+                    "name": "filter",
+                    "in": "query",
+                    "schema": {
+                      "type": "string",
+                      "enum": [
+                        "all",
+                        "closed",
+                        "none",
+                        "open",
+                        "starred",
+                        "unstarred"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/boards/{boardId}": {
+              "get": {
+                "summary": "Get board details",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update board",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete board",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello List Management",
+        "description": "Complete list management functionality for Trello boards including creation, updates, archiving, and deletion.",
+        "files": [
+          "TrelloTools/ListTools/create-list.ts",
+          "TrelloTools/ListTools/get-list.ts",
+          "TrelloTools/ListTools/update-list.ts",
+          "TrelloTools/ListTools/delete-list.ts",
+          "TrelloTools/ListTools/list-lists.ts",
+          "TrelloTools/ListTools/archive-list.ts",
+          "TrelloTools/ListTools/unarchive-list.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello List Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/lists": {
+              "post": {
+                "summary": "Create a new list",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "idBoard": {
+                            "type": "string"
+                          },
+                          "pos": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "idBoard"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "/api/trello/lists/{listId}": {
+              "get": {
+                "summary": "Get list details",
+                "parameters": [
+                  {
+                    "name": "listId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update list",
+                "parameters": [
+                  {
+                    "name": "listId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete list",
+                "parameters": [
+                  {
+                    "name": "listId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Card Management",
+        "description": "Full card lifecycle management including creation, updates, movement between lists, and deletion with support for descriptions, due dates, and member assignments.",
+        "files": [
+          "TrelloTools/CardTools/create-card.ts",
+          "TrelloTools/CardTools/get-card.ts",
+          "TrelloTools/CardTools/update-card.ts",
+          "TrelloTools/CardTools/delete-card.ts",
+          "TrelloTools/CardTools/list-cards.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Card Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/cards": {
+              "post": {
+                "summary": "Create a new card",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "desc": {
+                            "type": "string"
+                          },
+                          "idList": {
+                            "type": "string"
+                          },
+                          "due": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "idMembers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "idLabels": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "urlSource": {
+                            "type": "string"
+                          },
+                          "fileSource": {
+                            "type": "string"
+                          },
+                          "mimeType": {
+                            "type": "string"
+                          },
+                          "pos": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "idList"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List cards",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "query",
+                    "schema": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "name": "listId",
+                    "in": "query",
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/cards/{cardId}": {
+              "get": {
+                "summary": "Get card details",
+                "parameters": [
+                  {
+                    "name": "cardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update card",
+                "parameters": [
+                  {
+                    "name": "cardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete card",
+                "parameters": [
+                  {
+                    "name": "cardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Workspace Management",
+        "description": "Workspace creation, management, and organization functionality for Trello workspaces with member management capabilities.",
+        "files": [
+          "TrelloTools/WorkspaceTools/create-workspace.ts",
+          "TrelloTools/WorkspaceTools/get-workspace.ts",
+          "TrelloTools/WorkspaceTools/update-workspace.ts",
+          "TrelloTools/WorkspaceTools/delete-workspace.ts",
+          "TrelloTools/WorkspaceTools/list-workspaces.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Workspace Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/organizations": {
+              "post": {
+                "summary": "Create a new workspace",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "desc": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "website": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "displayName"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List workspaces",
+                "parameters": [
+                  {
+                    "name": "filter",
+                    "in": "query",
+                    "schema": {
+                      "type": "string",
+                      "enum": [
+                        "all",
+                        "members",
+                        "none",
+                        "public"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/organizations/{orgId}": {
+              "get": {
+                "summary": "Get workspace details",
+                "parameters": [
+                  {
+                    "name": "orgId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update workspace",
+                "parameters": [
+                  {
+                    "name": "orgId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete workspace",
+                "parameters": [
+                  {
+                    "name": "orgId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Label Management",
+        "description": "Label creation, management, and assignment to cards with color and naming support.",
+        "files": [
+          "TrelloTools/LabelTools/create-label.ts",
+          "TrelloTools/LabelTools/get-label.ts",
+          "TrelloTools/LabelTools/update-label.ts",
+          "TrelloTools/LabelTools/delete-label.ts",
+          "TrelloTools/LabelTools/list-labels.ts",
+          "TrelloTools/LabelTools/add-label-to-card.ts",
+          "TrelloTools/LabelTools/remove-label-from-card.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Label Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/labels": {
+              "post": {
+                "summary": "Create a new label",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "idBoard": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "idBoard"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List labels",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/labels/{labelId}": {
+              "get": {
+                "summary": "Get label details",
+                "parameters": [
+                  {
+                    "name": "labelId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update label",
+                "parameters": [
+                  {
+                    "name": "labelId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete label",
+                "parameters": [
+                  {
+                    "name": "labelId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Checklist Management",
+        "description": "Comprehensive checklist and checklist item management for Trello cards including creation, updates, and deletion.",
+        "files": [
+          "TrelloTools/ChecklistTools/create-checklist.ts",
+          "TrelloTools/ChecklistTools/get-checklist.ts",
+          "TrelloTools/ChecklistTools/update-checklist.ts",
+          "TrelloTools/ChecklistTools/delete-checklist.ts",
+          "TrelloTools/ChecklistTools/list-checklists.ts",
+          "TrelloTools/ChecklistTools/create-checklist-item.ts",
+          "TrelloTools/ChecklistTools/update-checklist-item.ts",
+          "TrelloTools/ChecklistTools/delete-checklist-item.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Checklist Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/checklists": {
+              "post": {
+                "summary": "Create a new checklist",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "idCard": {
+                            "type": "string"
+                          },
+                          "pos": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "idCard"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List checklists",
+                "parameters": [
+                  {
+                    "name": "cardId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/checklists/{checklistId}": {
+              "get": {
+                "summary": "Get checklist details",
+                "parameters": [
+                  {
+                    "name": "checklistId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "put": {
+                "summary": "Update checklist",
+                "parameters": [
+                  {
+                    "name": "checklistId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete checklist",
+                "parameters": [
+                  {
+                    "name": "checklistId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Attachment Management",
+        "description": "File attachment management for Trello cards including creation, retrieval, and deletion of attachments.",
+        "files": [
+          "TrelloTools/AttachmentTools/create-attachment.ts",
+          "TrelloTools/AttachmentTools/get-attachment.ts",
+          "TrelloTools/AttachmentTools/delete-attachment.ts",
+          "TrelloTools/AttachmentTools/list-attachments.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Attachment Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/attachments": {
+              "post": {
+                "summary": "Create a new attachment",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "idCard": {
+                            "type": "string"
+                          },
+                          "mimeType": {
+                            "type": "string"
+                          },
+                          "file": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "idCard"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List attachments",
+                "parameters": [
+                  {
+                    "name": "cardId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/attachments/{attachmentId}": {
+              "get": {
+                "summary": "Get attachment details",
+                "parameters": [
+                  {
+                    "name": "attachmentId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "delete": {
+                "summary": "Delete attachment",
+                "parameters": [
+                  {
+                    "name": "attachmentId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "Trello Member Management",
+        "description": "Member management functionality for Trello boards including adding, removing, and listing board members.",
+        "files": [
+          "TrelloTools/MemberTools/add-member-to-board.ts",
+          "TrelloTools/MemberTools/remove-member-from-board.ts",
+          "TrelloTools/MemberTools/list-members.ts",
+          "TrelloTools/MemberTools/get-member.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "Trello Member Management Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/trello/boards/{boardId}/members": {
+              "post": {
+                "summary": "Add member to board",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "email": {
+                            "type": "string"
+                          },
+                          "fullName": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "admin",
+                              "normal",
+                              "observer"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "email"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "get": {
+                "summary": "List board members",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/boards/{boardId}/members/{memberId}": {
+              "delete": {
+                "summary": "Remove member from board",
+                "parameters": [
+                  {
+                    "name": "boardId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "name": "memberId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "/api/trello/members/{memberId}": {
+              "get": {
+                "summary": "Get member details",
+                "parameters": [
+                  {
+                    "name": "memberId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "UI Generation Tools",
+        "description": "AI-powered UI generation tools for creating forms and interfaces for Trello resources including boards, lists, cards, workspaces, labels, attachments, and checklists.",
+        "files": [
+          "TrelloTools/UIGenerationTools/generate-board-form.ts",
+          "TrelloTools/UIGenerationTools/generate-list-form.ts",
+          "TrelloTools/UIGenerationTools/generate-card-form.ts",
+          "TrelloTools/UIGenerationTools/generate-workspace-form.ts",
+          "TrelloTools/UIGenerationTools/generate-label-form.ts",
+          "TrelloTools/UIGenerationTools/generate-attachment-form.ts",
+          "TrelloTools/UIGenerationTools/generate-checklist-form.ts"
+        ],
+        "api_doc": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "UI Generation Tools",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "/api/ui/generate-form": {
+              "post": {
+                "summary": "Generate UI form for Trello resource",
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "resourceType": {
+                            "type": "string",
+                            "enum": [
+                              "board",
+                              "list",
+                              "card",
+                              "workspace",
+                              "label",
+                              "attachment",
+                              "checklist"
+                            ]
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "create",
+                              "update",
+                              "delete"
+                            ]
+                          },
+                          "context": {
+                            "type": "object",
+                            "description": "Additional context for form generation"
+                          }
+                        },
+                        "required": [
+                          "resourceType",
+                          "action"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "Generated UI form component",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "formComponent": {
+                              "type": "string",
+                              "description": "React component code"
+                            },
+                            "metadata": {
+                              "type": "object",
+                              "description": "Form metadata and configuration"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

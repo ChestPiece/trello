@@ -122,7 +122,7 @@ const getCardSchema = z.object({
 export const getCardTool = tool({
   description:
     "Retrieve detailed information about a specific Trello card including attachments, members, checklists, and other data",
-  parameters: getCardSchema,
+  inputSchema: getCardSchema,
   execute: async ({
     cardId,
     fields,

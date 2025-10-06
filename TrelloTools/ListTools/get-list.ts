@@ -57,7 +57,7 @@ const getListSchema = z.object({
 export const getListTool = tool({
   description:
     "Retrieve detailed information about a specific Trello list including cards and other data",
-  parameters: getListSchema,
+  inputSchema: getListSchema,
   execute: async ({
     listId,
     fields,

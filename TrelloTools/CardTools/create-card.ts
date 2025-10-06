@@ -55,7 +55,7 @@ const createCardSchema = z.object({
 export const createCardTool = tool({
   description:
     "Create a new card in a Trello list with specified name, description, and optional settings",
-  parameters: createCardSchema,
+  inputSchema: createCardSchema,
   execute: async ({
     name,
     desc,

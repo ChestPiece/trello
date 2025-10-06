@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -136,7 +136,7 @@ export function createInternalErrorResponse(
  * Validate request body
  */
 export function validateRequestBody<T>(
-  body: any,
+  body: unknown,
   requiredFields: (keyof T)[]
 ): { isValid: boolean; error?: string } {
   if (!body || typeof body !== "object") {

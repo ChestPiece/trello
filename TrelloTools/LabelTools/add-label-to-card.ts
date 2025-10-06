@@ -10,7 +10,7 @@ const addLabelToCardSchema = z.object({
 export const addLabelToCardTool = tool({
   description:
     "Add a specific label to a Trello card. The label must exist in the same board as the card.",
-  parameters: addLabelToCardSchema,
+  inputSchema: addLabelToCardSchema,
   execute: async ({ cardId, labelId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -70,7 +70,7 @@ const updateWorkspaceSchema = z.object({
 export const updateWorkspaceTool = tool({
   description:
     "Update an existing Trello workspace with new display name, description, settings, or preferences. Supports comprehensive workspace configuration updates.",
-  parameters: updateWorkspaceSchema,
+  inputSchema: updateWorkspaceSchema,
   execute: async ({
     workspaceId,
     displayName,

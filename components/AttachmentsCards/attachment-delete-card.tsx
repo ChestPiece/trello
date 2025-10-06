@@ -269,11 +269,11 @@ export function AttachmentDeleteCard({
                   availableAttachments.map((attachment) => (
                     <SelectItem key={attachment.id} value={attachment.id}>
                       <div className="flex items-center space-x-2">
-                        <span>{getFileIcon(attachment.mimeType)}</span>
+                        <span>{getFileIcon(attachment.mimeType || "")}</span>
                         <span className="truncate">{attachment.name}</span>
-                        {attachment.size > 0 && (
+                        {attachment.bytes && attachment.bytes > 0 && (
                           <span className="text-xs text-gray-500">
-                            ({formatFileSize(attachment.size)})
+                            ({formatFileSize(attachment.bytes)})
                           </span>
                         )}
                       </div>
@@ -293,19 +293,20 @@ export function AttachmentDeleteCard({
               <p className="text-sm text-yellow-800">
                 <strong>Attachment to delete:</strong>
                 <div className="flex items-center space-x-2 mt-2">
-                  <span>{getFileIcon(selectedAttachment.mimeType)}</span>
+                  <span>{getFileIcon(selectedAttachment.mimeType || "")}</span>
                   <div>
                     <div className="font-medium">{selectedAttachment.name}</div>
                     <div className="text-xs text-gray-600">
                       {selectedAttachment.url}
                     </div>
-                    {selectedAttachment.size > 0 && (
-                      <div className="text-xs text-gray-500">
-                        Size: {formatFileSize(selectedAttachment.size)}
-                      </div>
-                    )}
+                    {selectedAttachment.bytes &&
+                      selectedAttachment.bytes > 0 && (
+                        <div className="text-xs text-gray-500">
+                          Size: {formatFileSize(selectedAttachment.bytes)}
+                        </div>
+                      )}
                     <div className="text-xs text-gray-500">
-                      Type: {selectedAttachment.mimeType}
+                      Type: {selectedAttachment.mimeType || "Unknown"}
                     </div>
                     <div className="text-xs text-gray-500">
                       Added:{" "}

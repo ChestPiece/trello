@@ -74,3 +74,14 @@ export {
   deleteWorkspaceTool,
   listWorkspacesTool,
 } from "./WorkspaceTools";
+
+// UI Generation Tools
+export {
+  generateBoardFormTool,
+  generateListFormTool,
+  generateCardFormTool,
+  generateWorkspaceFormTool,
+  generateLabelFormTool,
+  generateAttachmentFormTool,
+  generateChecklistFormTool,
+} from "./UIGenerationTools";

@@ -12,7 +12,7 @@ const deleteChecklistItemSchema = z.object({
 export const deleteChecklistItemTool = tool({
   description:
     "Delete a Trello checklist item permanently. This action cannot be undone.",
-  parameters: deleteChecklistItemSchema,
+  inputSchema: deleteChecklistItemSchema,
   execute: async ({ checklistId, checkItemId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

@@ -9,7 +9,7 @@ const deleteLabelSchema = z.object({
 export const deleteLabelTool = tool({
   description:
     "Delete a Trello label permanently. This action cannot be undone.",
-  parameters: deleteLabelSchema,
+  inputSchema: deleteLabelSchema,
   execute: async ({ labelId }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

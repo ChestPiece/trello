@@ -1,29 +1,28 @@
 "use client";
 
 import * as React from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { ChatInput } from "@/components/Chat/chat-input";
 import { ChatMessage } from "@/components/Chat/chat-message";
-import { useConversation } from "@/components/conversation-provider";
 import { ScrollArea } from "../ui/scroll-area";
 
 export function Chat() {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    isStreaming,
-    error,
-    regenerate,
-  } = useConversation();
+  const [input, setInput] = React.useState("");
+
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
+    experimental_throttle: 50,
+  });
 
   // Scroll to bottom when messages change
   React.useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, status]);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -36,8 +35,13 @@ export function Chat() {
     }
   };
 
-  // Show typing indicator when loading but not streaming
-  const showTypingIndicator = isLoading && !isStreaming;
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    sendMessage({ text: input });
+    setInput("");
+  };
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
@@ -58,11 +62,22 @@ export function Chat() {
           <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
             <div className="space-y-4 p-4">
               {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  onFormSubmit={(data, action) => {
+                    // Send a new message to the AI with the form data and action
+                    sendMessage({
+                      text: `Please ${action} the following data: ${JSON.stringify(
+                        data
+                      )}`,
+                    });
+                  }}
+                />
               ))}
 
-              {/* Typing indicator */}
-              {showTypingIndicator && (
+              {/* Loading indicator */}
+              {status === "streaming" && (
                 <div className="chat-message flex w-full items-start gap-4 py-4 justify-start">
                   <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-muted">
                     <div className="flex items-center gap-1">
@@ -85,14 +100,18 @@ export function Chat() {
                 <div className="chat-message flex w-full items-start gap-4 py-4 justify-start">
                   <div className="flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-2 bg-destructive/10 border border-destructive/20">
                     <div className="text-sm text-destructive">
-                      <strong>Error:</strong> {error.message}
+                      <strong>Something went wrong.</strong>
+                    </div>
+                    <div className="text-xs text-destructive/70">
+                      Please try again or contact support if the problem
+                      persists.
                     </div>
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={regenerate}
+                        onClick={() => regenerate()}
                         className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
                       >
-                        Regenerate
+                        Retry
                       </button>
                     </div>
                   </div>
@@ -110,9 +129,10 @@ export function Chat() {
         <div className="p-4">
           <ChatInput
             input={input}
-            handleInputChange={handleInputChange}
+            setInput={setInput}
             handleSubmit={handleSubmit}
-            isLoading={isLoading}
+            isLoading={status === "streaming"}
+            stop={stop}
           />
         </div>
       </div>

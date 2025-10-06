@@ -73,7 +73,7 @@ const updateBoardSchema = z.object({
 export const updateBoardTool = tool({
   description:
     "Update an existing Trello board with new name, description, settings, or preferences",
-  parameters: updateBoardSchema,
+  inputSchema: updateBoardSchema,
   execute: async ({
     boardId,
     name,

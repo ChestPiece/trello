@@ -23,7 +23,7 @@ const updateListSchema = z.object({
 export const updateListTool = tool({
   description:
     "Update an existing Trello list with new name, position, or other settings",
-  parameters: updateListSchema,
+  inputSchema: updateListSchema,
   execute: async ({ listId, name, closed, pos, subscribed, idBoard }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

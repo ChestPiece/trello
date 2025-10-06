@@ -1,4 +1,4 @@
-interface CacheEntry<T = any> {
+interface CacheEntry<T = unknown> {
   data: T;
   timestamp: number;
   ttl: number;
@@ -33,14 +33,14 @@ export class CacheService {
    */
   private generateKey(
     operation: string,
-    params: Record<string, any> = {}
+    params: Record<string, unknown> = {}
   ): string {
     const sortedParams = Object.keys(params)
       .sort()
       .reduce((result, key) => {
         result[key] = params[key];
         return result;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, unknown>);
 
     return `${operation}:${JSON.stringify(sortedParams)}`;
   }
@@ -48,7 +48,7 @@ export class CacheService {
   /**
    * Get cached data
    */
-  get<T>(operation: string, params: Record<string, any> = {}): T | null {
+  get<T>(operation: string, params: Record<string, unknown> = {}): T | null {
     const key = this.generateKey(operation, params);
     const entry = this.cache.get(key);
 
@@ -75,7 +75,7 @@ export class CacheService {
    */
   set<T>(
     operation: string,
-    params: Record<string, any> = {},
+    params: Record<string, unknown> = {},
     data: T,
     ttl?: number
   ): void {

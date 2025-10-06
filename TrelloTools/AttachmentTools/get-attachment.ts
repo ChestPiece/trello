@@ -14,7 +14,7 @@ const getAttachmentSchema = z.object({
 export const getAttachmentTool = tool({
   description:
     "Retrieve detailed information about a specific Trello attachment",
-  parameters: getAttachmentSchema,
+  inputSchema: getAttachmentSchema,
   execute: async ({ cardId, attachmentId, fields }) => {
     try {
       const apiKey = process.env.TRELLO_API_KEY;

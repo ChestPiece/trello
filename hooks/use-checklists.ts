@@ -31,10 +31,11 @@ export function useChecklists(cardId?: string) {
             ).map((item: Record<string, unknown>) => ({
               id: item.id as string,
               name: item.name as string,
-              state: item.state as string,
+              state: item.state as "complete" | "incomplete",
               pos: item.pos as number,
               due: item.due as string,
               idMember: item.idMember as string,
+              idChecklist: checklist.id as string, // Add the missing idChecklist property
             })),
           })
         ),
