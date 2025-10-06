@@ -267,3 +267,71 @@ export type TrelloResourceData<T extends TrelloResourceType> =
     : T extends "workspaces"
     ? Workspace[]
     : never;
+
+// Infrastructure types for rate limiting, caching, and monitoring
+
+export interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  resetTime: number;
+  retryAfter?: number;
+}
+
+export interface CacheEntry<T = any> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
+
+export interface MonitoringMetrics {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  averageResponseTime: number;
+  errorRate: number;
+  toolCallStats: Record<
+    string,
+    {
+      count: number;
+      averageDuration: number;
+      successRate: number;
+    }
+  >;
+  recentErrors: Array<{
+    timestamp: number;
+    error: string;
+    ip: string;
+  }>;
+}
+
+export interface RequestLog {
+  id: string;
+  ip: string;
+  method: string;
+  url: string;
+  userAgent?: string;
+  startTime: number;
+  endTime?: number;
+  duration?: number;
+  statusCode?: number;
+  error?: string;
+  toolCalls?: Array<{
+    toolName: string;
+    duration: number;
+    success: boolean;
+    error?: string;
+  }>;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  metadata?: {
+    timestamp: string;
+    requestId?: string;
+    duration?: number;
+    rateLimit?: RateLimitInfo;
+  };
+}

@@ -19,16 +19,16 @@ export function useLists(boardId?: string) {
     },
     {
       autoFetch: !!boardId,
-      transform: (data: unknown[]) =>
+      transform: (data: unknown[]): List[] =>
         (data as Record<string, unknown>[]).map(
           (list: Record<string, unknown>) => ({
-            id: list.id,
-            name: list.name,
-            closed: list.closed,
-            idBoard: list.boardId || list.idBoard,
-            pos: list.position || list.pos,
-            subscribed: list.subscribed,
-            cards: list.cards || [],
+            id: list.id as string,
+            name: list.name as string,
+            closed: list.closed as boolean,
+            idBoard: (list.boardId || list.idBoard) as string,
+            pos: (list.position || list.pos) as number,
+            subscribed: list.subscribed as boolean,
+            cards: (list.cards || []) as Card[],
           })
         ),
     }

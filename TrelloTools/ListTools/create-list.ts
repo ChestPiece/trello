@@ -69,13 +69,32 @@ export const createListTool = tool({
         message: `Successfully created list "${name}" in board ${boardId}`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to create list";
+      console.error("Create list error:", error);
+
+      let errorMessage = "Failed to create list";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
       return {
         success: false,
         error: errorMessage,
-        message: `Failed to create list: ${errorMessage}`,
+        statusCode,
+        message: `Failed to create list "${name}". ${errorMessage}`,
+        suggestions: [
+          "Check if the list name is valid and not too long",
+          "Verify that the board ID exists",
+          "Ensure API credentials are properly configured",
+          "Check if you have permission to create lists in this board",
+        ],
       };
     }
   },

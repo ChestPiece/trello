@@ -17,13 +17,13 @@ export function useLabels(boardId?: string) {
     },
     {
       autoFetch: !!boardId,
-      transform: (data: unknown[]) =>
+      transform: (data: unknown[]): Label[] =>
         (data as Record<string, unknown>[]).map(
           (label: Record<string, unknown>) => ({
-            id: label.id,
-            name: label.name,
-            color: label.color,
-            idBoard: label.idBoard,
+            id: label.id as string,
+            name: label.name as string,
+            color: label.color as string,
+            idBoard: label.idBoard as string,
           })
         ),
     }

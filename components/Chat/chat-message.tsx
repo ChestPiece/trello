@@ -1,9 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 import { FormattedText } from "../formatted-text";
-import { ToolCallDisplay } from "./tool-call-display";
-import { ToolResultDisplay } from "./tool-result-display";
 import { format } from "date-fns";
 import {
   BoardCreationCard,
@@ -84,7 +82,7 @@ import { useDataRefresh } from "../data-refresh-provider";
 import { detectFormType, shouldShowAnyForm } from "../form-detection";
 
 export interface ChatMessageProps {
-  message: Message;
+  message: UIMessage;
 }
 
 const formatDate = (timestamp: string) => {
@@ -99,16 +97,35 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const { refreshLists, refreshBoards, refreshCards } = useDataRefresh();
 
   // Use enhanced form detection logic
-  const formDetection = detectFormType(message.content, message.role);
+  const messageText =
+    message.parts
+      ?.filter((part) => part.type === "text")
+      ?.map((part) => part.text)
+      ?.join("") || "";
+
+  const formDetection = detectFormType(messageText, message.role);
+
+  // Helper function to convert content string to parts array
+  const createMessageWithParts = (content: string): UIMessage => ({
+    id: Date.now().toString(),
+    role: "user" as const,
+    content, // Keep content for backward compatibility
+    parts: [
+      {
+        type: "text" as const,
+        text: content,
+      },
+    ],
+  });
 
   const handleBoardCreation = async (data: BoardCreationData) => {
     try {
       // Send a message to the AI to create the board using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`,
-      });
+      await append(
+        createMessageWithParts(
+          `Create a board with name: "${data.name}", description: "${data.description}", visibility: "${data.visibility}"`
+        )
+      );
       // Trigger data refresh for boards
       refreshBoards();
     } catch (error) {
@@ -125,11 +142,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         data.visibility ? `, visibility: "${data.visibility}"` : ""
       }`;
 
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
       // Trigger data refresh for boards
       refreshBoards();
     } catch (error) {
@@ -140,11 +153,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleBoardDelete = async (data: BoardDeleteData) => {
     try {
       // Send a message to the AI to delete the board using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete board with ID: "${data.boardId}"`,
-      });
+      await append(
+        createMessageWithParts(`Delete board with ID: "${data.boardId}"`)
+      );
       // Trigger data refresh for boards
       refreshBoards();
     } catch (error) {
@@ -156,11 +167,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
     try {
       // Send a message to the AI to close/reopen the board using the Trello tools
       const action = data.action === "close" ? "close" : "reopen";
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `${action} board with ID: "${data.boardId}"`,
-      });
+      await append(
+        createMessageWithParts(`${action} board with ID: "${data.boardId}"`)
+      );
       // Trigger data refresh for boards
       refreshBoards();
     } catch (error) {
@@ -171,11 +180,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleListCreation = async (data: ListCreationData) => {
     try {
       // Send a message to the AI to create the list using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`,
-      });
+      await append(
+        createMessageWithParts(
+          `Create a list in board "${data.boardId}" with name: "${data.name}", position: "${data.position}", closed: ${data.closed}, subscribe: ${data.subscribe}`
+        )
+      );
       // Trigger data refresh for lists
       refreshLists(data.boardId);
     } catch (error) {
@@ -193,11 +202,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       }${data.subscribe !== undefined ? `, subscribe: ${data.subscribe}` : ""}${
         data.idBoard ? `, move to board: "${data.idBoard}"` : ""
       }`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
       // Trigger data refresh for lists
       refreshLists(data.idBoard);
     } catch (error) {
@@ -208,11 +213,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleListDelete = async (data: ListDeleteData) => {
     try {
       // Send a message to the AI to delete the list using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete list with ID: "${data.listId}"`,
-      });
+      await append(
+        createMessageWithParts(`Delete list with ID: "${data.listId}"`)
+      );
       // Trigger data refresh for lists
       refreshLists();
     } catch (error) {
@@ -224,11 +227,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
     try {
       // Send a message to the AI to close/reopen the list using the Trello tools
       const action = data.action === "close" ? "close" : "reopen";
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `${action} list with ID: "${data.listId}"`,
-      });
+      await append(
+        createMessageWithParts(`${action} list with ID: "${data.listId}"`)
+      );
       // Trigger data refresh for lists
       refreshLists();
     } catch (error) {
@@ -241,11 +242,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
       // Send a message to the AI to archive/unarchive the list using the Trello tools
       const action = data.action === "archive" ? "archive" : "unarchive";
       const archiveCards = data.archiveAllCards ? " and archive all cards" : "";
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `${action} list with ID: "${data.listId}"${archiveCards}`,
-      });
+      await append(
+        createMessageWithParts(
+          `${action} list with ID: "${data.listId}"${archiveCards}`
+        )
+      );
       // Trigger data refresh for lists
       refreshLists();
     } catch (error) {
@@ -256,17 +257,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleCardCreation = async (data: CardCreationData) => {
     try {
       // Send a message to the AI to create the card using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Create a card in list "${data.listId}" with name: "${
-          data.name
-        }"${data.description ? `, description: "${data.description}"` : ""}${
-          data.position ? `, position: "${data.position}"` : ""
-        }${data.due ? `, due: "${data.due}"` : ""}${
-          data.urlSource ? `, copy from: "${data.urlSource}"` : ""
-        }`,
-      });
+      await append(
+        createMessageWithParts(
+          `Create a card in list "${data.listId}" with name: "${data.name}"${
+            data.description ? `, description: "${data.description}"` : ""
+          }${data.position ? `, position: "${data.position}"` : ""}${
+            data.due ? `, due: "${data.due}"` : ""
+          }${data.urlSource ? `, copy from: "${data.urlSource}"` : ""}`
+        )
+      );
       // Trigger data refresh for cards
       refreshCards(undefined, data.listId);
     } catch (error) {
@@ -288,11 +287,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           ? `, due complete: ${data.dueComplete}`
           : ""
       }${data.urlSource ? `, copy from: "${data.urlSource}"` : ""}`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
       // Trigger data refresh for cards
       refreshCards();
     } catch (error) {
@@ -303,11 +298,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleCardDelete = async (data: CardDeleteData) => {
     try {
       // Send a message to the AI to delete the card using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete card with ID: "${data.cardId}"`,
-      });
+      await append(
+        createMessageWithParts(`Delete card with ID: "${data.cardId}"`)
+      );
       // Trigger data refresh for cards
       refreshCards();
     } catch (error) {
@@ -318,10 +311,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleWorkspaceCreation = async (data: WorkspaceCreationData) => {
     try {
       // Send a message to the AI to create the workspace using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Create a workspace with display name: "${data.displayName}"${
+      await append(
+        createMessageWithParts(
+          `Create a workspace with display name: "${data.displayName}"${
           data.description ? `, description: "${data.description}"` : ""
         }${data.name ? `, name: "${data.name}"` : ""}${
           data.website ? `, website: "${data.website}"` : ""
@@ -329,8 +321,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
           data.permissionLevel
             ? `, permission level: "${data.permissionLevel}"`
             : ""
-        }`,
-      });
+          }`
+        )
+      );
     } catch (error) {
       console.error("Error creating workspace:", error);
     }
@@ -350,11 +343,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           ? `, permission level: "${data.permissionLevel}"`
           : ""
       }`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
     } catch (error) {
       console.error("Error updating workspace:", error);
     }
@@ -363,11 +352,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleWorkspaceDelete = async (data: WorkspaceDeleteData) => {
     try {
       // Send a message to the AI to delete the workspace using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete workspace with ID: "${data.workspaceId}"`,
-      });
+      await append(
+        createMessageWithParts(
+          `Delete workspace with ID: "${data.workspaceId}"`
+        )
+      );
     } catch (error) {
       console.error("Error deleting workspace:", error);
     }
@@ -376,11 +365,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleLabelCreation = async (data: LabelCreationData) => {
     try {
       // Send a message to the AI to create the label using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Create a label in board "${data.boardId}" with name: "${data.name}" and color: "${data.color}"`,
-      });
+      await append(
+        createMessageWithParts(
+          `Create a label in board "${data.boardId}" with name: "${data.name}" and color: "${data.color}"`
+        )
+      );
     } catch (error) {
       console.error("Error creating label:", error);
     }
@@ -392,11 +381,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       const updateMessage = `Update label with ID: "${data.labelId}"${
         data.name ? `, name: "${data.name}"` : ""
       }${data.color ? `, color: "${data.color}"` : ""}`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
     } catch (error) {
       console.error("Error updating label:", error);
     }
@@ -405,11 +390,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleLabelDelete = async (data: LabelDeleteData) => {
     try {
       // Send a message to the AI to delete the label using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete label with ID: "${data.labelId}"`,
-      });
+      await append(
+        createMessageWithParts(`Delete label with ID: "${data.labelId}"`)
+      );
     } catch (error) {
       console.error("Error deleting label:", error);
     }
@@ -423,11 +406,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       }" with name: "${data.name}" and URL: "${data.url}"${
         data.mimeType ? `, mime type: "${data.mimeType}"` : ""
       }${data.setCover ? ", set as cover" : ""}`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: attachmentMessage,
-      });
+      await append(createMessageWithParts(attachmentMessage));
     } catch (error) {
       console.error("Error creating attachment:", error);
     }
@@ -436,11 +415,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleAttachmentDelete = async (data: AttachmentDeleteData) => {
     try {
       // Send a message to the AI to delete the attachment using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete attachment with ID: "${data.attachmentId}"`,
-      });
+      await append(
+        createMessageWithParts(
+          `Delete attachment with ID: "${data.attachmentId}"`
+        )
+      );
     } catch (error) {
       console.error("Error deleting attachment:", error);
     }
@@ -462,11 +441,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               .join(", ")}`
           : ""
       }`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: checklistMessage,
-      });
+      await append(createMessageWithParts(checklistMessage));
     } catch (error) {
       console.error("Error creating checklist:", error);
     }
@@ -478,11 +453,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       const updateMessage = `Update checklist with ID: "${data.checklistId}"${
         data.name ? `, name: "${data.name}"` : ""
       }${data.pos ? `, position: "${data.pos}"` : ""}`;
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: updateMessage,
-      });
+      await append(createMessageWithParts(updateMessage));
     } catch (error) {
       console.error("Error updating checklist:", error);
     }
@@ -491,11 +462,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const handleChecklistDelete = async (data: ChecklistDeleteData) => {
     try {
       // Send a message to the AI to delete the checklist using the Trello tools
-      await append({
-        id: Date.now().toString(),
-        role: "user",
-        content: `Delete checklist with ID: "${data.checklistId}"`,
-      });
+      await append(
+        createMessageWithParts(
+          `Delete checklist with ID: "${data.checklistId}"`
+        )
+      );
     } catch (error) {
       console.error("Error deleting checklist:", error);
     }
@@ -608,72 +579,39 @@ export function ChatMessage({ message }: ChatMessageProps) {
           ) : (
             <>
               {/* ✅ Use message.parts instead of message.content */}
-              {message.parts ? (
-                message.parts.map((part, index) => {
-                  switch (part.type) {
-                    case 'text':
-                      return (
-                        <React.Fragment key={index}>
-                          {part.text.split("\n").map((text, i) => (
-                            <p key={i} className={i > 0 ? "mt-2" : ""}>
-                              <FormattedText content={text} />
-                            </p>
-                          ))}
-                        </React.Fragment>
-                      );
-                    
-                    case 'tool-call':
-                      return (
-                        <div key={index} className="tool-call-streaming mt-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                            <span className="text-sm text-gray-600">
-                              Calling {part.toolName}...
-                            </span>
+              {message.parts
+                ? message.parts.map((part, index) => {
+                    switch (part.type) {
+                      case "text":
+                        return (
+                          <React.Fragment key={index}>
+                            {part.text.split("\n").map((text, i) => (
+                              <p key={i} className={i > 0 ? "mt-2" : ""}>
+                                <FormattedText content={text} />
+                              </p>
+                            ))}
+                          </React.Fragment>
+                        );
+
+                      case "step-start":
+                        return index > 0 ? (
+                          <div key={index} className="text-gray-500 mt-2">
+                            <hr className="my-2 border-gray-300" />
                           </div>
-                          {part.input && (
-                            <pre className="text-xs bg-gray-100 p-2 rounded mt-2">
-                              {JSON.stringify(part.input, null, 2)}
-                            </pre>
-                          )}
-                        </div>
-                      );
-                    
-                    case 'tool-result':
-                      return (
-                        <div key={index} className="tool-result mt-2">
-                          <div className="text-sm font-medium text-green-700 mb-2">
-                            ✅ {part.toolName} completed
-                          </div>
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <pre className="text-xs whitespace-pre-wrap">
-                              {typeof part.result === 'string' ? part.result : JSON.stringify(part.result, null, 2)}
-                            </pre>
-                          </div>
-                        </div>
-                      );
-                    
-                    case 'step-start':
-                      return index > 0 ? (
-                        <div key={index} className="text-gray-500 mt-2">
-                          <hr className="my-2 border-gray-300" />
-                        </div>
-                      ) : null;
-                    
-                    default:
-                      return null;
-                  }
-                })
-              ) : (
-                // Fallback for old message format
-                message.content.split("\n").map((text, i) => (
-                  <React.Fragment key={i}>
-                    <p className={i > 0 ? "mt-2" : ""}>
-                      <FormattedText content={text} />
-                    </p>
-                  </React.Fragment>
-                ))
-              )}
+                        ) : null;
+
+                      default:
+                        return null;
+                    }
+                  })
+                : // Fallback for old message format
+                  message.content.split("\n").map((text, i) => (
+                    <React.Fragment key={i}>
+                      <p className={i > 0 ? "mt-2" : ""}>
+                        <FormattedText content={text} />
+                      </p>
+                    </React.Fragment>
+                  ))}
               <span className="text-xs text-left">
                 {formatDate(new Date().toISOString())}
               </span>

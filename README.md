@@ -1,19 +1,77 @@
 # Trello AI Assistant
 
-An intelligent Trello management assistant built with Next.js, Vercel AI SDK, and OpenAI. This application provides a conversational interface for managing Trello boards, lists, cards, workspaces, and more through natural language interactions.
+An intelligent Trello management assistant built with Next.js, Vercel AI SDK v5, and OpenAI. This application provides both a conversational interface and direct API access for managing Trello boards, lists, cards, workspaces, and more.
 
 ## Features
 
 - **AI-Powered Trello Management**: Create, update, delete, and manage Trello resources through natural language
-- **Real-time Streaming**: Live responses from OpenAI with streaming capabilities
+- **Dual API Modes**: Both conversational AI chat and direct API access for programmatic integration
+- **Real-time Streaming**: Live responses from OpenAI with streaming capabilities using Vercel AI SDK v5
 - **Interactive Forms**: Smart form detection and generation for complex operations
 - **Comprehensive Tool Suite**: Full CRUD operations for boards, lists, cards, labels, attachments, checklists, and workspaces
+- **Backend Infrastructure**: Built-in rate limiting, caching, and monitoring (transparent to users)
 - **Error Recovery**: Intelligent error handling with automatic repair mechanisms
-- **Performance Optimized**: UI throttling and efficient state management
+- **Performance Optimized**: UI throttling, LRU caching, and efficient state management
 - **Modern UI**: Clean, accessible interface built with shadcn/ui components
 - **Responsive Design**: Works seamlessly on mobile and desktop
 - **Chat History**: Persistent conversation management with sidebar navigation
 - **Enhanced UX**: Stop/regenerate controls, loading states, and keyboard shortcuts
+
+## API Architecture
+
+The application uses a **consolidated API architecture** with a single endpoint that supports both modes:
+
+### Single API Endpoint: `/api/chat`
+
+**Chat Mode** (Default):
+
+```json
+POST /api/chat
+{
+  "mode": "chat",
+  "messages": [
+    {
+      "role": "user",
+      "parts": [{"type": "text", "text": "Create a new board"}]
+    }
+  ]
+}
+```
+
+**Direct API Mode**:
+
+```json
+POST /api/chat
+{
+  "mode": "api",
+  "operation": "createBoard",
+  "params": {
+    "name": "My Board",
+    "description": "Board description",
+    "visibility": "private"
+  }
+}
+```
+
+### Backend Features (Transparent to Users)
+
+- **Rate Limiting**: 100 requests per 15 minutes per IP address
+- **Caching**: LRU cache for read operations (5-minute TTL)
+- **Monitoring**: Request logging, error tracking, and performance metrics
+- **Error Handling**: Standardized error responses with proper HTTP status codes
+
+### Supported Operations
+
+The API supports all Trello operations:
+
+**Boards**: `listBoards`, `getBoard`, `createBoard`, `updateBoard`, `deleteBoard`
+**Lists**: `listLists`, `getList`, `createList`, `updateList`, `deleteList`, `archiveList`, `unarchiveList`
+**Cards**: `listCards`, `getCard`, `createCard`, `updateCard`, `deleteCard`
+**Labels**: `listLabels`, `getLabel`, `createLabel`, `updateLabel`, `deleteLabel`, `addLabelToCard`, `removeLabelFromCard`
+**Attachments**: `listAttachments`, `getAttachment`, `createAttachment`, `deleteAttachment`
+**Checklists**: `listChecklists`, `getChecklist`, `createChecklist`, `updateChecklist`, `deleteChecklist`, `createChecklistItem`, `updateChecklistItem`, `deleteChecklistItem`
+**Members**: `listMembers`, `getMember`, `addMemberToBoard`, `removeMemberFromBoard`
+**Workspaces**: `listWorkspaces`, `getWorkspace`, `createWorkspace`, `updateWorkspace`, `deleteWorkspace`
 
 ## Getting Started
 
@@ -80,10 +138,28 @@ This application can be easily deployed on Vercel. Make sure to add your environ
 
 ## Architecture
 
-The application is built with a modular architecture:
+The application uses a **consolidated architecture** with modern infrastructure:
 
-- **API Route**: `/app/api/chat/route.ts` - Handles AI conversations and tool calls
+### Backend Infrastructure
+
+- **Single API Endpoint**: `/api/chat` handles both AI chat and direct API calls
+- **Rate Limiting**: In-memory sliding window rate limiter (100 requests/15 minutes)
+- **Caching**: LRU cache for read operations with automatic invalidation
+- **Monitoring**: Request logging, error tracking, and performance metrics
+- **Error Handling**: Standardized error responses with proper HTTP status codes
+
+### Frontend Architecture
+
+- **Vercel AI SDK v5**: Modern streaming with `DefaultChatTransport` and `UIMessage`
+- **Tool Registry**: Centralized tool management for easier maintenance
+- **Type Safety**: Full TypeScript support with proper type definitions
+- **Performance**: UI throttling and efficient state management
+
+### Key Components
+
+- **API Route**: `/app/api/chat/route.ts` - Consolidated endpoint with dual modes
 - **Trello Tools**: `/TrelloTools/` - Comprehensive suite of Trello management tools
+- **Infrastructure**: `/lib/` - Rate limiting, caching, monitoring, and API helpers
 - **UI Components**: `/components/` - Reusable React components with shadcn/ui
 - **Form Detection**: Smart form generation based on user intent
 - **Error Handling**: Robust error recovery and user feedback

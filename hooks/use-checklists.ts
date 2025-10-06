@@ -19,22 +19,22 @@ export function useChecklists(cardId?: string) {
     },
     {
       autoFetch: !!cardId,
-      transform: (data: unknown[]) =>
+      transform: (data: unknown[]): Checklist[] =>
         (data as Record<string, unknown>[]).map(
           (checklist: Record<string, unknown>) => ({
-            id: checklist.id,
-            name: checklist.name,
-            idCard: checklist.idCard,
-            pos: checklist.pos,
+            id: checklist.id as string,
+            name: checklist.name as string,
+            idCard: checklist.idCard as string,
+            pos: checklist.pos as number,
             checkItems: (
               (checklist.checkItems as Record<string, unknown>[]) || []
             ).map((item: Record<string, unknown>) => ({
-              id: item.id,
-              name: item.name,
-              state: item.state,
-              pos: item.pos,
-              due: item.due,
-              idMember: item.idMember,
+              id: item.id as string,
+              name: item.name as string,
+              state: item.state as string,
+              pos: item.pos as number,
+              due: item.due as string,
+              idMember: item.idMember as string,
             })),
           })
         ),

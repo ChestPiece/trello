@@ -151,16 +151,33 @@ export const updateCardTool = tool({
         message: `Successfully updated card "${response.data.name}"`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to update card";
+      console.error("Update card error:", error);
+
+      let errorMessage = "Failed to update card";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
       return {
         success: false,
         error: errorMessage,
-        message: `Failed to update card: ${errorMessage}`,
+        statusCode,
+        message: `Failed to update card with ID "${cardId}". ${errorMessage}`,
+        suggestions: [
+          "Check if the card ID is valid and exists",
+          "Verify that you have permission to update this card",
+          "Ensure all field values are valid",
+          "Check if the target list or board exists when moving cards",
+        ],
       };
     }
   },
 });
-
-

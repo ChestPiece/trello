@@ -35,16 +35,33 @@ export const deleteCardTool = tool({
         cardId: cardId,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to delete card";
+      console.error("Delete card error:", error);
+
+      let errorMessage = "Failed to delete card";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
       return {
         success: false,
         error: errorMessage,
-        message: `Failed to delete card: ${errorMessage}`,
+        statusCode,
+        message: `Failed to delete card with ID "${cardId}". ${errorMessage}`,
+        suggestions: [
+          "Check if the card ID is valid and exists",
+          "Verify that you have permission to delete this card",
+          "Ensure API credentials are properly configured",
+          "Check if the card is not locked or protected",
+        ],
       };
     }
   },
 });
-
-

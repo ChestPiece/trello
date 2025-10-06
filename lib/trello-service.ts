@@ -1,5 +1,7 @@
 import { TrelloResponse, TrelloError, TrelloOperation } from "./types/trello";
 import * as TrelloTools from "@/TrelloTools";
+import { cacheService } from "./cache-service";
+import { monitoringService } from "./monitoring-service";
 
 export class TrelloService {
   private static instance: TrelloService;
@@ -25,13 +27,25 @@ export class TrelloService {
   }
 
   /**
-   * Execute a Trello tool operation with standardized error handling
+   * Execute a Trello tool operation with standardized error handling and caching
    */
   public async executeToolOperation<T = any>(
     operation: TrelloOperation,
-    params: Record<string, any> = {}
+    params: Record<string, any> = {},
+    requestId?: string
   ): Promise<TrelloResponse<T>> {
+    const startTime = Date.now();
+
     try {
+      // Check cache first for read operations
+      if (cacheService.shouldCache(operation)) {
+        const cachedResult = cacheService.get<T>(operation, params);
+        if (cachedResult !== null) {
+          console.log(`[TrelloService] Cache hit for ${operation}`);
+          return this.standardizeResponse(cachedResult);
+        }
+      }
+
       // Get the tool from TrelloTools
       const tool = this.getToolByName(operation);
       if (!tool) {
@@ -39,14 +53,56 @@ export class TrelloService {
       }
 
       // Execute the tool
-      const result = await tool.execute(params, {
+      const toolStartTime = Date.now();
+      const result = (await tool.execute(params, {
         toolCallId: `${operation}-${Date.now()}`,
         messages: [],
-      });
+      })) as any;
+      const toolDuration = Date.now() - toolStartTime;
+
+      // Log tool execution
+      if (requestId) {
+        monitoringService.logToolExecution(
+          requestId,
+          operation,
+          toolDuration,
+          true
+        );
+      }
+
+      // Cache successful read operations
+      if (cacheService.shouldCache(operation) && result.success !== false) {
+        cacheService.set(operation, params, result);
+      }
+
+      // Invalidate cache for write operations
+      if (!cacheService.shouldCache(operation)) {
+        this.invalidateRelatedCache(operation);
+      }
 
       // Standardize the response
-      return this.standardizeResponse(result);
+      const standardizedResult = this.standardizeResponse(result);
+
+      const totalDuration = Date.now() - startTime;
+      console.log(
+        `[TrelloService] ${operation} completed in ${totalDuration}ms`
+      );
+
+      return standardizedResult;
     } catch (error) {
+      const toolDuration = Date.now() - startTime;
+
+      // Log tool execution error
+      if (requestId) {
+        monitoringService.logToolExecution(
+          requestId,
+          operation,
+          toolDuration,
+          false,
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+
       return this.handleError(error);
     }
   }
@@ -128,8 +184,8 @@ export class TrelloService {
     if (result.success === false) {
       return {
         success: false,
-        error: result.error || "Operation failed",
-        message: result.message || "Unknown error occurred",
+        error: (result as any).error || "Operation failed",
+        message: (result as any).message || "Unknown error occurred",
       };
     }
 
@@ -137,46 +193,46 @@ export class TrelloService {
     let data: T;
     let count: number | undefined;
 
-    if (result.boards) {
-      data = result.boards as T;
-      count = result.count;
-    } else if (result.lists) {
-      data = result.lists as T;
-      count = result.count;
-    } else if (result.cards) {
-      data = result.cards as T;
-      count = result.count;
-    } else if (result.labels) {
-      data = result.labels as T;
-      count = result.count;
-    } else if (result.attachments) {
-      data = result.attachments as T;
-      count = result.count;
-    } else if (result.checklists) {
-      data = result.checklists as T;
-      count = result.count;
-    } else if (result.members) {
-      data = result.members as T;
-      count = result.count;
-    } else if (result.workspaces) {
-      data = result.workspaces as T;
-      count = result.count;
-    } else if (result.board) {
-      data = result.board as T;
-    } else if (result.list) {
-      data = result.list as T;
-    } else if (result.card) {
-      data = result.card as T;
-    } else if (result.label) {
-      data = result.label as T;
-    } else if (result.attachment) {
-      data = result.attachment as T;
-    } else if (result.checklist) {
-      data = result.checklist as T;
-    } else if (result.member) {
-      data = result.member as T;
-    } else if (result.workspace) {
-      data = result.workspace as T;
+    if ((result as any).boards) {
+      data = (result as any).boards as T;
+      count = (result as any).count;
+    } else if ((result as any).lists) {
+      data = (result as any).lists as T;
+      count = (result as any).count;
+    } else if ((result as any).cards) {
+      data = (result as any).cards as T;
+      count = (result as any).count;
+    } else if ((result as any).labels) {
+      data = (result as any).labels as T;
+      count = (result as any).count;
+    } else if ((result as any).attachments) {
+      data = (result as any).attachments as T;
+      count = (result as any).count;
+    } else if ((result as any).checklists) {
+      data = (result as any).checklists as T;
+      count = (result as any).count;
+    } else if ((result as any).members) {
+      data = (result as any).members as T;
+      count = (result as any).count;
+    } else if ((result as any).workspaces) {
+      data = (result as any).workspaces as T;
+      count = (result as any).count;
+    } else if ((result as any).board) {
+      data = (result as any).board as T;
+    } else if ((result as any).list) {
+      data = (result as any).list as T;
+    } else if ((result as any).card) {
+      data = (result as any).card as T;
+    } else if ((result as any).label) {
+      data = (result as any).label as T;
+    } else if ((result as any).attachment) {
+      data = (result as any).attachment as T;
+    } else if ((result as any).checklist) {
+      data = (result as any).checklist as T;
+    } else if ((result as any).member) {
+      data = (result as any).member as T;
+    } else if ((result as any).workspace) {
+      data = (result as any).workspace as T;
     } else {
       // For operations that don't return specific data
       data = result as T;
@@ -248,6 +304,70 @@ export class TrelloService {
   }
 
   /**
+   * Invalidate related cache entries when data changes
+   */
+  private invalidateRelatedCache(operation: TrelloOperation): void {
+    // Define cache invalidation rules based on operation type
+    const invalidationRules: Record<string, string[]> = {
+      // Board operations invalidate board-related caches
+      createBoard: ["listBoards", "getBoard"],
+      updateBoard: ["getBoard", "listBoards"],
+      deleteBoard: ["getBoard", "listBoards", "listLists"],
+
+      // List operations invalidate list and card caches
+      createList: ["listLists", "getList"],
+      updateList: ["getList", "listLists"],
+      deleteList: ["getList", "listLists", "listCards"],
+      archiveList: ["getList", "listLists"],
+      unarchiveList: ["getList", "listLists"],
+
+      // Card operations invalidate card caches
+      createCard: ["listCards", "getCard"],
+      updateCard: ["getCard", "listCards"],
+      deleteCard: ["getCard", "listCards"],
+
+      // Label operations invalidate label caches
+      createLabel: ["listLabels", "getLabel"],
+      updateLabel: ["getLabel", "listLabels"],
+      deleteLabel: ["getLabel", "listLabels"],
+      addLabelToCard: ["getCard"],
+      removeLabelFromCard: ["getCard"],
+
+      // Attachment operations invalidate attachment caches
+      createAttachment: ["listAttachments", "getAttachment"],
+      deleteAttachment: ["getAttachment", "listAttachments"],
+
+      // Checklist operations invalidate checklist caches
+      createChecklist: ["listChecklists", "getChecklist"],
+      updateChecklist: ["getChecklist", "listChecklists"],
+      deleteChecklist: ["getChecklist", "listChecklists"],
+      createChecklistItem: ["getChecklist"],
+      updateChecklistItem: ["getChecklist"],
+      deleteChecklistItem: ["getChecklist"],
+
+      // Member operations invalidate member caches
+      addMemberToBoard: ["listMembers", "getMember"],
+      removeMemberFromBoard: ["listMembers", "getMember"],
+
+      // Workspace operations invalidate workspace caches
+      createWorkspace: ["listWorkspaces", "getWorkspace"],
+      updateWorkspace: ["getWorkspace", "listWorkspaces"],
+      deleteWorkspace: ["getWorkspace", "listWorkspaces"],
+    };
+
+    const operationsToInvalidate = invalidationRules[operation] || [];
+    operationsToInvalidate.forEach((op) => {
+      cacheService.invalidate(op);
+    });
+
+    console.log(
+      `[TrelloService] Invalidated cache for operations: ${operationsToInvalidate.join(
+        ", "
+      )}`
+    );
+  }
+
+  /**
    * Get API credentials (for debugging)
    */
   public getCredentials(): { hasKey: boolean; hasToken: boolean } {
@@ -255,6 +375,21 @@ export class TrelloService {
       hasKey: !!this.apiKey,
       hasToken: !!this.apiToken,
     };
+  }
+
+  /**
+   * Get cache statistics
+   */
+  public getCacheStats() {
+    return cacheService.getStats();
+  }
+
+  /**
+   * Clear cache (useful for testing or manual cache invalidation)
+   */
+  public clearCache(): void {
+    cacheService.clear();
+    console.log("[TrelloService] Cache cleared");
   }
 }
 

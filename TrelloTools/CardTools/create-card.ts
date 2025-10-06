@@ -131,16 +131,33 @@ export const createCardTool = tool({
         message: `Successfully created card "${name}" in list ${idList}`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to create card";
+      console.error("Create card error:", error);
+
+      let errorMessage = "Failed to create card";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
       return {
         success: false,
         error: errorMessage,
-        message: `Failed to create card: ${errorMessage}`,
+        statusCode,
+        message: `Failed to create card "${name}". ${errorMessage}`,
+        suggestions: [
+          "Check if the card name is valid and not too long",
+          "Verify that the list ID exists",
+          "Ensure API credentials are properly configured",
+          "Check if you have permission to create cards in this list",
+        ],
       };
     }
   },
 });
-
-

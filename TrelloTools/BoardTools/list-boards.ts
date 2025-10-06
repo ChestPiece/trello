@@ -138,16 +138,32 @@ export const listBoardsTool = tool({
         message: `Successfully retrieved ${response.data.length} board(s)`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Failed to list boards";
+      console.error("List boards error:", error);
+
+      let errorMessage = "Failed to list boards";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
 
       return {
         success: false,
         error: errorMessage,
+        statusCode,
         message: `Failed to list boards. ${errorMessage}`,
+        suggestions: [
+          "Check if API credentials are properly configured",
+          "Verify that you have permission to access boards",
+          "Ensure the filter parameters are valid",
+          "Check if the field names are correct",
+        ],
       };
     }
   },

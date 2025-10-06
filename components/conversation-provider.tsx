@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 
 interface Conversation {
   id: string;
@@ -20,14 +20,14 @@ interface ConversationContextType {
   currentConversationId: string | null;
   createNewConversation: () => void;
   selectConversation: (id: string) => void;
-  messages: Message[];
+  messages: UIMessage[];
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   isStreaming: boolean;
   error: Error | undefined;
-  append: (message: Message) => void;
+  append: (message: UIMessage) => void;
   stop: () => void;
   regenerate: () => void;
 }
@@ -74,8 +74,8 @@ export function ConversationProvider({
     stop,
     setMessages,
   } = useChat({
-    api: "/api/chat",
     id: currentConversationId || undefined,
+    api: "/api/chat",
     // Throttle UI updates to improve performance
     experimental_throttle: 50,
     onResponse: (response) => {
@@ -97,9 +97,16 @@ export function ConversationProvider({
               messages.length === 1
             ) {
               // Use the first few words of the user's first message as the title
-              const title =
-                messages[0].content.split(" ").slice(0, 5).join(" ") + "...";
-              return { ...conversation, title };
+              const firstUserMessage = messages.find((m) => m.role === "user");
+              if (firstUserMessage) {
+                const textContent = firstUserMessage.parts
+                  .filter((part) => part.type === "text")
+                  .map((part) => part.text)
+                  .join("");
+                const title =
+                  textContent.split(" ").slice(0, 5).join(" ") + "...";
+                return { ...conversation, title };
+              }
             }
             return conversation;
           });
@@ -143,10 +150,15 @@ export function ConversationProvider({
         // Find the last user message and resend it
         const lastUserMessage = newMessages[newMessages.length - 1];
         if (lastUserMessage && lastUserMessage.role === "user") {
+          const textContent = lastUserMessage.parts
+            .filter((part) => part.type === "text")
+            .map((part) => part.text)
+            .join("");
+
           append({
             id: Date.now().toString(),
             role: "user",
-            content: lastUserMessage.content,
+            content: textContent,
           });
         }
       }

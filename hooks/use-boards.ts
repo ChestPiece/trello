@@ -28,19 +28,20 @@ export function useBoards() {
       lists: "none", // Don't include lists for performance
     },
     {
-      transform: (data: unknown[]) =>
+      transform: (data: unknown[]): Board[] =>
         (data as Record<string, unknown>[]).map(
           (board: Record<string, unknown>) => ({
-            id: board.id,
-            name: board.name,
-            description: board.description || board.desc,
-            visibility: board.visibility || board.permissionLevel,
-            url: board.url,
-            shortUrl: board.shortUrl,
-            closed: board.closed,
-            pinned: board.pinned,
-            starred: board.starred,
-            organizationId: board.organizationId || board.idOrganization,
+            id: board.id as string,
+            name: board.name as string,
+            description: (board.description || board.desc) as string,
+            visibility: (board.visibility || board.permissionLevel) as string,
+            url: board.url as string,
+            shortUrl: board.shortUrl as string,
+            closed: board.closed as boolean,
+            pinned: board.pinned as boolean,
+            starred: board.starred as boolean,
+            organizationId: (board.organizationId ||
+              board.idOrganization) as string,
           })
         ),
     }

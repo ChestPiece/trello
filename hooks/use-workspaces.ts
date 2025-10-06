@@ -24,21 +24,21 @@ export function useWorkspaces() {
       ],
     },
     {
-      transform: (data: unknown[]) =>
+      transform: (data: unknown[]): Workspace[] =>
         (data as Record<string, unknown>[]).map(
           (workspace: Record<string, unknown>) => ({
-            id: workspace.id,
-            name: workspace.name,
-            displayName: workspace.displayName,
-            desc: workspace.desc,
-            descData: workspace.descData,
-            url: workspace.url,
-            website: workspace.website,
-            logo: workspace.logo,
-            prefs: workspace.prefs,
-            memberships: workspace.memberships,
-            boards: workspace.boards,
-            members: workspace.members,
+            id: workspace.id as string,
+            name: workspace.name as string,
+            displayName: workspace.displayName as string,
+            desc: workspace.desc as string,
+            descData: workspace.descData as any,
+            url: workspace.url as string,
+            website: workspace.website as string,
+            logo: workspace.logo as string,
+            prefs: workspace.prefs as any,
+            memberships: workspace.memberships as any,
+            boards: workspace.boards as any,
+            members: workspace.members as any,
           })
         ),
     }

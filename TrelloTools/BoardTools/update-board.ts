@@ -146,16 +146,32 @@ export const updateBoardTool = tool({
         message: `Successfully updated board "${response.data.name}" (ID: ${boardId})`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Failed to update board";
+      console.error("Update board error:", error);
+
+      let errorMessage = "Failed to update board";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
 
       return {
         success: false,
         error: errorMessage,
+        statusCode,
         message: `Failed to update board with ID "${boardId}". ${errorMessage}`,
+        suggestions: [
+          "Check if the board ID is valid and exists",
+          "Verify that you have permission to update this board",
+          "Ensure all preference values are valid",
+          "Check if the organization ID exists when moving boards",
+        ],
       };
     }
   },

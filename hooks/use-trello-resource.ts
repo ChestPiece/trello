@@ -1,169 +1,97 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useDataRefresh } from "@/components/data-refresh-provider";
-import {
-  TrelloResponse,
-  TrelloOperation,
-  TrelloHookOptions,
-} from "@/lib/types/trello";
+import { TrelloOperation } from "@/lib/types/trello";
 
-interface UseTrelloResourceState<T> {
+interface UseTrelloResourceOptions<T> {
+  autoFetch?: boolean;
+  transform?: (data: any) => T;
+}
+
+interface UseTrelloResourceResult<T> {
   data: T | null;
   loading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
 }
 
-interface UseTrelloResourceReturn<T> extends UseTrelloResourceState<T> {
-  refetch: (params?: Record<string, any>) => Promise<void>;
-  mutate: (newData: T) => void;
-}
-
+/**
+ * Hook for fetching Trello resources using the consolidated API
+ */
 export function useTrelloResource<T = any>(
   operation: TrelloOperation,
   params: Record<string, any> = {},
-  options: TrelloHookOptions = {}
-): UseTrelloResourceReturn<T> {
-  const { autoFetch = true, refreshTriggers = [], transform } = options;
+  options: UseTrelloResourceOptions<T> = {}
+): UseTrelloResourceResult<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [state, setState] = useState<UseTrelloResourceState<T>>({
-    data: null,
-    loading: false,
-    error: null,
-  });
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  const {
-    refreshBoards,
-    refreshCards,
-    refreshLists,
-    refreshLabels,
-    refreshWorkspaces,
-  } = useDataRefresh();
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "api",
+          operation,
+          params,
+        }),
+      });
 
-  // Create a stable key for this hook instance
-  const hookKey = `${operation}-${JSON.stringify(params)}`;
-
-  const fetchData = useCallback(
-    async (customParams?: Record<string, any>) => {
-      const requestParams = { ...params, ...customParams };
-
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-
-      try {
-        const response = await fetch("/api/trello", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            operation,
-            params: requestParams,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || `HTTP ${response.status}: ${response.statusText}`
-          );
-        }
-
-        const result: TrelloResponse<T> = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error || "Operation failed");
-        }
-
-        let processedData = result.data;
-
-        // Apply transformation if provided
-        if (transform && processedData) {
-          processedData = transform(processedData);
-        }
-
-        setState({
-          data: processedData,
-          loading: false,
-          error: null,
-        });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred";
-        setState({
-          data: null,
-          loading: false,
-          error: errorMessage,
-        });
-        console.error(`Error in useTrelloResource (${operation}):`, error);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    },
-    [operation, params, transform]
-  );
 
-  // Manual data mutation
-  const mutate = useCallback((newData: T) => {
-    setState((prev) => ({ ...prev, data: newData }));
-  }, []);
+      const result = await response.json();
 
-  // Auto-fetch on mount and when params change
+      if (result.success) {
+        const transformedData = options.transform
+          ? options.transform(result.data)
+          : result.data;
+        setData(transformedData);
+      } else {
+        throw new Error(result.error || "Unknown error occurred");
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      setError(errorMessage);
+      console.error(`Error fetching ${operation}:`, err);
+    } finally {
+      setLoading(false);
+    }
+  }, [operation, params, options.transform]);
+
   useEffect(() => {
-    if (autoFetch) {
+    if (options.autoFetch !== false) {
       fetchData();
     }
-  }, [autoFetch, fetchData]);
-
-  // Listen for refresh triggers
-  useEffect(() => {
-    if (refreshTriggers.length === 0) {
-      // Default refresh behavior based on operation
-      const operationRefreshMap: Record<string, () => void> = {
-        listBoards: refreshBoards,
-        listCards: refreshCards,
-        listLists: refreshLists,
-        listLabels: refreshLabels,
-        listWorkspaces: refreshWorkspaces,
-      };
-
-      const refreshFunction = operationRefreshMap[operation];
-      if (refreshFunction) {
-        refreshFunction();
-      }
-    }
-  }, [
-    operation,
-    refreshTriggers,
-    refreshBoards,
-    refreshCards,
-    refreshLists,
-    refreshLabels,
-    refreshWorkspaces,
-  ]);
+  }, [fetchData, options.autoFetch]);
 
   return {
-    ...state,
+    data,
+    loading,
+    error,
     refetch: fetchData,
-    mutate,
   };
 }
 
-// Convenience hooks for common operations
+/**
+ * Hook for fetching Trello lists (boards, lists, cards, etc.)
+ */
 export function useTrelloList<T = any>(
   operation: TrelloOperation,
   params: Record<string, any> = {},
-  options: TrelloHookOptions = {}
-) {
+  options: UseTrelloResourceOptions<T[]> = {}
+): UseTrelloResourceResult<T[]> {
   return useTrelloResource<T[]>(operation, params, {
     ...options,
-    transform: (data: any) => (Array.isArray(data) ? data : []),
+    transform: options.transform || ((data: any) => data || []),
   });
-}
-
-export function useTrelloSingle<T = any>(
-  operation: TrelloOperation,
-  params: Record<string, any> = {},
-  options: TrelloHookOptions = {}
-) {
-  return useTrelloResource<T>(operation, params, options);
 }

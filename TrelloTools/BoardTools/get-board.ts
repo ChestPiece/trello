@@ -197,16 +197,32 @@ export const getBoardTool = tool({
         message: `Successfully retrieved board "${response.data.name}" (ID: ${boardId})`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Failed to retrieve board";
+      console.error("Get board error:", error);
+
+      let errorMessage = "Failed to retrieve board";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
 
       return {
         success: false,
         error: errorMessage,
+        statusCode,
         message: `Failed to retrieve board with ID "${boardId}". ${errorMessage}`,
+        suggestions: [
+          "Check if the board ID is valid and exists",
+          "Verify that you have permission to access this board",
+          "Ensure API credentials are properly configured",
+          "Check if the board is not archived or deleted",
+        ],
       };
     }
   },

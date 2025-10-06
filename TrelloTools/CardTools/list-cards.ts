@@ -253,16 +253,33 @@ export const listCardsTool = tool({
         }`,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to retrieve cards";
+      console.error("List cards error:", error);
+
+      let errorMessage = "Failed to retrieve cards";
+      let statusCode = 500;
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string }; status?: number };
+        };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+        statusCode = axiosError.response?.status || statusCode;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
       return {
         success: false,
         error: errorMessage,
-        message: `Failed to retrieve cards: ${errorMessage}`,
+        statusCode,
+        message: `Failed to retrieve cards. ${errorMessage}`,
+        suggestions: [
+          "Check if the board ID or list ID is valid and exists",
+          "Verify that you have permission to access this board/list",
+          "Ensure API credentials are properly configured",
+          "Check if the filter parameters are valid",
+        ],
       };
     }
   },
 });
-
-
